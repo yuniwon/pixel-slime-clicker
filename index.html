@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>픽셀 슬라임 클리커</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css">
 <style>
-  @font-face { font-family: 'fallback'; src: local('Courier New'); }
-
   * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
 
   :root {
@@ -70,8 +69,23 @@
   #stage-name {
     font-size: 13px;
     color: var(--text-dim);
-    margin-bottom: 14px;
+    margin-bottom: 8px;
   }
+
+  /* ── 진화 진행바 ── */
+  #evo-progress-wrap { text-align: center; margin-bottom: 10px; }
+  #evo-progress-outer {
+    width: 240px; height: 12px;
+    background: #00000066;
+    border: 2px solid var(--border);
+    margin: 0 auto;
+  }
+  #evo-progress-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--green), var(--gold));
+    transition: width .3s ease;
+  }
+  #evo-progress-label { font-size: 11px; color: var(--text-dim); margin-top: 5px; }
 
   #coin-display {
     font-size: 32px;
@@ -93,8 +107,10 @@
     cursor: pointer;
     position: relative;
     transition: filter .15s;
+    outline: none;
   }
   #slime-wrap:active { filter: brightness(1.15); }
+  #slime-wrap:focus-visible { filter: drop-shadow(0 0 8px var(--gold)); }
 
   #slime-canvas {
     width: 288px;
@@ -124,6 +140,28 @@
     filter: blur(2px);
   }
 
+  /* ── 친구 시각화 ── */
+  #friends-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: visible;
+    z-index: -1;
+  }
+  .friend {
+    position: absolute;
+    font-size: 26px;
+    filter: drop-shadow(2px 2px 0 #00000044);
+  }
+  .friend > span {
+    display: inline-block;
+    animation: friendbob ease-in-out infinite alternate;
+  }
+  @keyframes friendbob {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10px); }
+  }
+
   #combo-box {
     height: 44px;
     margin-top: 10px;
@@ -140,7 +178,7 @@
   }
   #combo-bar { height: 100%; width: 100%; background: var(--pink); transition: width .1s linear; }
 
-  #frenzy-banner {
+  #buff-banner {
     position: absolute;
     top: 12px; left: 50%;
     transform: translateX(-50%);
@@ -148,14 +186,15 @@
     color: #5e4517;
     font-weight: bold;
     padding: 8px 18px;
-    font-size: 15px;
+    font-size: 14px;
     border: 3px solid #fff;
     box-shadow: 4px 4px 0 #00000055;
     display: none;
     z-index: 5;
-    animation: frenzy-pulse .4s infinite alternate;
+    animation: buff-pulse .4s infinite alternate;
+    white-space: nowrap;
   }
-  @keyframes frenzy-pulse { from { transform: translateX(-50%) scale(1);} to { transform: translateX(-50%) scale(1.06);} }
+  @keyframes buff-pulse { from { transform: translateX(-50%) scale(1);} to { transform: translateX(-50%) scale(1.06);} }
 
   /* ── 떠오르는 숫자 ── */
   .float-num {
@@ -181,7 +220,7 @@
     z-index: 49;
   }
 
-  /* ── 황금별 ── */
+  /* ── 황금별 / 미니 별똥별 ── */
   #golden-star {
     position: fixed;
     width: 64px; height: 64px;
@@ -193,6 +232,16 @@
     filter: drop-shadow(0 0 12px #ffd75ecc);
   }
   @keyframes starwobble { from { transform: rotate(-12deg) scale(1);} to { transform: rotate(12deg) scale(1.12);} }
+
+  .mini-star {
+    position: fixed;
+    width: 32px; height: 32px;
+    cursor: pointer;
+    z-index: 60;
+    image-rendering: pixelated;
+    animation: starwobble .5s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 8px #ffd75ecc);
+  }
 
   /* ── 상점 패널 ── */
   #shop {
@@ -212,6 +261,15 @@
     align-items: center;
   }
   #shop-header h2 { font-size: 16px; color: var(--gold); letter-spacing: 1px; }
+  #discount-badge {
+    display: none;
+    font-size: 11px;
+    color: #5e4517;
+    background: var(--gold);
+    padding: 2px 8px;
+    border: 2px solid #fff;
+    animation: buff-pulse .5s infinite alternate;
+  }
 
   .icon-btn {
     background: var(--panel-light);
@@ -223,6 +281,7 @@
     cursor: pointer;
   }
   .icon-btn:hover { background: var(--border); }
+  #reset-btn.holding { background: #8a2b2b; }
 
   #shop-tabs { display: flex; border-bottom: 3px solid var(--border); }
   .tab {
@@ -235,6 +294,24 @@
     background: var(--panel);
   }
   .tab.active { color: var(--gold); background: var(--panel-light); }
+
+  #buy-modes {
+    display: none;
+    gap: 6px;
+    padding: 8px 10px 0;
+  }
+  #buy-modes.on { display: flex; }
+  .mode-btn {
+    flex: 1;
+    background: var(--panel-light);
+    border: 2px solid var(--border);
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 5px 0;
+    cursor: pointer;
+  }
+  .mode-btn.active { color: var(--gold); border-color: var(--gold); }
 
   #shop-list {
     flex: 1;
@@ -259,7 +336,6 @@
   .shop-item:hover:not(.locked) { border-color: var(--gold); }
   .shop-item:active:not(.locked) { transform: scale(.98); }
   .shop-item.locked { opacity: .45; cursor: not-allowed; }
-  .shop-item.hidden-item { display: none; }
 
   .shop-icon { font-size: 30px; width: 42px; text-align: center; filter: drop-shadow(2px 2px 0 #00000044); }
   .shop-info { flex: 1; min-width: 0; }
@@ -273,6 +349,18 @@
     min-width: 36px;
     text-align: right;
   }
+
+  /* 업적 */
+  #ach-summary {
+    text-align: center;
+    font-size: 12px;
+    color: var(--gold);
+    padding: 4px 0 10px;
+  }
+  .ach-item { cursor: default; }
+  .ach-item.done { border-color: var(--gold); }
+  .ach-item.done .shop-name { color: var(--gold); }
+  .ach-item:not(.done) { opacity: .5; }
 
   #stats-bar {
     border-top: 3px solid var(--border);
@@ -297,6 +385,7 @@
     box-shadow: 4px 4px 0 #00000066;
     text-align: center;
     line-height: 1.6;
+    max-width: 90vw;
   }
   #toast.show { transform: translateX(-50%) translateY(0); }
 
@@ -320,18 +409,24 @@
     #shop { width: 100%; flex: 1; border-left: none; border-top: 4px solid var(--border); min-height: 0; }
     #title { font-size: 18px; }
     #coin-display { font-size: 24px; }
+    .friend { font-size: 20px; }
   }
 </style>
 </head>
 <body>
 
 <div id="game-area">
-  <div id="frenzy-banner">⭐ 광란의 시간! x7 ⭐</div>
+  <div id="buff-banner"></div>
   <div id="title">픽셀 슬라임 클리커</div>
   <div id="stage-name">아기 초록 슬라임</div>
+  <div id="evo-progress-wrap">
+    <div id="evo-progress-outer"><div id="evo-progress-bar"></div></div>
+    <div id="evo-progress-label"></div>
+  </div>
   <div id="coin-display"><canvas id="coin-icon" width="8" height="8"></canvas><span id="coin-num">0</span></div>
   <div id="cps-display">초당 0 코인</div>
-  <div id="slime-wrap">
+  <div id="slime-wrap" role="button" tabindex="0" aria-label="슬라임 클릭 (스페이스/엔터 키로도 가능)">
+    <div id="friends-layer"></div>
     <canvas id="slime-canvas" width="16" height="17"></canvas>
     <div id="slime-shadow"></div>
   </div>
@@ -344,24 +439,31 @@
 <div id="shop">
   <div id="shop-header">
     <h2>★ 상점 ★</h2>
+    <span id="discount-badge">⭐ 다음 구매 50% 할인!</span>
     <div>
-      <button class="icon-btn" id="sound-btn">🔊</button>
-      <button class="icon-btn" id="reset-btn">초기화</button>
+      <button class="icon-btn" id="sound-btn" aria-label="소리 켜기/끄기">🔊</button>
+      <button class="icon-btn" id="reset-btn" aria-label="게임 초기화 (길게 누르기)" title="길게 눌러 초기화">초기화</button>
     </div>
   </div>
   <div id="shop-tabs">
-    <div class="tab active" data-tab="producers">친구들</div>
-    <div class="tab" data-tab="upgrades">강화</div>
+    <div class="tab active" data-tab="producers" role="button">친구들</div>
+    <div class="tab" data-tab="upgrades" role="button">강화</div>
+    <div class="tab" data-tab="achievements" role="button">업적</div>
+  </div>
+  <div id="buy-modes" class="on">
+    <button class="mode-btn active" data-mode="1">x1</button>
+    <button class="mode-btn" data-mode="10">x10</button>
+    <button class="mode-btn" data-mode="max">MAX</button>
   </div>
   <div id="shop-list"></div>
   <div id="stats-bar">
-    <div>총 클릭: <span id="stat-clicks">0</span></div>
+    <div>총 클릭: <span id="stat-clicks">0</span> · 황금별: <span id="stat-stars">0</span></div>
     <div>누적 코인: <span id="stat-total">0</span></div>
-    <div>클릭당: <span id="stat-power">1</span> 코인</div>
+    <div>클릭당: <span id="stat-power">1</span> 코인 · 업적 보너스: +<span id="stat-ach">0</span>%</div>
   </div>
 </div>
 
-<canvas id="golden-star" width="16" height="16"></canvas>
+<canvas id="golden-star" width="16" height="16" aria-label="황금별"></canvas>
 <div id="evo-flash"></div>
 <div id="toast"></div>
 
@@ -369,6 +471,8 @@
 'use strict';
 
 /* ════════════════════════ 데이터 ════════════════════════ */
+
+const SAVE_VERSION = 2;
 
 const PRODUCERS = [
   { id: 'chick',   icon: '🐤', name: '병아리',     desc: '삐약삐약 코인을 쪼아 모아요',      baseCost: 15,       cps: 0.1 },
@@ -408,6 +512,50 @@ const STAGES = [
     pal: null, crown: true, rainbow: true },
 ];
 
+const ACHIEVEMENTS = [
+  { id: 'click1',    icon: '👆', name: '첫 말랑',         desc: '슬라임을 처음 클릭하기' },
+  { id: 'click100',  icon: '👏', name: '말랑 입문자',     desc: '총 100번 클릭하기' },
+  { id: 'click1k',   icon: '🔥', name: '손가락 단련',     desc: '총 1,000번 클릭하기' },
+  { id: 'click10k',  icon: '💪', name: '클릭의 화신',     desc: '총 10,000번 클릭하기' },
+  { id: 'combo30',   icon: '⚡', name: '리듬 타기',       desc: '콤보 30 달성하기' },
+  { id: 'combo50',   icon: '🌪️', name: '폭풍 연타',       desc: '콤보 50 달성하기' },
+  { id: 'chick10',   icon: '🐤', name: '병아리 목장',     desc: '병아리 10마리 모으기' },
+  { id: 'chick50',   icon: '🐔', name: '병아리 왕국',     desc: '병아리 50마리 모으기' },
+  { id: 'cat25',     icon: '🐱', name: '고양이 경제학',   desc: '고양이 25마리 모으기' },
+  { id: 'friend100', icon: '🎪', name: '대가족',          desc: '친구 총 100마리 모으기' },
+  { id: 'star1',     icon: '⭐', name: '별을 잡은 슬라임', desc: '황금별 1회 클릭하기' },
+  { id: 'star10',    icon: '🌟', name: '별 사냥꾼',       desc: '황금별 10회 클릭하기' },
+  { id: 'coin1e4',   icon: '💰', name: '첫 목돈',         desc: '누적 1만 코인 모으기' },
+  { id: 'coin1e6',   icon: '💎', name: '슬라임 부자',     desc: '누적 100만 코인 모으기' },
+  { id: 'coin1e8',   icon: '🏦', name: '코인 재벌',       desc: '누적 1억 코인 모으기' },
+  { id: 'coin1e10',  icon: '🌌', name: '우주 경제 장악',  desc: '누적 100억 코인 모으기' },
+  { id: 'evo1',      icon: '🧬', name: '첫 진화',         desc: '슬라임을 처음 진화시키기' },
+  { id: 'evoMax',    icon: '👑', name: '전설의 시작',     desc: '갓 슬라임에 도달하기' },
+  { id: 'allUp',     icon: '🏆', name: '강화 완전체',     desc: '모든 강화 구매하기' },
+];
+
+const ACH_CONDITIONS = {
+  click1:    () => S.totalClicks >= 1,
+  click100:  () => S.totalClicks >= 100,
+  click1k:   () => S.totalClicks >= 1000,
+  click10k:  () => S.totalClicks >= 10000,
+  combo30:   () => S.stats.bestCombo >= 30,
+  combo50:   () => S.stats.bestCombo >= 50,
+  chick10:   () => S.producers.chick >= 10,
+  chick50:   () => S.producers.chick >= 50,
+  cat25:     () => S.producers.cat >= 25,
+  friend100: () => PRODUCERS.reduce((a, p) => a + S.producers[p.id], 0) >= 100,
+  star1:     () => S.stats.starsClicked >= 1,
+  star10:    () => S.stats.starsClicked >= 10,
+  coin1e4:   () => S.totalEarned >= 1e4,
+  coin1e6:   () => S.totalEarned >= 1e6,
+  coin1e8:   () => S.totalEarned >= 1e8,
+  coin1e10:  () => S.totalEarned >= 1e10,
+  evo1:      () => stageIdx >= 1,
+  evoMax:    () => stageIdx >= STAGES.length - 1,
+  allUp:     () => UPGRADES.every(u => S.upgrades[u.id]),
+};
+
 const SLIME_MAP = [
   '................',
   '................',
@@ -438,22 +586,40 @@ const CROWN_MAP = [
 
 const SAVE_KEY = 'pixelSlimeClicker_v1';
 
-let S = {
-  coins: 0,
-  totalEarned: 0,
-  totalClicks: 0,
-  producers: {},        // id -> count
-  upgrades: {},         // id -> true
-  soundOn: true,
-  lastSave: Date.now(),
-};
-PRODUCERS.forEach(p => S.producers[p.id] = 0);
+function defaultState() {
+  const s = {
+    version: SAVE_VERSION,
+    coins: 0,
+    totalEarned: 0,
+    totalClicks: 0,
+    producers: {},
+    upgrades: {},
+    achievements: {},
+    stats: {
+      bestCombo: 0,
+      starsClicked: 0,
+      clickEarned: 0,
+      idleEarned: 0,
+      offlineEarned: 0,
+    },
+    buffs: { discount: false },
+    prestige: { souls: 0, totalResets: 0, perks: {} },
+    soundOn: true,
+    lastSave: Date.now(),
+  };
+  PRODUCERS.forEach(p => s.producers[p.id] = 0);
+  return s;
+}
+
+let S = defaultState();
 
 let combo = 0;
-let comboTimer = 0;          // 남은 시간(초)
+let comboTimer = 0;
 const COMBO_WINDOW = 0.9;
-let frenzyTimer = 0;         // 광란 남은 시간
+let frenzyTimer = 0;        // 광란 x7
+let partyTimer = 0;         // 친구 파티 x5 (자동 생산만)
 let currentTab = 'producers';
+let buyMode = '1';
 let stageIdx = 0;
 let blinkTimer = 3;
 let blinking = 0;
@@ -475,8 +641,50 @@ function fmt(n) {
   return Math.floor(n).toLocaleString();
 }
 
-function producerCost(p) {
-  return Math.ceil(p.baseCost * Math.pow(1.15, S.producers[p.id]));
+function fmtTime(sec) {
+  if (!isFinite(sec)) return '∞';
+  if (sec < 60) return Math.ceil(sec) + '초';
+  if (sec < 3600) return Math.floor(sec / 60) + '분 ' + Math.ceil(sec % 60) + '초';
+  if (sec < 86400) return (sec / 3600).toFixed(1) + '시간';
+  return (sec / 86400).toFixed(1) + '일';
+}
+
+function producerCost(p, owned) {
+  if (owned === undefined) owned = S.producers[p.id];
+  return Math.ceil(p.baseCost * Math.pow(1.15, owned));
+}
+
+/* 구매 모드에 따른 수량/총비용. max는 현재 코인 기준 */
+function bulkInfo(p) {
+  const owned = S.producers[p.id];
+  const budget = S.coins;
+  const disc = S.buffs.discount ? 0.5 : 1;
+  if (buyMode === '1') {
+    return { count: 1, cost: producerCost(p, owned) * disc };
+  }
+  if (buyMode === '10') {
+    let total = 0;
+    for (let k = 0; k < 10; k++) total += producerCost(p, owned + k);
+    return { count: 10, cost: total * disc };
+  }
+  // MAX: 살 수 있는 최대 수량 (상한 500)
+  let total = 0, count = 0;
+  for (let k = 0; k < 500; k++) {
+    const c = producerCost(p, owned + count) * disc;
+    if (total + c > budget) break;
+    total += c;
+    count++;
+  }
+  if (count === 0) return { count: 0, cost: producerCost(p, owned) * disc };
+  return { count, cost: total };
+}
+
+function achCount() {
+  return Object.keys(S.achievements).length;
+}
+
+function globalMul() {
+  return 1 + achCount() * 0.01;
 }
 
 function clickPower() {
@@ -487,21 +695,26 @@ function clickPower() {
     if (u.type === 'clickMul') mul *= u.value;
     if (u.type === 'clickCps') cpsPart += u.value;
   }
-  return (add * mul + totalCps() * cpsPart);
+  return add * mul * globalMul() + totalCps() * cpsPart;
+}
+
+function cpsMulFactor() {
+  let mul = 1;
+  for (const u of UPGRADES) {
+    if (S.upgrades[u.id] && u.type === 'cpsMul') mul *= u.value;
+  }
+  return mul * globalMul();
 }
 
 function totalCps() {
   let base = 0;
   for (const p of PRODUCERS) base += p.cps * S.producers[p.id];
-  let mul = 1;
-  for (const u of UPGRADES) {
-    if (S.upgrades[u.id] && u.type === 'cpsMul') mul *= u.value;
-  }
-  return base * mul;
+  return base * cpsMulFactor();
 }
 
 function comboMul() { return 1 + Math.min(combo, 50) * 0.02; }
 function frenzyMul() { return frenzyTimer > 0 ? 7 : 1; }
+function partyMul() { return partyTimer > 0 ? 5 : 1; }
 
 /* ════════════════════════ 사운드 (WebAudio) ════════════════════════ */
 
@@ -525,6 +738,7 @@ function sndClick() { beep(420 + Math.min(combo, 50) * 14, 0.06); }
 function sndBuy()   { beep(523, 0.08); setTimeout(() => beep(784, 0.1), 70); }
 function sndEvo()   { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.15, 'triangle', 0.1), i * 110)); }
 function sndStar()  { [880, 1175, 1568].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.1), i * 80)); }
+function sndAch()   { [659, 880, 1319].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.09), i * 90)); }
 
 /* ════════════════════════ 슬라임 렌더링 ════════════════════════ */
 
@@ -551,7 +765,6 @@ function drawSlime(t) {
     for (let x = 0; x < 16; x++) {
       let c = SLIME_MAP[y][x];
       if (c === '.') continue;
-      // 눈 깜빡임: 눈 윗줄 지우고 아랫줄을 감은 눈으로
       if (blinking > 0 && (c === 'w' || c === 'k')) {
         if (y === 9) c = 'b';
         else c = 'k';
@@ -583,9 +796,11 @@ function drawSlime(t) {
   }));
 })();
 
-/* 황금별 (16x16) */
+/* 황금별 (16x16) — 미니 별똥별용 데이터 URL도 함께 생성 */
+let starDataURL = '';
 (function drawStar() {
-  const c = $('golden-star').getContext('2d');
+  const cv = $('golden-star');
+  const c = cv.getContext('2d');
   const map = [
     '.......oo.......',
     '......oyyo......',
@@ -609,31 +824,45 @@ function drawSlime(t) {
     if (ch === '.') return;
     c.fillStyle = col[ch]; c.fillRect(x, y, 1, 1);
   }));
+  starDataURL = cv.toDataURL();
 })();
 
 /* ════════════════════════ 클릭 처리 ════════════════════════ */
 
 const slimeWrap = $('slime-wrap');
 
-slimeWrap.addEventListener('pointerdown', e => {
+function doClick(x, y) {
   const gain = clickPower() * comboMul() * frenzyMul();
   S.coins += gain;
   S.totalEarned += gain;
   S.totalClicks++;
+  S.stats.clickEarned += gain;
 
   combo++;
   comboTimer = COMBO_WINDOW;
+  if (combo > S.stats.bestCombo) S.stats.bestCombo = combo;
 
-  // 찌그러짐 애니메이션
   slimeCv.classList.remove('squish');
   void slimeCv.offsetWidth;
   slimeCv.classList.add('squish');
 
-  spawnFloat(e.clientX, e.clientY, '+' + fmt(gain), frenzyTimer > 0);
-  spawnSparks(e.clientX, e.clientY);
+  spawnFloat(x, y, '+' + fmt(gain), frenzyTimer > 0);
+  spawnSparks(x, y);
   sndClick();
   checkEvolution();
   renderHud();
+}
+
+slimeWrap.addEventListener('pointerdown', e => doClick(e.clientX, e.clientY));
+
+/* 키보드 접근성: Space/Enter로 클릭 */
+window.addEventListener('keydown', e => {
+  if (e.code !== 'Space' && e.code !== 'Enter') return;
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'button' || tag === 'input') return;
+  e.preventDefault();
+  const r = slimeCv.getBoundingClientRect();
+  doClick(r.left + r.width / 2 + (Math.random() * 60 - 30), r.top + r.height * 0.55);
 });
 
 function spawnFloat(x, y, text, big) {
@@ -683,7 +912,82 @@ function checkEvolution() {
     $('evo-flash').classList.add('go');
     sndEvo();
     toast(`🎉 진화! <b>${STAGES[idx].name}</b> 등장!`);
+    save();
   }
+}
+
+function renderEvoProgress() {
+  const bar = $('evo-progress-bar');
+  const label = $('evo-progress-label');
+  if (stageIdx >= STAGES.length - 1) {
+    bar.style.width = '100%';
+    label.textContent = '✨ 최종 진화 완료! ✨';
+    return;
+  }
+  const cur = STAGES[stageIdx];
+  const next = STAGES[stageIdx + 1];
+  const pct = Math.min(100, (S.totalEarned - cur.need) / (next.need - cur.need) * 100);
+  bar.style.width = pct + '%';
+  label.textContent = `${next.name}까지 ${fmt(Math.max(0, next.need - S.totalEarned))} 코인 (${pct.toFixed(1)}%)`;
+}
+
+/* ════════════════════════ 업적 ════════════════════════ */
+
+function checkAchievements() {
+  let newUnlock = false;
+  for (const a of ACHIEVEMENTS) {
+    if (S.achievements[a.id]) continue;
+    if (ACH_CONDITIONS[a.id]()) {
+      S.achievements[a.id] = true;
+      newUnlock = true;
+      toast(`${a.icon} 업적 달성! <b>${a.name}</b><br><small>전체 수입 +1%</small>`);
+      sndAch();
+    }
+  }
+  if (newUnlock) {
+    save();
+    if (currentTab === 'achievements') buildShop();
+  }
+}
+
+/* ════════════════════════ 친구 시각화 ════════════════════════ */
+
+const friendsLayer = $('friends-layer');
+
+/* 슬라임 주변 고정 슬롯 (종류별 3개씩, 최대 24개) */
+function slotPos(i) {
+  const ang = i * 2.39996;
+  const rx = 150 + (i % 3) * 30;
+  const ry = 70 + (i % 4) * 25;
+  return { x: Math.cos(ang) * rx, y: Math.sin(ang) * ry + 60 };
+}
+
+function friendTier(count) {
+  if (count >= 25) return 3;
+  if (count >= 10) return 2;
+  if (count >= 1) return 1;
+  return 0;
+}
+
+function rebuildFriends() {
+  friendsLayer.innerHTML = '';
+  PRODUCERS.forEach((p, pi) => {
+    const tier = friendTier(S.producers[p.id]);
+    for (let k = 0; k < tier; k++) {
+      const pos = slotPos(pi * 3 + k);
+      const el = document.createElement('div');
+      el.className = 'friend';
+      el.style.left = `calc(50% + ${pos.x}px)`;
+      el.style.top = `calc(45% + ${pos.y}px)`;
+      const inner = document.createElement('span');
+      inner.textContent = p.icon;
+      inner.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+      inner.style.animationDelay = (Math.random() * 2) + 's';
+      if (Math.random() < 0.5) inner.style.transform = 'scaleX(-1)';
+      el.appendChild(inner);
+      friendsLayer.appendChild(el);
+    }
+  });
 }
 
 /* ════════════════════════ 상점 ════════════════════════ */
@@ -692,6 +996,8 @@ const shopList = $('shop-list');
 
 function buildShop() {
   shopList.innerHTML = '';
+  $('buy-modes').classList.toggle('on', currentTab === 'producers');
+
   if (currentTab === 'producers') {
     for (const p of PRODUCERS) {
       const el = document.createElement('div');
@@ -701,14 +1007,15 @@ function buildShop() {
         <div class="shop-icon">${p.icon}</div>
         <div class="shop-info">
           <div class="shop-name">${p.name}</div>
-          <div class="shop-desc">${p.desc} · 초당 ${fmt(p.cps)}</div>
+          <div class="shop-desc">${p.desc}</div>
+          <div class="shop-desc shop-payback"></div>
           <div class="shop-cost"></div>
         </div>
         <div class="shop-count"></div>`;
-      el.addEventListener('pointerdown', () => buyProducer(p));
+      el.addEventListener('click', () => buyProducer(p));
       shopList.appendChild(el);
     }
-  } else {
+  } else if (currentTab === 'upgrades') {
     for (const u of UPGRADES) {
       if (S.upgrades[u.id]) continue;
       const el = document.createElement('div');
@@ -719,60 +1026,107 @@ function buildShop() {
         <div class="shop-info">
           <div class="shop-name">${u.name}</div>
           <div class="shop-desc">${u.desc}</div>
-          <div class="shop-cost">${fmt(u.cost)} 코인</div>
+          <div class="shop-cost"></div>
         </div>`;
-      el.addEventListener('pointerdown', () => buyUpgrade(u));
+      el.addEventListener('click', () => buyUpgrade(u));
       shopList.appendChild(el);
     }
     if (!shopList.children.length) {
       shopList.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:30px 10px;font-size:13px;">모든 강화 완료! 🏆</div>';
+    }
+  } else {
+    const summary = document.createElement('div');
+    summary.id = 'ach-summary';
+    summary.textContent = `업적 ${achCount()}/${ACHIEVEMENTS.length} 달성 · 전체 수입 +${achCount()}%`;
+    shopList.appendChild(summary);
+    for (const a of ACHIEVEMENTS) {
+      const done = !!S.achievements[a.id];
+      const el = document.createElement('div');
+      el.className = 'shop-item ach-item' + (done ? ' done' : '');
+      el.innerHTML = `
+        <div class="shop-icon">${done ? a.icon : '❓'}</div>
+        <div class="shop-info">
+          <div class="shop-name">${a.name}</div>
+          <div class="shop-desc">${a.desc}</div>
+        </div>
+        <div class="shop-count">${done ? '✓' : ''}</div>`;
+      shopList.appendChild(el);
     }
   }
   refreshShop();
 }
 
 function refreshShop() {
-  for (const el of shopList.querySelectorAll('.shop-item')) {
-    const id = el.dataset.id;
-    const p = PRODUCERS.find(x => x.id === id);
-    if (p) {
-      const cost = producerCost(p);
-      el.querySelector('.shop-cost').textContent = fmt(cost) + ' 코인';
-      el.querySelector('.shop-count').textContent = S.producers[id] || '';
-      el.classList.toggle('locked', S.coins < cost);
-      // 아직 너무 비싼 항목은 ??? 처리
-      const reveal = S.totalEarned >= p.baseCost * 0.4 || S.producers[id] > 0;
+  $('discount-badge').style.display = S.buffs.discount ? 'inline-block' : 'none';
+
+  if (currentTab === 'producers') {
+    for (const el of shopList.querySelectorAll('.shop-item')) {
+      const p = PRODUCERS.find(x => x.id === el.dataset.id);
+      if (!p) continue;
+      const info = bulkInfo(p);
+      const costEl = el.querySelector('.shop-cost');
+      const prefix = buyMode === '1' ? '' : (buyMode === '10' ? 'x10 = ' : `x${info.count} = `);
+      costEl.textContent = prefix + fmt(info.cost) + ' 코인' + (S.buffs.discount ? ' (50%↓)' : '');
+      el.querySelector('.shop-count').textContent = S.producers[p.id] || '';
+
+      // 회수 시간 = 1개 비용 / 1개가 더해주는 실효 CPS
+      const oneCost = producerCost(p) * (S.buffs.discount ? 0.5 : 1);
+      const oneCps = p.cps * cpsMulFactor();
+      el.querySelector('.shop-payback').textContent = `초당 +${fmt(p.cps)} · 회수 ${fmtTime(oneCost / oneCps)}`;
+
+      const affordable = buyMode === 'max' ? info.count > 0 : S.coins >= info.cost;
+      el.classList.toggle('locked', !affordable);
+
+      const reveal = S.totalEarned >= p.baseCost * 0.4 || S.producers[p.id] > 0;
       el.querySelector('.shop-name').textContent = reveal ? p.name : '???';
       el.querySelector('.shop-icon').textContent = reveal ? p.icon : '❓';
-    } else {
-      const u = UPGRADES.find(x => x.id === id);
-      if (u) el.classList.toggle('locked', S.coins < u.cost);
+    }
+  } else if (currentTab === 'upgrades') {
+    for (const el of shopList.querySelectorAll('.shop-item')) {
+      const u = UPGRADES.find(x => x.id === el.dataset.id);
+      if (!u) continue;
+      const cost = u.cost * (S.buffs.discount ? 0.5 : 1);
+      el.querySelector('.shop-cost').textContent = fmt(cost) + ' 코인' + (S.buffs.discount ? ' (50%↓)' : '');
+      el.classList.toggle('locked', S.coins < cost);
     }
   }
 }
 
+function consumeDiscount() {
+  if (S.buffs.discount) {
+    S.buffs.discount = false;
+    toast('⭐ 할인이 적용되었어요!');
+  }
+}
+
 function buyProducer(p) {
-  const cost = producerCost(p);
-  if (S.coins < cost) return;
-  S.coins -= cost;
-  S.producers[p.id]++;
+  const info = bulkInfo(p);
+  if (info.count === 0 || S.coins < info.cost) return;
+  S.coins -= info.cost;
+  S.producers[p.id] += info.count;
+  consumeDiscount();
   sndBuy();
+  rebuildFriends();
   refreshShop();
   renderHud();
+  save();
 }
 
 function buyUpgrade(u) {
-  if (S.upgrades[u.id] || S.coins < u.cost) return;
-  S.coins -= u.cost;
+  const cost = u.cost * (S.buffs.discount ? 0.5 : 1);
+  if (S.upgrades[u.id] || S.coins < cost) return;
+  S.coins -= cost;
   S.upgrades[u.id] = true;
+  consumeDiscount();
   sndBuy();
   toast(`${u.icon} <b>${u.name}</b> 구매 완료!`);
   buildShop();
   renderHud();
+  save();
 }
 
 document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('pointerdown', () => {
+  tab.addEventListener('click', () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     currentTab = tab.dataset.tab;
@@ -780,18 +1134,37 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    buyMode = btn.dataset.mode;
+    refreshShop();
+  });
+});
+
 /* ════════════════════════ 황금별 이벤트 ════════════════════════ */
 
 const starEl = $('golden-star');
-let starTimer = 20 + Math.random() * 40;   // 첫 등장
+let starTimer = 20 + Math.random() * 40;
 let starVisible = 0;
+
+function starSpawnRect() {
+  const area = $('game-area').getBoundingClientRect();
+  const maxX = Math.max(0, area.width - 140);
+  const maxY = Math.max(0, area.height - 240);
+  return {
+    x: area.left + 40 + Math.random() * maxX,
+    y: area.top + 70 + Math.random() * maxY,
+  };
+}
 
 function spawnStar() {
   starVisible = 10;
   starEl.style.display = 'block';
-  const area = $('game-area').getBoundingClientRect();
-  starEl.style.left = (area.left + 40 + Math.random() * (area.width - 140)) + 'px';
-  starEl.style.top = (80 + Math.random() * (area.height - 220)) + 'px';
+  const pos = starSpawnRect();
+  starEl.style.left = pos.x + 'px';
+  starEl.style.top = pos.y + 'px';
 }
 
 function hideStar() {
@@ -800,39 +1173,113 @@ function hideStar() {
   starTimer = 40 + Math.random() * 60;
 }
 
+/* 이벤트 종류: 가중치 랜덤 */
+const STAR_EVENTS = [
+  { w: 30, run: (e) => {
+      frenzyTimer = 20;
+      toast('⭐ <b>광란의 시간!</b> 20초간 모든 수입 x7!');
+  }},
+  { w: 25, run: (e) => {
+      const bonus = Math.max(totalCps() * 90, clickPower() * 150, 50);
+      S.coins += bonus;
+      S.totalEarned += bonus;
+      spawnFloat(e.clientX, e.clientY, '+' + fmt(bonus), true);
+      toast(`⭐ 행운의 보너스! <b>+${fmt(bonus)}</b> 코인!`);
+  }},
+  { w: 20, run: (e) => {
+      partyTimer = 30;
+      toast('🎉 <b>친구 파티!</b> 30초간 자동 생산 x5!');
+  }},
+  { w: 15, run: (e) => {
+      S.buffs.discount = true;
+      toast('🏷️ <b>별의 할인!</b> 다음 구매가 50% 할인돼요!');
+  }},
+  { w: 10, run: (e) => {
+      toast('🌠 <b>미니 별똥별!</b> 작은 별들을 빠르게 클릭하세요!');
+      spawnMiniStars();
+  }},
+];
+
+function pickStarEvent() {
+  const total = STAR_EVENTS.reduce((a, ev) => a + ev.w, 0);
+  let r = Math.random() * total;
+  for (const ev of STAR_EVENTS) {
+    r -= ev.w;
+    if (r <= 0) return ev;
+  }
+  return STAR_EVENTS[0];
+}
+
 starEl.addEventListener('pointerdown', e => {
   e.stopPropagation();
   sndStar();
-  if (Math.random() < 0.5) {
-    frenzyTimer = 20;
-    $('frenzy-banner').style.display = 'block';
-    toast('⭐ <b>광란의 시간!</b> 20초간 모든 수입 x7!');
-  } else {
-    const bonus = Math.max(totalCps() * 90, clickPower() * 150, 50);
-    S.coins += bonus;
-    S.totalEarned += bonus;
-    spawnFloat(e.clientX, e.clientY, '+' + fmt(bonus), true);
-    toast(`⭐ 행운의 보너스! <b>+${fmt(bonus)}</b> 코인!`);
-  }
+  S.stats.starsClicked++;
+  pickStarEvent().run(e);
   hideStar();
   checkEvolution();
   renderHud();
+  save();
 });
+
+function spawnMiniStars() {
+  for (let i = 0; i < 5; i++) {
+    const img = document.createElement('img');
+    img.src = starDataURL;
+    img.className = 'mini-star';
+    img.alt = '미니 별똥별';
+    const pos = starSpawnRect();
+    img.style.left = pos.x + 'px';
+    img.style.top = pos.y + 'px';
+    img.addEventListener('pointerdown', ev => {
+      ev.stopPropagation();
+      const bonus = Math.max(totalCps() * 8, clickPower() * 15, 25);
+      S.coins += bonus;
+      S.totalEarned += bonus;
+      spawnFloat(ev.clientX, ev.clientY, '+' + fmt(bonus), true);
+      beep(1175, 0.1, 'triangle', 0.09);
+      img.remove();
+      renderHud();
+    }, { once: true });
+    document.body.appendChild(img);
+    setTimeout(() => img.remove(), 6000);
+  }
+}
 
 /* ════════════════════════ HUD / 토스트 ════════════════════════ */
 
 function renderHud() {
   $('coin-num').textContent = fmt(S.coins);
-  $('cps-display').textContent = '초당 ' + fmt(totalCps() * frenzyMul()) + ' 코인' + (frenzyTimer > 0 ? ' (x7!)' : '');
+  const effCps = totalCps() * frenzyMul() * partyMul();
+  let suffix = '';
+  if (frenzyTimer > 0 && partyTimer > 0) suffix = ' (x35!)';
+  else if (frenzyTimer > 0) suffix = ' (x7!)';
+  else if (partyTimer > 0) suffix = ' (x5!)';
+  $('cps-display').textContent = '초당 ' + fmt(effCps) + ' 코인' + suffix;
   $('stat-clicks').textContent = S.totalClicks.toLocaleString();
+  $('stat-stars').textContent = S.stats.starsClicked;
   $('stat-total').textContent = fmt(S.totalEarned);
   $('stat-power').textContent = fmt(clickPower() * comboMul() * frenzyMul());
+  $('stat-ach').textContent = achCount();
+  renderEvoProgress();
+}
+
+function renderBuffBanner() {
+  const banner = $('buff-banner');
+  const parts = [];
+  if (frenzyTimer > 0) parts.push(`⭐ 광란 x7 (${Math.ceil(frenzyTimer)}초)`);
+  if (partyTimer > 0) parts.push(`🎉 파티 x5 (${Math.ceil(partyTimer)}초)`);
+  if (parts.length) {
+    banner.textContent = parts.join('  ');
+    banner.style.display = 'block';
+  } else {
+    banner.style.display = 'none';
+  }
 }
 
 let toastTimer = null;
 function toast(html) {
   const el = $('toast');
-  el.innerHTML = html;
+  el.innerHTML = html;   // 주의: 내부 고정 문자열만 전달할 것 (사용자 입력 금지)
   el.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
@@ -845,13 +1292,25 @@ function save() {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {}
 }
 
+/* 구버전 세이브에 새 필드 기본값 채우기 */
+function migrateSave(data) {
+  const base = defaultState();
+  const out = Object.assign(base, data);
+  out.stats = Object.assign(defaultState().stats, data.stats || {});
+  out.buffs = Object.assign(defaultState().buffs, data.buffs || {});
+  out.prestige = Object.assign(defaultState().prestige, data.prestige || {});
+  out.achievements = data.achievements || {};
+  out.producers = Object.assign({}, defaultState().producers, data.producers || {});
+  out.upgrades = data.upgrades || {};
+  out.version = SAVE_VERSION;
+  return out;
+}
+
 function load() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return;
-    const data = JSON.parse(raw);
-    Object.assign(S, data);
-    PRODUCERS.forEach(p => { if (!(p.id in S.producers)) S.producers[p.id] = 0; });
+    S = migrateSave(JSON.parse(raw));
 
     // 오프라인 보상: 자리 비운 시간의 50%, 최대 8시간
     const away = Math.min((Date.now() - (S.lastSave || Date.now())) / 1000, 8 * 3600);
@@ -859,21 +1318,43 @@ function load() {
     if (offline >= 1) {
       S.coins += offline;
       S.totalEarned += offline;
+      S.stats.offlineEarned += offline;
       setTimeout(() => toast(`💤 자리 비운 동안 친구들이 <b>${fmt(offline)}</b> 코인을 모았어요!`), 600);
     }
   } catch (e) {}
 }
 
-$('reset-btn').addEventListener('pointerdown', () => {
-  if (!confirm('정말 처음부터 다시 시작할까요? 모든 진행이 사라져요!')) return;
-  localStorage.removeItem(SAVE_KEY);
-  location.reload();
-});
+/* 초기화: 1.2초 길게 누르기 → 확인 */
+const resetBtn = $('reset-btn');
+let resetHold = null;
 
-$('sound-btn').addEventListener('pointerdown', () => {
+resetBtn.addEventListener('pointerdown', () => {
+  resetBtn.classList.add('holding');
+  resetHold = setTimeout(() => {
+    resetBtn.classList.remove('holding');
+    resetHold = null;
+    if (confirm('정말 처음부터 다시 시작할까요? 모든 진행이 사라져요!')) {
+      localStorage.removeItem(SAVE_KEY);
+      location.reload();
+    }
+  }, 1200);
+});
+function cancelReset() {
+  resetBtn.classList.remove('holding');
+  if (resetHold) {
+    clearTimeout(resetHold);
+    resetHold = null;
+    toast('초기화하려면 버튼을 <b>길게</b> 누르세요');
+  }
+}
+resetBtn.addEventListener('pointerup', cancelReset);
+resetBtn.addEventListener('pointerleave', cancelReset);
+
+$('sound-btn').addEventListener('click', () => {
   S.soundOn = !S.soundOn;
   $('sound-btn').textContent = S.soundOn ? '🔊' : '🔇';
   if (S.soundOn) beep(660, 0.08);
+  save();
 });
 
 window.addEventListener('beforeunload', save);
@@ -883,16 +1364,18 @@ window.addEventListener('beforeunload', save);
 let lastT = performance.now();
 let saveAcc = 0;
 let shopAcc = 0;
+let achAcc = 0;
 
 function loop(t) {
   const dt = Math.min((t - lastT) / 1000, 0.5);
   lastT = t;
 
   // 자동 생산
-  const income = totalCps() * frenzyMul() * dt;
+  const income = totalCps() * frenzyMul() * partyMul() * dt;
   if (income > 0) {
     S.coins += income;
     S.totalEarned += income;
+    S.stats.idleEarned += income;
   }
 
   // 콤보 감소
@@ -909,15 +1392,16 @@ function loop(t) {
     cbox.classList.remove('on');
   }
 
-  // 광란
+  // 버프 타이머
   if (frenzyTimer > 0) {
     frenzyTimer -= dt;
-    if (frenzyTimer <= 0) {
-      frenzyTimer = 0;
-      $('frenzy-banner').style.display = 'none';
-      toast('광란의 시간 종료!');
-    }
+    if (frenzyTimer <= 0) { frenzyTimer = 0; toast('광란의 시간 종료!'); }
   }
+  if (partyTimer > 0) {
+    partyTimer -= dt;
+    if (partyTimer <= 0) { partyTimer = 0; toast('친구 파티 종료!'); }
+  }
+  renderBuffBanner();
 
   // 황금별
   if (starVisible > 0) {
@@ -936,6 +1420,9 @@ function loop(t) {
   drawSlime(t);
   checkEvolution();
   renderHud();
+
+  achAcc += dt;
+  if (achAcc >= 0.5) { achAcc = 0; checkAchievements(); }
 
   shopAcc += dt;
   if (shopAcc >= 0.25) { shopAcc = 0; refreshShop(); }
@@ -964,6 +1451,7 @@ stageIdx = currentStageFor(S.totalEarned);
 $('stage-name').textContent = STAGES[stageIdx].name;
 $('sound-btn').textContent = S.soundOn ? '🔊' : '🔇';
 buildShop();
+rebuildFriends();
 renderHud();
 requestAnimationFrame(loop);
 </script>
