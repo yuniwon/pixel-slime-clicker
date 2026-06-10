@@ -19,6 +19,7 @@
     --gold: #ffd75e;
     --green: #7dff8a;
     --pink: #ff8ac4;
+    --soul: #b48aff;
   }
 
   html, body { height: 100%; overflow: hidden; }
@@ -71,6 +72,7 @@
     color: var(--text-dim);
     margin-bottom: 8px;
   }
+  #stage-name .trait { color: var(--gold); }
 
   /* ── 진화 진행바 ── */
   #evo-progress-wrap { text-align: center; margin-bottom: 10px; }
@@ -138,6 +140,35 @@
     border-radius: 50%;
     margin: -18px auto 0;
     filter: blur(2px);
+  }
+
+  /* ── 말풍선 ── */
+  #speech-bubble {
+    position: absolute;
+    top: -14px; left: 50%;
+    transform: translateX(-50%) scale(0);
+    background: var(--text);
+    color: #2d1b4e;
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 8px 14px;
+    border: 3px solid #2d1b4e;
+    box-shadow: 3px 3px 0 #00000055;
+    max-width: 240px;
+    width: max-content;
+    text-align: center;
+    z-index: 10;
+    transition: transform .2s ease;
+    pointer-events: none;
+  }
+  #speech-bubble.show { transform: translateX(-50%) scale(1); }
+  #speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; left: 50%;
+    margin-left: -5px;
+    border: 5px solid transparent;
+    border-top-color: #2d1b4e;
   }
 
   /* ── 친구 시각화 ── */
@@ -288,7 +319,7 @@
     flex: 1;
     text-align: center;
     padding: 10px 0;
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
     color: var(--text-dim);
     background: var(--panel);
@@ -362,6 +393,20 @@
   .ach-item.done .shop-name { color: var(--gold); }
   .ach-item:not(.done) { opacity: .5; }
 
+  /* 환생 */
+  #prestige-info {
+    text-align: center;
+    font-size: 12px;
+    color: var(--soul);
+    padding: 4px 0 10px;
+    line-height: 1.8;
+  }
+  .prestige-btn { border-color: var(--soul); }
+  .prestige-btn .shop-name { color: var(--soul); }
+  .prestige-btn:hover:not(.locked) { border-color: var(--text); }
+  .perk-item .shop-cost { color: var(--soul); }
+  .perk-item.maxed { border-color: var(--soul); opacity: .8; cursor: default; }
+
   #stats-bar {
     border-top: 3px solid var(--border);
     padding: 10px 16px;
@@ -369,6 +414,7 @@
     color: var(--text-dim);
     line-height: 1.7;
   }
+  #stats-bar .soul { color: var(--soul); }
 
   /* ── 토스트 ── */
   #toast {
@@ -410,6 +456,7 @@
     #title { font-size: 18px; }
     #coin-display { font-size: 24px; }
     .friend { font-size: 20px; }
+    #speech-bubble { font-size: 11px; max-width: 180px; }
   }
 </style>
 </head>
@@ -426,6 +473,7 @@
   <div id="coin-display"><canvas id="coin-icon" width="8" height="8"></canvas><span id="coin-num">0</span></div>
   <div id="cps-display">초당 0 코인</div>
   <div id="slime-wrap" role="button" tabindex="0" aria-label="슬라임 클릭 (스페이스/엔터 키로도 가능)">
+    <div id="speech-bubble"></div>
     <div id="friends-layer"></div>
     <canvas id="slime-canvas" width="16" height="17"></canvas>
     <div id="slime-shadow"></div>
@@ -449,6 +497,7 @@
     <div class="tab active" data-tab="producers" role="button">친구들</div>
     <div class="tab" data-tab="upgrades" role="button">강화</div>
     <div class="tab" data-tab="achievements" role="button">업적</div>
+    <div class="tab" data-tab="prestige" role="button">환생</div>
   </div>
   <div id="buy-modes" class="on">
     <button class="mode-btn active" data-mode="1">x1</button>
@@ -460,6 +509,7 @@
     <div>총 클릭: <span id="stat-clicks">0</span> · 황금별: <span id="stat-stars">0</span></div>
     <div>누적 코인: <span id="stat-total">0</span></div>
     <div>클릭당: <span id="stat-power">1</span> 코인 · 업적 보너스: +<span id="stat-ach">0</span>%</div>
+    <div class="soul">젤리 영혼: <span id="stat-souls">0</span> (수입 +<span id="stat-soul-bonus">0</span>%) · 환생 <span id="stat-resets">0</span>회</div>
   </div>
 </div>
 
@@ -472,7 +522,8 @@
 
 /* ════════════════════════ 데이터 ════════════════════════ */
 
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
+const PRESTIGE_UNLOCK = 1e9;
 
 const PRODUCERS = [
   { id: 'chick',   icon: '🐤', name: '병아리',     desc: '삐약삐약 코인을 쪼아 모아요',      baseCost: 15,       cps: 0.1 },
@@ -512,6 +563,16 @@ const STAGES = [
     pal: null, crown: true, rainbow: true },
 ];
 
+/* 환생 특성: cost = (현재 레벨 + 1) 젤리 영혼 */
+const PERKS = [
+  { id: 'sticky',    icon: '🍬', name: '끈적한 기억', desc: '클릭 파워 +25%',          max: 10, per: 0.25 },
+  { id: 'promise',   icon: '🤝', name: '친구의 약속', desc: '자동 생산 +20%',          max: 10, per: 0.20 },
+  { id: 'starlight', icon: '🌠', name: '별빛 친화',   desc: '황금별 등장 간격 -8%',    max: 5,  per: 0.08 },
+  { id: 'softtime',  icon: '🛌', name: '말랑한 시간', desc: '오프라인 보상 +10%p',     max: 5,  per: 0.10 },
+  { id: 'combo',     icon: '🥁', name: '콤보 본능',   desc: '콤보 지속 +0.15초',       max: 5,  per: 0.15 },
+  { id: 'evoseed',   icon: '🌱', name: '진화의 씨앗', desc: '진화 요구치 -5%',         max: 5,  per: 0.05 },
+];
+
 const ACHIEVEMENTS = [
   { id: 'click1',    icon: '👆', name: '첫 말랑',         desc: '슬라임을 처음 클릭하기' },
   { id: 'click100',  icon: '👏', name: '말랑 입문자',     desc: '총 100번 클릭하기' },
@@ -532,6 +593,8 @@ const ACHIEVEMENTS = [
   { id: 'evo1',      icon: '🧬', name: '첫 진화',         desc: '슬라임을 처음 진화시키기' },
   { id: 'evoMax',    icon: '👑', name: '전설의 시작',     desc: '갓 슬라임에 도달하기' },
   { id: 'allUp',     icon: '🏆', name: '강화 완전체',     desc: '모든 강화 구매하기' },
+  { id: 'rebirth1',  icon: '🌸', name: '윤회의 시작',     desc: '첫 환생하기' },
+  { id: 'rebirth3',  icon: '🌀', name: '깊은 층의 슬라임', desc: '환생 3회 달성하기' },
 ];
 
 const ACH_CONDITIONS = {
@@ -554,6 +617,63 @@ const ACH_CONDITIONS = {
   evo1:      () => stageIdx >= 1,
   evoMax:    () => stageIdx >= STAGES.length - 1,
   allUp:     () => UPGRADES.every(u => S.upgrades[u.id]),
+  rebirth1:  () => S.prestige.totalResets >= 1,
+  rebirth3:  () => S.prestige.totalResets >= 3,
+};
+
+/* 성향(분기 진화)과 대사 */
+const TRAITS = [
+  { key: 'samsara', name: '윤회 성향', pupil: '#b48aff', cond: () => S.prestige.totalResets >= 3 },
+  { key: 'star',    name: '별빛 성향', pupil: '#e8b73a', cond: () => S.stats.starsClicked >= 15 },
+  { key: 'muscle',  name: '근육 성향', pupil: '#d94f4f',
+    cond: () => earnShare('clickEarned') > 0.6 && S.totalClicks > 300 },
+  { key: 'ranch',   name: '목장 성향', pupil: '#3a9e4d',
+    cond: () => earnShare('idleEarned') > 0.6 },
+  { key: 'dream',   name: '꿈꾸는 성향', pupil: '#5a9ad9',
+    cond: () => earnShare('offlineEarned') > 0.25 },
+];
+
+const QUIPS = {
+  generic: [
+    '오늘도 말랑말랑한 하루야.',
+    '코인은 바삭바삭하고 맛있어.',
+    '우주 어딘가에서 별이 떨어진대.',
+    '나 조금 자란 것 같지 않아?',
+    '친구들이 많아지면 덜 외로워.',
+    '말랑… 말랑…',
+  ],
+  muscle: [
+    '또 눌렀어? 좋아, 나도 이제 적응했어.',
+    '내 몸 어딘가에 근육이 생긴 것 같아.',
+    '오늘의 운동: 눌리기 1만 회.',
+  ],
+  ranch: [
+    '친구들이 일하고 있어. 우리는 경영을 하자.',
+    '나는 CEO야. 클릭은 친구들이 해.',
+    '오늘 병아리들 출근 도장 찍었어.',
+  ],
+  star: [
+    '별이 떨어질 때까지 숨 참는다. 흡.',
+    '내 눈에 별 들어간 거 보여?',
+    '별은 줍는 게 아니라 마중 나가는 거야.',
+  ],
+  dream: [
+    '방금 코인 꿈 꿨는데 진짜였네.',
+    '잘 자고 일어나면 부자야.',
+    '꿈에서 우주 고래를 탔어.',
+  ],
+  samsara: [
+    '이번 생은 왠지 낯설지 않아…',
+    '어쩐지 이 장면 본 것 같아.',
+    '환생해도 너는 기억나.',
+  ],
+  evolve: [
+    '나… 변한 것 같아!',
+    '두근두근… 새로운 내가 됐어!',
+  ],
+  rebirth: [
+    '처음으로 돌아간 게 아니야. 더 깊은 층으로 온 거야.',
+  ],
 };
 
 const SLIME_MAP = [
@@ -615,7 +735,6 @@ let S = defaultState();
 
 let combo = 0;
 let comboTimer = 0;
-const COMBO_WINDOW = 0.9;
 let frenzyTimer = 0;        // 광란 x7
 let partyTimer = 0;         // 친구 파티 x5 (자동 생산만)
 let currentTab = 'producers';
@@ -623,6 +742,8 @@ let buyMode = '1';
 let stageIdx = 0;
 let blinkTimer = 3;
 let blinking = 0;
+let currentTrait = null;    // 0.5초마다 갱신
+let quipTimer = 30;
 
 /* ════════════════════════ 유틸 ════════════════════════ */
 
@@ -649,12 +770,16 @@ function fmtTime(sec) {
   return (sec / 86400).toFixed(1) + '일';
 }
 
+function earnShare(key) {
+  const tot = S.stats.clickEarned + S.stats.idleEarned + S.stats.offlineEarned;
+  return tot > 0 ? S.stats[key] / tot : 0;
+}
+
 function producerCost(p, owned) {
   if (owned === undefined) owned = S.producers[p.id];
   return Math.ceil(p.baseCost * Math.pow(1.15, owned));
 }
 
-/* 구매 모드에 따른 수량/총비용. max는 현재 코인 기준 */
 function bulkInfo(p) {
   const owned = S.producers[p.id];
   const budget = S.coins;
@@ -667,7 +792,6 @@ function bulkInfo(p) {
     for (let k = 0; k < 10; k++) total += producerCost(p, owned + k);
     return { count: 10, cost: total * disc };
   }
-  // MAX: 살 수 있는 최대 수량 (상한 500)
   let total = 0, count = 0;
   for (let k = 0; k < 500; k++) {
     const c = producerCost(p, owned + count) * disc;
@@ -679,12 +803,27 @@ function bulkInfo(p) {
   return { count, cost: total };
 }
 
-function achCount() {
-  return Object.keys(S.achievements).length;
-}
+function perkLv(id) { return S.prestige.perks[id] || 0; }
+function perkCost(id) { return perkLv(id) + 1; }
+
+function achCount() { return Object.keys(S.achievements).length; }
+
+function soulMul() { return 1 + S.prestige.souls * 0.05; }
 
 function globalMul() {
-  return 1 + achCount() * 0.01;
+  return (1 + achCount() * 0.01) * soulMul();
+}
+
+function comboWindow() { return 0.9 + 0.15 * perkLv('combo'); }
+
+function offlineRate() { return Math.min(1, 0.5 + 0.1 * perkLv('softtime')); }
+
+function effNeed(i) {
+  return STAGES[i].need * (1 - 0.05 * perkLv('evoseed'));
+}
+
+function soulsGain() {
+  return Math.floor(Math.sqrt(S.totalEarned / 1e8));
 }
 
 function clickPower() {
@@ -695,7 +834,8 @@ function clickPower() {
     if (u.type === 'clickMul') mul *= u.value;
     if (u.type === 'clickCps') cpsPart += u.value;
   }
-  return add * mul * globalMul() + totalCps() * cpsPart;
+  const sticky = 1 + 0.25 * perkLv('sticky');
+  return add * mul * globalMul() * sticky + totalCps() * cpsPart;
 }
 
 function cpsMulFactor() {
@@ -703,7 +843,7 @@ function cpsMulFactor() {
   for (const u of UPGRADES) {
     if (S.upgrades[u.id] && u.type === 'cpsMul') mul *= u.value;
   }
-  return mul * globalMul();
+  return mul * globalMul() * (1 + 0.2 * perkLv('promise'));
 }
 
 function totalCps() {
@@ -739,6 +879,7 @@ function sndBuy()   { beep(523, 0.08); setTimeout(() => beep(784, 0.1), 70); }
 function sndEvo()   { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.15, 'triangle', 0.1), i * 110)); }
 function sndStar()  { [880, 1175, 1568].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.1), i * 80)); }
 function sndAch()   { [659, 880, 1319].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.09), i * 90)); }
+function sndRebirth() { [1047, 784, 523, 392, 523, 784, 1047, 1568].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'triangle', 0.1), i * 130)); }
 
 /* ════════════════════════ 슬라임 렌더링 ════════════════════════ */
 
@@ -757,7 +898,9 @@ function drawSlime(t) {
   }
   const colors = {
     o: pal.o, b: pal.b, l: pal.l, d: pal.d,
-    w: '#ffffff', k: '#26203a', p: '#ff9fb2', y: '#ffd75e',
+    w: '#ffffff',
+    k: currentTrait ? currentTrait.pupil : '#26203a',  // 성향에 따라 눈동자 색 변화
+    p: '#ff9fb2', y: '#ffd75e',
   };
   slimeCtx.clearRect(0, 0, 16, 17);
 
@@ -827,6 +970,23 @@ let starDataURL = '';
   starDataURL = cv.toDataURL();
 })();
 
+/* ════════════════════════ 말풍선 ════════════════════════ */
+
+let quipHideTimer = null;
+function showQuip(text) {
+  const el = $('speech-bubble');
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(quipHideTimer);
+  quipHideTimer = setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function randomQuip() {
+  const pool = QUIPS.generic.slice();
+  if (currentTrait && QUIPS[currentTrait.key]) pool.push(...QUIPS[currentTrait.key], ...QUIPS[currentTrait.key]);
+  showQuip(pool[Math.floor(Math.random() * pool.length)]);
+}
+
 /* ════════════════════════ 클릭 처리 ════════════════════════ */
 
 const slimeWrap = $('slime-wrap');
@@ -839,7 +999,7 @@ function doClick(x, y) {
   S.stats.clickEarned += gain;
 
   combo++;
-  comboTimer = COMBO_WINDOW;
+  comboTimer = comboWindow();
   if (combo > S.stats.bestCombo) S.stats.bestCombo = combo;
 
   slimeCv.classList.remove('squish');
@@ -855,7 +1015,6 @@ function doClick(x, y) {
 
 slimeWrap.addEventListener('pointerdown', e => doClick(e.clientX, e.clientY));
 
-/* 키보드 접근성: Space/Enter로 클릭 */
 window.addEventListener('keydown', e => {
   if (e.code !== 'Space' && e.code !== 'Enter') return;
   const tag = (e.target.tagName || '').toLowerCase();
@@ -894,11 +1053,11 @@ function spawnSparks(x, y) {
   }
 }
 
-/* ════════════════════════ 진화 ════════════════════════ */
+/* ════════════════════════ 진화 / 성향 ════════════════════════ */
 
 function currentStageFor(total) {
   let idx = 0;
-  for (let i = 0; i < STAGES.length; i++) if (total >= STAGES[i].need) idx = i;
+  for (let i = 0; i < STAGES.length; i++) if (total >= effNeed(i)) idx = i;
   return idx;
 }
 
@@ -906,13 +1065,28 @@ function checkEvolution() {
   const idx = currentStageFor(S.totalEarned);
   if (idx > stageIdx) {
     stageIdx = idx;
-    $('stage-name').textContent = STAGES[idx].name;
+    renderStageName();
     $('evo-flash').classList.remove('go');
     void $('evo-flash').offsetWidth;
     $('evo-flash').classList.add('go');
     sndEvo();
     toast(`🎉 진화! <b>${STAGES[idx].name}</b> 등장!`);
+    showQuip(QUIPS.evolve[Math.floor(Math.random() * QUIPS.evolve.length)]);
     save();
+  }
+}
+
+function detectTrait() {
+  for (const t of TRAITS) if (t.cond()) return t;
+  return null;
+}
+
+function renderStageName() {
+  const el = $('stage-name');
+  if (currentTrait) {
+    el.innerHTML = `${STAGES[stageIdx].name} · <span class="trait">${currentTrait.name}</span>`;
+  } else {
+    el.textContent = STAGES[stageIdx].name;
   }
 }
 
@@ -924,11 +1098,11 @@ function renderEvoProgress() {
     label.textContent = '✨ 최종 진화 완료! ✨';
     return;
   }
-  const cur = STAGES[stageIdx];
-  const next = STAGES[stageIdx + 1];
-  const pct = Math.min(100, (S.totalEarned - cur.need) / (next.need - cur.need) * 100);
+  const cur = effNeed(stageIdx);
+  const next = effNeed(stageIdx + 1);
+  const pct = Math.min(100, (S.totalEarned - cur) / (next - cur) * 100);
   bar.style.width = pct + '%';
-  label.textContent = `${next.name}까지 ${fmt(Math.max(0, next.need - S.totalEarned))} 코인 (${pct.toFixed(1)}%)`;
+  label.textContent = `${STAGES[stageIdx + 1].name}까지 ${fmt(Math.max(0, next - S.totalEarned))} 코인 (${pct.toFixed(1)}%)`;
 }
 
 /* ════════════════════════ 업적 ════════════════════════ */
@@ -950,11 +1124,78 @@ function checkAchievements() {
   }
 }
 
+/* ════════════════════════ 플레이스타일 ════════════════════════ */
+
+function playstyleName() {
+  const click = earnShare('clickEarned');
+  const idle = earnShare('idleEarned');
+  const off = earnShare('offlineEarned');
+  if (S.stats.starsClicked >= 20 && click < 0.5) return '⭐ 별 사냥꾼';
+  if (click > 0.55) return '💪 클릭왕';
+  if (off > 0.3) return '🛌 꿈꾸는 방랑자';
+  if (idle + off > 0.75) return '🐱 방치 장인';
+  return '⚖️ 균형 성장형';
+}
+
+/* ════════════════════════ 환생 ════════════════════════ */
+
+function doPrestige() {
+  const gain = soulsGain();
+  if (gain < 1) return;
+  const style = playstyleName();
+  const ok = confirm(
+    `젤리 환생을 할까요?\n\n` +
+    `+ 젤리 영혼 ${gain}개 획득 (영혼 1개당 모든 수입 +5%)\n` +
+    `- 코인, 친구들, 강화가 초기화돼요\n` +
+    `- 업적, 영혼, 특성은 유지돼요\n\n` +
+    `이번 생의 플레이스타일: ${style.replace(/^\S+ /, '')}`
+  );
+  if (!ok) return;
+
+  S.prestige.souls += gain;
+  S.prestige.totalResets++;
+  S.coins = 0;
+  S.totalEarned = 0;
+  S.producers = {};
+  PRODUCERS.forEach(p => S.producers[p.id] = 0);
+  S.upgrades = {};
+  S.buffs.discount = false;
+  combo = 0; comboTimer = 0; frenzyTimer = 0; partyTimer = 0;
+  stageIdx = 0;
+
+  sndRebirth();
+  $('evo-flash').classList.remove('go');
+  void $('evo-flash').offsetWidth;
+  $('evo-flash').classList.add('go');
+  toast(`🌸 <b>환생!</b> 젤리 영혼 +${gain}<br><small>이번 생의 플레이스타일: <b>${style}</b></small>`);
+  showQuip(QUIPS.rebirth[0]);
+
+  currentTrait = detectTrait();
+  renderStageName();
+  rebuildFriends();
+  buildShop();
+  renderHud();
+  save();
+}
+
+function buyPerk(perk) {
+  const lv = perkLv(perk.id);
+  if (lv >= perk.max) return;
+  const cost = perkCost(perk.id);
+  if (S.prestige.souls < cost) return;
+  S.prestige.souls -= cost;
+  S.prestige.perks[perk.id] = lv + 1;
+  sndBuy();
+  toast(`${perk.icon} <b>${perk.name}</b> Lv.${lv + 1}!`);
+  buildShop();
+  renderHud();
+  save();
+}
+
 /* ════════════════════════ 친구 시각화 ════════════════════════ */
 
 const friendsLayer = $('friends-layer');
 
-/* 슬라임 주변 고정 슬롯 (종류별 3개씩, 최대 24개) */
 function slotPos(i) {
   const ang = i * 2.39996;
   const rx = 150 + (i % 3) * 30;
@@ -1034,7 +1275,7 @@ function buildShop() {
     if (!shopList.children.length) {
       shopList.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:30px 10px;font-size:13px;">모든 강화 완료! 🏆</div>';
     }
-  } else {
+  } else if (currentTab === 'achievements') {
     const summary = document.createElement('div');
     summary.id = 'ach-summary';
     summary.textContent = `업적 ${achCount()}/${ACHIEVEMENTS.length} 달성 · 전체 수입 +${achCount()}%`;
@@ -1052,8 +1293,53 @@ function buildShop() {
         <div class="shop-count">${done ? '✓' : ''}</div>`;
       shopList.appendChild(el);
     }
+  } else {
+    buildPrestigeTab();
   }
   refreshShop();
+}
+
+function buildPrestigeTab() {
+  const info = document.createElement('div');
+  info.id = 'prestige-info';
+  info.innerHTML =
+    `🍮 젤리 영혼: <b>${S.prestige.souls}</b>개 · 모든 수입 +${(S.prestige.souls * 5)}%<br>` +
+    `환생 ${S.prestige.totalResets}회 · 현재 플레이스타일: ${playstyleName()}`;
+  shopList.appendChild(info);
+
+  // 환생 버튼
+  const gain = soulsGain();
+  const unlocked = S.totalEarned >= PRESTIGE_UNLOCK;
+  const btn = document.createElement('div');
+  btn.className = 'shop-item prestige-btn' + (gain < 1 ? ' locked' : '');
+  btn.innerHTML = `
+    <div class="shop-icon">🌸</div>
+    <div class="shop-info">
+      <div class="shop-name">젤리 환생</div>
+      <div class="shop-desc">${unlocked
+        ? `지금 환생하면 젤리 영혼 <b>+${gain}</b>개! (코인·친구·강화 초기화, 업적·영혼·특성 유지)`
+        : `누적 ${fmt(PRESTIGE_UNLOCK)} 코인부터 환생할 수 있어요 (현재 ${fmt(S.totalEarned)})`}</div>
+    </div>`;
+  if (unlocked && gain >= 1) btn.addEventListener('click', doPrestige);
+  shopList.appendChild(btn);
+
+  // 특성 목록
+  for (const perk of PERKS) {
+    const lv = perkLv(perk.id);
+    const maxed = lv >= perk.max;
+    const cost = perkCost(perk.id);
+    const el = document.createElement('div');
+    el.className = 'shop-item perk-item' + (maxed ? ' maxed' : (S.prestige.souls < cost ? ' locked' : ''));
+    el.innerHTML = `
+      <div class="shop-icon">${perk.icon}</div>
+      <div class="shop-info">
+        <div class="shop-name">${perk.name} <span style="color:var(--soul)">Lv.${lv}/${perk.max}</span></div>
+        <div class="shop-desc">${perk.desc} (레벨당)</div>
+        <div class="shop-cost">${maxed ? 'MAX' : `젤리 영혼 ${cost}개`}</div>
+      </div>`;
+    if (!maxed) el.addEventListener('click', () => buyPerk(perk));
+    shopList.appendChild(el);
+  }
 }
 
 function refreshShop() {
@@ -1069,7 +1355,6 @@ function refreshShop() {
       costEl.textContent = prefix + fmt(info.cost) + ' 코인' + (S.buffs.discount ? ' (50%↓)' : '');
       el.querySelector('.shop-count').textContent = S.producers[p.id] || '';
 
-      // 회수 시간 = 1개 비용 / 1개가 더해주는 실효 CPS
       const oneCost = producerCost(p) * (S.buffs.discount ? 0.5 : 1);
       const oneCps = p.cps * cpsMulFactor();
       el.querySelector('.shop-payback').textContent = `초당 +${fmt(p.cps)} · 회수 ${fmtTime(oneCost / oneCps)}`;
@@ -1149,6 +1434,10 @@ const starEl = $('golden-star');
 let starTimer = 20 + Math.random() * 40;
 let starVisible = 0;
 
+function starInterval() {
+  return (40 + Math.random() * 60) * (1 - 0.08 * perkLv('starlight'));
+}
+
 function starSpawnRect() {
   const area = $('game-area').getBoundingClientRect();
   const maxX = Math.max(0, area.width - 140);
@@ -1170,10 +1459,9 @@ function spawnStar() {
 function hideStar() {
   starVisible = 0;
   starEl.style.display = 'none';
-  starTimer = 40 + Math.random() * 60;
+  starTimer = starInterval();
 }
 
-/* 이벤트 종류: 가중치 랜덤 */
 const STAR_EVENTS = [
   { w: 30, run: (e) => {
       frenzyTimer = 20;
@@ -1260,6 +1548,9 @@ function renderHud() {
   $('stat-total').textContent = fmt(S.totalEarned);
   $('stat-power').textContent = fmt(clickPower() * comboMul() * frenzyMul());
   $('stat-ach').textContent = achCount();
+  $('stat-souls').textContent = S.prestige.souls;
+  $('stat-soul-bonus').textContent = S.prestige.souls * 5;
+  $('stat-resets').textContent = S.prestige.totalResets;
   renderEvoProgress();
 }
 
@@ -1292,13 +1583,13 @@ function save() {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {}
 }
 
-/* 구버전 세이브에 새 필드 기본값 채우기 */
 function migrateSave(data) {
   const base = defaultState();
   const out = Object.assign(base, data);
   out.stats = Object.assign(defaultState().stats, data.stats || {});
   out.buffs = Object.assign(defaultState().buffs, data.buffs || {});
   out.prestige = Object.assign(defaultState().prestige, data.prestige || {});
+  out.prestige.perks = (data.prestige && data.prestige.perks) || {};
   out.achievements = data.achievements || {};
   out.producers = Object.assign({}, defaultState().producers, data.producers || {});
   out.upgrades = data.upgrades || {};
@@ -1312,9 +1603,9 @@ function load() {
     if (!raw) return;
     S = migrateSave(JSON.parse(raw));
 
-    // 오프라인 보상: 자리 비운 시간의 50%, 최대 8시간
+    // 오프라인 보상: 기본 50% + 말랑한 시간 특성, 최대 8시간
     const away = Math.min((Date.now() - (S.lastSave || Date.now())) / 1000, 8 * 3600);
-    const offline = totalCps() * away * 0.5;
+    const offline = totalCps() * away * offlineRate();
     if (offline >= 1) {
       S.coins += offline;
       S.totalEarned += offline;
@@ -1333,7 +1624,7 @@ resetBtn.addEventListener('pointerdown', () => {
   resetHold = setTimeout(() => {
     resetBtn.classList.remove('holding');
     resetHold = null;
-    if (confirm('정말 처음부터 다시 시작할까요? 모든 진행이 사라져요!')) {
+    if (confirm('정말 처음부터 다시 시작할까요? 환생 영혼을 포함해 모든 진행이 사라져요!')) {
       localStorage.removeItem(SAVE_KEY);
       location.reload();
     }
@@ -1359,18 +1650,22 @@ $('sound-btn').addEventListener('click', () => {
 
 window.addEventListener('beforeunload', save);
 
-/* ════════════════════════ 메인 루프 ════════════════════════ */
+/* ════════════════════════ 메인 루프 ════════════════════════
+   경제(수입·버프·타이머)는 econTick()으로 분리.
+   rAF는 백그라운드 탭에서 완전히 멈추므로 setInterval에서도 호출한다.
+   lastEcon 기준 실제 경과 시간으로 계산해 이중 적립은 없다. */
 
-let lastT = performance.now();
+let lastEcon = performance.now();
 let saveAcc = 0;
-let shopAcc = 0;
 let achAcc = 0;
 
-function loop(t) {
-  const dt = Math.min((t - lastT) / 1000, 0.5);
-  lastT = t;
+function econTick() {
+  const now = performance.now();
+  let dt = (now - lastEcon) / 1000;
+  lastEcon = now;
+  if (dt <= 0) return;
+  dt = Math.min(dt, 3600); // 안전 상한
 
-  // 자동 생산
   const income = totalCps() * frenzyMul() * partyMul() * dt;
   if (income > 0) {
     S.coins += income;
@@ -1378,21 +1673,11 @@ function loop(t) {
     S.stats.idleEarned += income;
   }
 
-  // 콤보 감소
   if (comboTimer > 0) {
     comboTimer -= dt;
     if (comboTimer <= 0) combo = 0;
   }
-  const cbox = $('combo-box');
-  if (combo >= 3) {
-    cbox.classList.add('on');
-    $('combo-label').textContent = '콤보 x' + comboMul().toFixed(1) + '  (' + combo + ')';
-    $('combo-bar').style.width = Math.max(0, comboTimer / COMBO_WINDOW * 100) + '%';
-  } else {
-    cbox.classList.remove('on');
-  }
 
-  // 버프 타이머
   if (frenzyTimer > 0) {
     frenzyTimer -= dt;
     if (frenzyTimer <= 0) { frenzyTimer = 0; toast('광란의 시간 종료!'); }
@@ -1401,9 +1686,7 @@ function loop(t) {
     partyTimer -= dt;
     if (partyTimer <= 0) { partyTimer = 0; toast('친구 파티 종료!'); }
   }
-  renderBuffBanner();
 
-  // 황금별
   if (starVisible > 0) {
     starVisible -= dt;
     if (starVisible <= 0) hideStar();
@@ -1412,30 +1695,71 @@ function loop(t) {
     if (starTimer <= 0) spawnStar();
   }
 
-  // 눈 깜빡임
   blinkTimer -= dt;
   if (blinkTimer <= 0) { blinking = 0.15; blinkTimer = 2.5 + Math.random() * 3; }
   if (blinking > 0) blinking -= dt;
 
-  drawSlime(t);
+  // 슬라임 대사 (40~80초 간격)
+  quipTimer -= dt;
+  if (quipTimer <= 0) {
+    randomQuip();
+    quipTimer = 40 + Math.random() * 40;
+  }
+
   checkEvolution();
-  renderHud();
 
   achAcc += dt;
-  if (achAcc >= 0.5) { achAcc = 0; checkAchievements(); }
+  if (achAcc >= 0.5) {
+    achAcc = 0;
+    checkAchievements();
+    const tr = detectTrait();
+    if ((tr && tr.key) !== (currentTrait && currentTrait.key)) {
+      currentTrait = tr;
+      renderStageName();
+      if (tr) toast(`✨ 슬라임에게 <b>${tr.name}</b>이 생겼어요!`);
+    }
+  }
+
+  saveAcc += dt;
+  if (saveAcc >= 5) { saveAcc = 0; save(); }
+}
+
+let shopAcc = 0;
+let lastFrame = performance.now();
+
+function loop(t) {
+  const dt = (t - lastFrame) / 1000;
+  lastFrame = t;
+
+  econTick();
+
+  const cbox = $('combo-box');
+  if (combo >= 3) {
+    cbox.classList.add('on');
+    $('combo-label').textContent = '콤보 x' + comboMul().toFixed(1) + '  (' + combo + ')';
+    $('combo-bar').style.width = Math.max(0, comboTimer / comboWindow() * 100) + '%';
+  } else {
+    cbox.classList.remove('on');
+  }
+  renderBuffBanner();
+
+  drawSlime(t);
+  renderHud();
 
   shopAcc += dt;
   if (shopAcc >= 0.25) { shopAcc = 0; refreshShop(); }
 
-  saveAcc += dt;
-  if (saveAcc >= 5) { saveAcc = 0; save(); }
-
   requestAnimationFrame(loop);
 }
 
+// 백그라운드 탭 대비: rAF가 멈춰도 경제는 계속 돈다
+setInterval(() => {
+  econTick();
+  renderHud();
+}, 1000);
+
 /* ════════════════════════ 초기화 ════════════════════════ */
 
-// 별 배경 생성
 for (let i = 0; i < 40; i++) {
   const s = document.createElement('div');
   s.className = 'star';
@@ -1448,7 +1772,8 @@ for (let i = 0; i < 40; i++) {
 
 load();
 stageIdx = currentStageFor(S.totalEarned);
-$('stage-name').textContent = STAGES[stageIdx].name;
+currentTrait = detectTrait();
+renderStageName();
 $('sound-btn').textContent = S.soundOn ? '🔊' : '🔇';
 buildShop();
 rebuildFriends();
