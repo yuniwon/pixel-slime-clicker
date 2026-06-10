@@ -621,8 +621,8 @@ const PRODUCERS = [
   { id: 'rabbit',  icon: '🐰', name: '로켓 토끼',   desc: '달까지 가서 코인을 캐와요',        baseCost: 12000,    cps: 47 },
   { id: 'unicorn', icon: '🦄', name: '유니콘',     desc: '무지개에서 코인이 쏟아져요',       baseCost: 130000,   cps: 260 },
   { id: 'dragon',  icon: '🐲', name: '아기 드래곤', desc: '보물 더미 위에서 잠을 자요',       baseCost: 1.4e6,    cps: 1400 },
-  { id: 'whale',   icon: '🐋', name: '우주 고래',   desc: '은하수를 헤엄치며 코인을 뿜어요',  baseCost: 2e7,      cps: 7800 },
-  { id: 'planet',  icon: '🪐', name: '코인 행성',   desc: '행성 전체가 코인으로 되어 있어요', baseCost: 3.3e8,    cps: 44000 },
+  { id: 'whale',   icon: '🐋', name: '우주 고래',   desc: '은하수를 헤엄치며 코인을 뿜어요',  baseCost: 1.8e7,    cps: 7800 },
+  { id: 'planet',  icon: '🪐', name: '코인 행성',   desc: '행성 전체가 코인으로 되어 있어요', baseCost: 2.8e8,    cps: 44000 },
 ];
 
 const PRODUCER_SPRITE_ATLAS = 'assets/generated/sprites/slime-friends-ai/sprite-sheet-alpha.png';
@@ -1203,7 +1203,7 @@ function effNeed(i) {
 }
 
 function soulsGain() {
-  return Math.floor(Math.sqrt(S.totalEarned / 1e8) * (hasSyn('planet', 5) ? 1.05 : 1));
+  return Math.floor(Math.sqrt(S.totalEarned / 6e7) * (hasSyn('planet', 5) ? 1.05 : 1));
 }
 
 function decorClickMul() {

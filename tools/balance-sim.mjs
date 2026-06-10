@@ -11,8 +11,8 @@ const PRODUCERS = [
   { id: 'rabbit', name: '로켓 토끼', baseCost: 12000, cps: 47 },
   { id: 'unicorn', name: '유니콘', baseCost: 130000, cps: 260 },
   { id: 'dragon', name: '아기 드래곤', baseCost: 1.4e6, cps: 1400 },
-  { id: 'whale', name: '우주 고래', baseCost: 2e7, cps: 7800 },
-  { id: 'planet', name: '코인 행성', baseCost: 3.3e8, cps: 44000 },
+  { id: 'whale', name: '우주 고래', baseCost: 1.8e7, cps: 7800 },
+  { id: 'planet', name: '코인 행성', baseCost: 2.8e8, cps: 44000 },
 ];
 
 const UPGRADES = [
@@ -302,7 +302,7 @@ class BalanceSim {
   }
 
   soulsGain() {
-    return Math.floor(Math.sqrt(this.S.totalEarned / 1e8) * (this.hasSyn('planet', 5) ? 1.05 : 1));
+    return Math.floor(Math.sqrt(this.S.totalEarned / 6e7) * (this.hasSyn('planet', 5) ? 1.05 : 1));
   }
 
   effNeed(i) {
