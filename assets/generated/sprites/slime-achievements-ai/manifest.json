@@ -1,0 +1,338 @@
+{
+  "characterId": "slime-achievements-ai",
+  "engine": "component-row",
+  "game_input": "sprite-sheet-alpha.png",
+  "degraded_static_fallback": false,
+  "curation_applied": false,
+  "sprite_sheet_alpha": "sprite-sheet-alpha.png",
+  "sprite_sheet_alpha_report": "sprite-sheet-alpha.report.json",
+  "base_image": null,
+  "cell": {
+    "shape": "square",
+    "width": 256,
+    "height": 256,
+    "safe_margin_x": 28,
+    "safe_margin_y": 28,
+    "size": 256,
+    "safe_margin": 28
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "animation": {
+    "cellWidth": 256,
+    "cellHeight": 256,
+    "columns": 1,
+    "rows": {
+      "click1": {
+        "row": 0,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "click100": {
+        "row": 1,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "click1k": {
+        "row": 2,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "click10k": {
+        "row": 3,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "combo30": {
+        "row": 4,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "combo50": {
+        "row": 5,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "chick10": {
+        "row": 6,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "chick50": {
+        "row": 7,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "cat25": {
+        "row": 8,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "friend100": {
+        "row": 9,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "star1": {
+        "row": 10,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "star10": {
+        "row": 11,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "coin1e4": {
+        "row": 12,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "coin1e6": {
+        "row": 13,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "coin1e8": {
+        "row": 14,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "coin1e10": {
+        "row": 15,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "evo1": {
+        "row": 16,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "evoMax": {
+        "row": 17,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "allUp": {
+        "row": 18,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "rebirth1": {
+        "row": 19,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "rebirth3": {
+        "row": 20,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      }
+    }
+  },
+  "frame_layout": {
+    "sheetWidth": 256,
+    "sheetHeight": 5376,
+    "cellWidth": 256,
+    "cellHeight": 256,
+    "rows": {
+      "click1": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "click100": [
+        {
+          "x": 0,
+          "y": 256,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "click1k": [
+        {
+          "x": 0,
+          "y": 512,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "click10k": [
+        {
+          "x": 0,
+          "y": 768,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "combo30": [
+        {
+          "x": 0,
+          "y": 1024,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "combo50": [
+        {
+          "x": 0,
+          "y": 1280,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "chick10": [
+        {
+          "x": 0,
+          "y": 1536,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "chick50": [
+        {
+          "x": 0,
+          "y": 1792,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "cat25": [
+        {
+          "x": 0,
+          "y": 2048,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "friend100": [
+        {
+          "x": 0,
+          "y": 2304,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "star1": [
+        {
+          "x": 0,
+          "y": 2560,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "star10": [
+        {
+          "x": 0,
+          "y": 2816,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "coin1e4": [
+        {
+          "x": 0,
+          "y": 3072,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "coin1e6": [
+        {
+          "x": 0,
+          "y": 3328,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "coin1e8": [
+        {
+          "x": 0,
+          "y": 3584,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "coin1e10": [
+        {
+          "x": 0,
+          "y": 3840,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "evo1": [
+        {
+          "x": 0,
+          "y": 4096,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "evoMax": [
+        {
+          "x": 0,
+          "y": 4352,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "allUp": [
+        {
+          "x": 0,
+          "y": 4608,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "rebirth1": [
+        {
+          "x": 0,
+          "y": 4864,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "rebirth3": [
+        {
+          "x": 0,
+          "y": 5120,
+          "w": 256,
+          "h": 256
+        }
+      ]
+    }
+  }
+}

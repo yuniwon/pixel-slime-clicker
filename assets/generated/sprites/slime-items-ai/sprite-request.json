@@ -1,0 +1,141 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-items-ai",
+    "description": "cute high resolution shop upgrade and prestige perk icons for a cozy slime clicker game",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 512,
+    "height": 512,
+    "safe_margin_x": 56,
+    "safe_margin_y": 56,
+    "size": 512,
+    "safe_margin": 56
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "glove1": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "soft mint padded glove icon, rounded mitten silhouette, beginner click upgrade"
+    },
+    "glove2": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "plush sky blue glove icon, thicker cuff and cushion, intermediate click upgrade"
+    },
+    "glove3": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "fluffy cloud glove icon, white cloud padding with tiny blue accents, high click upgrade"
+    },
+    "hand1": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "golden fingertip talisman icon, warm gold shine built into object, click multiplier"
+    },
+    "hand2": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "diamond fingertip talisman icon, faceted cyan diamond cap, click multiplier"
+    },
+    "hand3": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "starry fingertip talisman icon, deep indigo and yellow star cap, strongest click multiplier"
+    },
+    "snack1": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "round cookie snack icon with chocolate chips and slime-green ribbon, production boost"
+    },
+    "snack2": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "strawberry cake slice icon, pink cream and red strawberry, bigger production boost"
+    },
+    "snack3": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "cosmic pizza slice icon, purple crust, star toppings, strongest production boost"
+    },
+    "click1": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "cute cheer baton pointer icon, small wand with foam finger charm, click bonus"
+    },
+    "click2": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "slime cheer megaphone icon, blue and yellow megaphone with tiny slime face emblem, click bonus"
+    },
+    "prestige": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "jelly soul blossom icon, translucent pink flower-jelly gem, prestige reset"
+    },
+    "sticky": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "sticky memory candy icon, glossy wrapped candy with green slime swirl"
+    },
+    "promise": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "friend promise charm icon, two rounded paw-like hands clasping around a tiny heart"
+    },
+    "starlight": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "starlight affinity icon, comet star badge with blue trail contained inside the object silhouette"
+    },
+    "softtime": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "soft time pillow clock icon, sleepy pillow with small clock face and moon accent"
+    },
+    "combo": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "combo instinct drum icon, tiny festival drum with rhythmic star marks painted on it"
+    },
+    "evoseed": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "evolution seed icon, glowing green seed sprouting two leaves, progression perk"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

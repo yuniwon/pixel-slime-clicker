@@ -1,2 +1,9 @@
 .bkit/
 .claude/
+
+# 스프라이트 생성 중간 산출물 (게임은 sprite-sheet-alpha.png만 사용)
+assets/generated/sprites/*/raw/
+assets/generated/sprites/*/qa/
+assets/generated/sprites/*/frames/
+assets/generated/sprites/*/prompts/
+assets/generated/sprites/*/references/

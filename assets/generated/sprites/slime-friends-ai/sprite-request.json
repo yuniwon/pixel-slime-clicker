@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-friends-ai",
+    "description": "generated producer friend sprites for Pixel Slime Clicker",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 896,
+    "height": 896,
+    "safe_margin_x": 80,
+    "safe_margin_y": 80,
+    "size": 896,
+    "safe_margin": 80
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "chick": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "two-frame cheerful idle bounce"
+    },
+    "cat": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "two-frame sleepy idle tail sway"
+    },
+    "dog": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "two-frame happy idle tail wag"
+    },
+    "rabbit": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "two-frame rocket bunny hover bounce"
+    },
+    "unicorn": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "two-frame magical idle mane sway"
+    },
+    "dragon": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "two-frame baby dragon wing flap"
+    },
+    "whale": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "two-frame cosmic whale float"
+    },
+    "planet": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "two-frame coin planet gentle spin"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

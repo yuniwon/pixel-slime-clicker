@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-achievements-ai",
+    "description": "compact colorful achievement badge icons for a cozy slime clicker game",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 256,
+    "height": 256,
+    "safe_margin_x": 28,
+    "safe_margin_y": 28,
+    "size": 256,
+    "safe_margin": 28
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "click1": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "first click achievement badge, tiny smiling slime button with one tap sparkle painted on badge"
+    },
+    "click100": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "100 clicks achievement badge, cute clapping glove pair around small slime coin"
+    },
+    "click1k": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "1000 clicks achievement badge, energetic flame-shaped click medal"
+    },
+    "click10k": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "10000 clicks achievement badge, strong golden fist medal with slime face"
+    },
+    "combo30": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "combo 30 achievement badge, yellow lightning rhythm badge"
+    },
+    "combo50": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "combo 50 achievement badge, blue spiral storm rhythm badge"
+    },
+    "chick10": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "10 chicks achievement badge, tiny chick nest medal"
+    },
+    "chick50": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "50 chicks achievement badge, proud chicken crown medal"
+    },
+    "cat25": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "25 cats achievement badge, cute cat coin scholar medal"
+    },
+    "friend100": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "100 friends achievement badge, cheerful circus tent friendship medal"
+    },
+    "star1": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "first golden star achievement badge, single bright star catch medal"
+    },
+    "star10": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "10 golden stars achievement badge, radiant double star hunter medal"
+    },
+    "coin1e4": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "10000 coins achievement badge, small coin pouch medal"
+    },
+    "coin1e6": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "one million coins achievement badge, blue diamond coin medal"
+    },
+    "coin1e8": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "one hundred million coins achievement badge, cute bank vault coin medal"
+    },
+    "coin1e10": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "ten billion coins achievement badge, cosmic galaxy coin medal"
+    },
+    "evo1": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "first evolution achievement badge, DNA slime droplet medal"
+    },
+    "evoMax": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "max evolution achievement badge, royal crown legendary slime medal"
+    },
+    "allUp": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "all upgrades achievement badge, trophy with tiny upgrade charms"
+    },
+    "rebirth1": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "first rebirth achievement badge, pink jelly blossom soul medal"
+    },
+    "rebirth3": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "three rebirths achievement badge, deep blue reincarnation swirl medal"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

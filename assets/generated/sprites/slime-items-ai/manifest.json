@@ -1,0 +1,296 @@
+{
+  "characterId": "slime-items-ai",
+  "engine": "component-row",
+  "game_input": "sprite-sheet-alpha.png",
+  "degraded_static_fallback": false,
+  "curation_applied": false,
+  "sprite_sheet_alpha": "sprite-sheet-alpha.png",
+  "sprite_sheet_alpha_report": "sprite-sheet-alpha.report.json",
+  "base_image": null,
+  "cell": {
+    "shape": "square",
+    "width": 512,
+    "height": 512,
+    "safe_margin_x": 56,
+    "safe_margin_y": 56,
+    "size": 512,
+    "safe_margin": 56
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "animation": {
+    "cellWidth": 512,
+    "cellHeight": 512,
+    "columns": 1,
+    "rows": {
+      "glove1": {
+        "row": 0,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "glove2": {
+        "row": 1,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "glove3": {
+        "row": 2,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "hand1": {
+        "row": 3,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "hand2": {
+        "row": 4,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "hand3": {
+        "row": 5,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "snack1": {
+        "row": 6,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "snack2": {
+        "row": 7,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "snack3": {
+        "row": 8,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "click1": {
+        "row": 9,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "click2": {
+        "row": 10,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "prestige": {
+        "row": 11,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "sticky": {
+        "row": 12,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "promise": {
+        "row": 13,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "starlight": {
+        "row": 14,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "softtime": {
+        "row": 15,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "combo": {
+        "row": 16,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "evoseed": {
+        "row": 17,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      }
+    }
+  },
+  "frame_layout": {
+    "sheetWidth": 512,
+    "sheetHeight": 9216,
+    "cellWidth": 512,
+    "cellHeight": 512,
+    "rows": {
+      "glove1": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "glove2": [
+        {
+          "x": 0,
+          "y": 512,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "glove3": [
+        {
+          "x": 0,
+          "y": 1024,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "hand1": [
+        {
+          "x": 0,
+          "y": 1536,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "hand2": [
+        {
+          "x": 0,
+          "y": 2048,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "hand3": [
+        {
+          "x": 0,
+          "y": 2560,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "snack1": [
+        {
+          "x": 0,
+          "y": 3072,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "snack2": [
+        {
+          "x": 0,
+          "y": 3584,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "snack3": [
+        {
+          "x": 0,
+          "y": 4096,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "click1": [
+        {
+          "x": 0,
+          "y": 4608,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "click2": [
+        {
+          "x": 0,
+          "y": 5120,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "prestige": [
+        {
+          "x": 0,
+          "y": 5632,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "sticky": [
+        {
+          "x": 0,
+          "y": 6144,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "promise": [
+        {
+          "x": 0,
+          "y": 6656,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "starlight": [
+        {
+          "x": 0,
+          "y": 7168,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "softtime": [
+        {
+          "x": 0,
+          "y": 7680,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "combo": [
+        {
+          "x": 0,
+          "y": 8192,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "evoseed": [
+        {
+          "x": 0,
+          "y": 8704,
+          "w": 512,
+          "h": 512
+        }
+      ]
+    }
+  }
+}

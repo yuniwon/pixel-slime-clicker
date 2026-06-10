@@ -181,12 +181,24 @@
   }
   .friend {
     position: absolute;
-    font-size: 26px;
     filter: drop-shadow(2px 2px 0 #00000044);
   }
-  .friend > span {
-    display: inline-block;
+  .friend-body {
+    display: inline-flex;
     animation: friendbob ease-in-out infinite alternate;
+  }
+  .sprite-icon {
+    display: inline-block;
+    flex: 0 0 auto;
+    background-repeat: no-repeat;
+    image-rendering: auto;
+    vertical-align: middle;
+  }
+  .sprite-icon.friend-sprite { filter: drop-shadow(2px 2px 0 #00000055); }
+  .sprite-icon.shop-sprite { filter: drop-shadow(2px 2px 0 #00000044); }
+  .sprite-icon.locked-sprite {
+    filter: grayscale(1) brightness(.48) drop-shadow(2px 2px 0 #00000044);
+    opacity: .72;
   }
   @keyframes friendbob {
     from { transform: translateY(0); }
@@ -368,7 +380,16 @@
   .shop-item:active:not(.locked) { transform: scale(.98); }
   .shop-item.locked { opacity: .45; cursor: not-allowed; }
 
-  .shop-icon { font-size: 30px; width: 42px; text-align: center; filter: drop-shadow(2px 2px 0 #00000044); }
+  .shop-icon {
+    font-size: 30px;
+    width: 72px;
+    min-width: 72px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(2px 2px 0 #00000044);
+  }
   .shop-info { flex: 1; min-width: 0; }
   .shop-name { font-size: 14px; font-weight: bold; }
   .shop-desc { font-size: 11px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
@@ -535,6 +556,68 @@ const PRODUCERS = [
   { id: 'whale',   icon: '🐋', name: '우주 고래',   desc: '은하수를 헤엄치며 코인을 뿜어요',  baseCost: 2e7,      cps: 7800 },
   { id: 'planet',  icon: '🪐', name: '코인 행성',   desc: '행성 전체가 코인으로 되어 있어요', baseCost: 3.3e8,    cps: 44000 },
 ];
+
+const PRODUCER_SPRITE_ATLAS = 'assets/generated/sprites/slime-friends-ai/sprite-sheet-alpha.png';
+const PRODUCER_SPRITE_SHEET = { w: 1792, h: 7168 };
+const PRODUCER_SPRITE_LAYOUT = {
+  chick:   [{ x: 0, y: 0,    w: 896, h: 896 }, { x: 896, y: 0,    w: 896, h: 896 }],
+  cat:     [{ x: 0, y: 896,  w: 896, h: 896 }, { x: 896, y: 896,  w: 896, h: 896 }],
+  dog:     [{ x: 0, y: 1792, w: 896, h: 896 }, { x: 896, y: 1792, w: 896, h: 896 }],
+  rabbit:  [{ x: 0, y: 2688, w: 896, h: 896 }, { x: 896, y: 2688, w: 896, h: 896 }],
+  unicorn: [{ x: 0, y: 3584, w: 896, h: 896 }, { x: 896, y: 3584, w: 896, h: 896 }],
+  dragon:  [{ x: 0, y: 4480, w: 896, h: 896 }, { x: 896, y: 4480, w: 896, h: 896 }],
+  whale:   [{ x: 0, y: 5376, w: 896, h: 896 }, { x: 896, y: 5376, w: 896, h: 896 }],
+  planet:  [{ x: 0, y: 6272, w: 896, h: 896 }, { x: 896, y: 6272, w: 896, h: 896 }],
+};
+
+const ITEM_SPRITE_ATLAS = 'assets/generated/sprites/slime-items-ai/sprite-sheet-alpha.png';
+const ITEM_SPRITE_SHEET = { w: 512, h: 9216 };
+const ITEM_SPRITE_LAYOUT = {
+  glove1:    [{ x: 0, y: 0,    w: 512, h: 512 }],
+  glove2:    [{ x: 0, y: 512,  w: 512, h: 512 }],
+  glove3:    [{ x: 0, y: 1024, w: 512, h: 512 }],
+  hand1:     [{ x: 0, y: 1536, w: 512, h: 512 }],
+  hand2:     [{ x: 0, y: 2048, w: 512, h: 512 }],
+  hand3:     [{ x: 0, y: 2560, w: 512, h: 512 }],
+  snack1:    [{ x: 0, y: 3072, w: 512, h: 512 }],
+  snack2:    [{ x: 0, y: 3584, w: 512, h: 512 }],
+  snack3:    [{ x: 0, y: 4096, w: 512, h: 512 }],
+  click1:    [{ x: 0, y: 4608, w: 512, h: 512 }],
+  click2:    [{ x: 0, y: 5120, w: 512, h: 512 }],
+  prestige:  [{ x: 0, y: 5632, w: 512, h: 512 }],
+  sticky:    [{ x: 0, y: 6144, w: 512, h: 512 }],
+  promise:   [{ x: 0, y: 6656, w: 512, h: 512 }],
+  starlight: [{ x: 0, y: 7168, w: 512, h: 512 }],
+  softtime:  [{ x: 0, y: 7680, w: 512, h: 512 }],
+  combo:     [{ x: 0, y: 8192, w: 512, h: 512 }],
+  evoseed:   [{ x: 0, y: 8704, w: 512, h: 512 }],
+};
+
+const ACHIEVEMENT_SPRITE_ATLAS = 'assets/generated/sprites/slime-achievements-ai/sprite-sheet-alpha.png';
+const ACHIEVEMENT_SPRITE_SHEET = { w: 256, h: 5376 };
+const ACHIEVEMENT_SPRITE_LAYOUT = {
+  click1:    [{ x: 0, y: 0,    w: 256, h: 256 }],
+  click100:  [{ x: 0, y: 256,  w: 256, h: 256 }],
+  click1k:   [{ x: 0, y: 512,  w: 256, h: 256 }],
+  click10k:  [{ x: 0, y: 768,  w: 256, h: 256 }],
+  combo30:   [{ x: 0, y: 1024, w: 256, h: 256 }],
+  combo50:   [{ x: 0, y: 1280, w: 256, h: 256 }],
+  chick10:   [{ x: 0, y: 1536, w: 256, h: 256 }],
+  chick50:   [{ x: 0, y: 1792, w: 256, h: 256 }],
+  cat25:     [{ x: 0, y: 2048, w: 256, h: 256 }],
+  friend100: [{ x: 0, y: 2304, w: 256, h: 256 }],
+  star1:     [{ x: 0, y: 2560, w: 256, h: 256 }],
+  star10:    [{ x: 0, y: 2816, w: 256, h: 256 }],
+  coin1e4:   [{ x: 0, y: 3072, w: 256, h: 256 }],
+  coin1e6:   [{ x: 0, y: 3328, w: 256, h: 256 }],
+  coin1e8:   [{ x: 0, y: 3584, w: 256, h: 256 }],
+  coin1e10:  [{ x: 0, y: 3840, w: 256, h: 256 }],
+  evo1:      [{ x: 0, y: 4096, w: 256, h: 256 }],
+  evoMax:    [{ x: 0, y: 4352, w: 256, h: 256 }],
+  allUp:     [{ x: 0, y: 4608, w: 256, h: 256 }],
+  rebirth1:  [{ x: 0, y: 4864, w: 256, h: 256 }],
+  rebirth3:  [{ x: 0, y: 5120, w: 256, h: 256 }],
+};
 
 const UPGRADES = [
   { id: 'glove1',  icon: '🧤', name: '말랑 장갑',     desc: '클릭당 +1 코인',            cost: 50,      type: 'clickAdd', value: 1 },
@@ -748,6 +831,60 @@ let quipTimer = 30;
 /* ════════════════════════ 유틸 ════════════════════════ */
 
 const $ = id => document.getElementById(id);
+
+function producerSpriteHtml(id, fallback, className = 'shop-sprite', frame = 0) {
+  const frames = PRODUCER_SPRITE_LAYOUT[id];
+  if (!frames) return fallback;
+  const r = frames[frame % frames.length];
+  const size = className.includes('friend-sprite') ? 56 : 64;
+  const scale = size / r.w;
+  const style = [
+    `width:${size}px`,
+    `height:${size}px`,
+    `background-image:url('${PRODUCER_SPRITE_ATLAS}')`,
+    `background-size:${PRODUCER_SPRITE_SHEET.w * scale}px ${PRODUCER_SPRITE_SHEET.h * scale}px`,
+    `background-position:-${r.x * scale}px -${r.y * scale}px`,
+  ].join(';');
+  return `<span class="sprite-icon ${className}" aria-hidden="true" style="${style}"></span>`;
+}
+
+function itemSpriteHtml(id, fallback, className = 'shop-sprite') {
+  const frames = ITEM_SPRITE_LAYOUT[id];
+  if (!frames) return fallback;
+  const r = frames[0];
+  const size = 60;
+  const scale = size / r.w;
+  const style = [
+    `width:${size}px`,
+    `height:${size}px`,
+    `background-image:url('${ITEM_SPRITE_ATLAS}')`,
+    `background-size:${ITEM_SPRITE_SHEET.w * scale}px ${ITEM_SPRITE_SHEET.h * scale}px`,
+    `background-position:-${r.x * scale}px -${r.y * scale}px`,
+  ].join(';');
+  return `<span class="sprite-icon ${className}" aria-hidden="true" style="${style}"></span>`;
+}
+
+function achievementSpriteHtml(id, fallback, done) {
+  const frames = ACHIEVEMENT_SPRITE_LAYOUT[id];
+  if (!frames) return done ? fallback : '❓';
+  const r = frames[0];
+  const size = 54;
+  const scale = size / r.w;
+  const className = done ? 'shop-sprite' : 'shop-sprite locked-sprite';
+  const style = [
+    `width:${size}px`,
+    `height:${size}px`,
+    `background-image:url('${ACHIEVEMENT_SPRITE_ATLAS}')`,
+    `background-size:${ACHIEVEMENT_SPRITE_SHEET.w * scale}px ${ACHIEVEMENT_SPRITE_SHEET.h * scale}px`,
+    `background-position:-${r.x * scale}px -${r.y * scale}px`,
+  ].join(';');
+  return `<span class="sprite-icon ${className}" aria-hidden="true" style="${style}"></span>`;
+}
+
+function setProducerShopIcon(el, p, reveal) {
+  const icon = el.querySelector('.shop-icon');
+  icon.innerHTML = reveal ? producerSpriteHtml(p.id, p.icon) : '❓';
+}
 
 function fmt(n) {
   if (n < 0) return '0';
@@ -1221,7 +1358,8 @@ function rebuildFriends() {
       el.style.left = `calc(50% + ${pos.x}px)`;
       el.style.top = `calc(45% + ${pos.y}px)`;
       const inner = document.createElement('span');
-      inner.textContent = p.icon;
+      inner.className = 'friend-body';
+      inner.innerHTML = producerSpriteHtml(p.id, p.icon, 'friend-sprite', k);
       inner.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
       inner.style.animationDelay = (Math.random() * 2) + 's';
       if (Math.random() < 0.5) inner.style.transform = 'scaleX(-1)';
@@ -1245,7 +1383,7 @@ function buildShop() {
       el.className = 'shop-item';
       el.dataset.id = p.id;
       el.innerHTML = `
-        <div class="shop-icon">${p.icon}</div>
+        <div class="shop-icon">${producerSpriteHtml(p.id, p.icon)}</div>
         <div class="shop-info">
           <div class="shop-name">${p.name}</div>
           <div class="shop-desc">${p.desc}</div>
@@ -1263,7 +1401,7 @@ function buildShop() {
       el.className = 'shop-item';
       el.dataset.id = u.id;
       el.innerHTML = `
-        <div class="shop-icon">${u.icon}</div>
+        <div class="shop-icon">${itemSpriteHtml(u.id, u.icon)}</div>
         <div class="shop-info">
           <div class="shop-name">${u.name}</div>
           <div class="shop-desc">${u.desc}</div>
@@ -1285,7 +1423,7 @@ function buildShop() {
       const el = document.createElement('div');
       el.className = 'shop-item ach-item' + (done ? ' done' : '');
       el.innerHTML = `
-        <div class="shop-icon">${done ? a.icon : '❓'}</div>
+        <div class="shop-icon">${achievementSpriteHtml(a.id, a.icon, done)}</div>
         <div class="shop-info">
           <div class="shop-name">${a.name}</div>
           <div class="shop-desc">${a.desc}</div>
@@ -1313,7 +1451,7 @@ function buildPrestigeTab() {
   const btn = document.createElement('div');
   btn.className = 'shop-item prestige-btn' + (gain < 1 ? ' locked' : '');
   btn.innerHTML = `
-    <div class="shop-icon">🌸</div>
+    <div class="shop-icon">${itemSpriteHtml('prestige', '🌸')}</div>
     <div class="shop-info">
       <div class="shop-name">젤리 환생</div>
       <div class="shop-desc">${unlocked
@@ -1331,7 +1469,7 @@ function buildPrestigeTab() {
     const el = document.createElement('div');
     el.className = 'shop-item perk-item' + (maxed ? ' maxed' : (S.prestige.souls < cost ? ' locked' : ''));
     el.innerHTML = `
-      <div class="shop-icon">${perk.icon}</div>
+      <div class="shop-icon">${itemSpriteHtml(perk.id, perk.icon)}</div>
       <div class="shop-info">
         <div class="shop-name">${perk.name} <span style="color:var(--soul)">Lv.${lv}/${perk.max}</span></div>
         <div class="shop-desc">${perk.desc} (레벨당)</div>
@@ -1364,7 +1502,7 @@ function refreshShop() {
 
       const reveal = S.totalEarned >= p.baseCost * 0.4 || S.producers[p.id] > 0;
       el.querySelector('.shop-name').textContent = reveal ? p.name : '???';
-      el.querySelector('.shop-icon').textContent = reveal ? p.icon : '❓';
+      setProducerShopIcon(el, p, reveal);
     }
   } else if (currentTab === 'upgrades') {
     for (const el of shopList.querySelectorAll('.shop-item')) {
