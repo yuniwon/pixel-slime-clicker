@@ -485,6 +485,22 @@
     margin: 0 auto 4px;
     border: 2px solid #00000055;
   }
+  .trait-cell {
+    min-height: 92px;
+    padding-top: 6px;
+  }
+  .trait-preview {
+    width: 48px;
+    height: 51px;
+    image-rendering: pixelated;
+    margin: 0 auto 3px;
+  }
+  .trait-cell .trait-desc {
+    color: var(--text-dim);
+    font-size: 10px;
+    line-height: 1.35;
+  }
+  .trait-cell.seen .trait-desc { color: var(--text); opacity: .8; }
   .codex-cell .sprite-icon { margin-bottom: 2px; }
   .story-entry {
     background: var(--panel-light);
@@ -771,6 +787,21 @@ const STORY = [
   { id: 'seed', title: '끝은 씨앗',
     cond: () => S.prestige.totalResets >= 1,
     text: '모든 것이 사라지는 순간, 슬라임은 알았다. 끝은 끝이 아니라 씨앗이라는 것을. 슬라임은 더 깊은 층에서 다시 눈을 떴다.' },
+  { id: 'trait-muscle', title: '눌림을 견디는 법',
+    cond: () => S.codex.traits.muscle,
+    text: '수없이 눌린 슬라임은 튕겨 오르는 법을 배웠다. 작은 머리띠는 오늘도 말랑한 용기의 표시다.' },
+  { id: 'trait-ranch', title: '친구들이 만든 왕국',
+    cond: () => S.codex.traits.ranch,
+    text: '슬라임이 잠시 쉬는 동안에도 친구들은 코인을 모았다. 어느새 방 한구석에는 작은 왕국이 자라고 있었다.' },
+  { id: 'trait-star', title: '떨어지는 것을 마중하는 마음',
+    cond: () => S.codex.traits.star,
+    text: '별을 기다리는 시간이 길어질수록 슬라임의 눈빛도 반짝였다. 떨어지는 것은 혼자가 아니었다.' },
+  { id: 'trait-dream', title: '잠든 동안 자라는 것',
+    cond: () => S.codex.traits.dream,
+    text: '꿈속에서도 슬라임은 조금씩 자랐다. 구름 같은 모자는 그 조용한 성장을 덮어 주었다.' },
+  { id: 'trait-samsara', title: '기억하지 못하는 기억',
+    cond: () => S.codex.traits.samsara,
+    text: '몇 번을 다시 시작해도 손끝의 온기는 남았다. 슬라임은 기억하지 못하는 기억을 둥글게 품었다.' },
 ];
 
 /* 친구 시너지: 보유 수에 따라 자동 해금되는 역할 보너스 */
@@ -876,13 +907,15 @@ const ACH_CONDITIONS = {
 /* 성향(분기 진화)과 대사 */
 /* 성향은 이번 생(run) 기준으로 판정한다 */
 const TRAITS = [
-  { key: 'samsara', name: '윤회 성향', pupil: '#b48aff', cond: () => S.prestige.totalResets >= 3 },
-  { key: 'star',    name: '별빛 성향', pupil: '#e8b73a', cond: () => S.stats.run.starsClicked >= 15 },
-  { key: 'muscle',  name: '근육 성향', pupil: '#d94f4f',
+  { key: 'samsara', name: '윤회 성향', pupil: '#b48aff', desc: '보라 고리와 잔상',
+    cond: () => S.prestige.totalResets >= 3 },
+  { key: 'star',    name: '별빛 성향', pupil: '#e8b73a', desc: '별가루와 별 눈빛',
+    cond: () => S.stats.run.starsClicked >= 15 },
+  { key: 'muscle',  name: '근육 성향', pupil: '#d94f4f', desc: '빨간 머리띠와 힘 픽셀',
     cond: () => earnShare('clickEarned') > 0.6 && S.stats.run.clicks > 300 },
-  { key: 'ranch',   name: '목장 성향', pupil: '#3a9e4d',
+  { key: 'ranch',   name: '목장 성향', pupil: '#3a9e4d', desc: '풀잎 모자와 새싹',
     cond: () => earnShare('idleEarned') > 0.6 },
-  { key: 'dream',   name: '꿈꾸는 성향', pupil: '#5a9ad9',
+  { key: 'dream',   name: '꿈꾸는 성향', pupil: '#5a9ad9', desc: '잠자는 모자와 구름',
     cond: () => earnShare('offlineEarned') > dreamThreshold() },
 ];
 
@@ -899,26 +932,41 @@ const QUIPS = {
     '또 눌렀어? 좋아, 나도 이제 적응했어.',
     '내 몸 어딘가에 근육이 생긴 것 같아.',
     '오늘의 운동: 눌리기 1만 회.',
+    '머리띠가 꽉 묶였어. 마음도 꽉!',
+    '말랑하지만 약하진 않아.',
+    '한 번 더 눌러 봐. 버틸 수 있어.',
   ],
   ranch: [
     '친구들이 일하고 있어. 우리는 경영을 하자.',
     '나는 CEO야. 클릭은 친구들이 해.',
     '오늘 병아리들 출근 도장 찍었어.',
+    '풀잎 냄새가 나면 코인이 모여.',
+    '우리 목장은 아주 말랑해.',
+    '친구들아, 쉬엄쉬엄 벌자.',
   ],
   star: [
     '별이 떨어질 때까지 숨 참는다. 흡.',
     '내 눈에 별 들어간 거 보여?',
     '별은 줍는 게 아니라 마중 나가는 거야.',
+    '반짝임은 놓치면 아쉬워.',
+    '내가 별을 기다리면 별도 나를 기다려.',
+    '눈 끝에 작은 우주가 붙었어.',
   ],
   dream: [
     '방금 코인 꿈 꿨는데 진짜였네.',
     '잘 자고 일어나면 부자야.',
     '꿈에서 우주 고래를 탔어.',
+    '이 모자는 낮잠 전용이야.',
+    '잠깐 눈 감아도 자라고 있어.',
+    '꿈속 코인은 이불처럼 포근해.',
   ],
   samsara: [
     '이번 생은 왠지 낯설지 않아…',
     '어쩐지 이 장면 본 것 같아.',
     '환생해도 너는 기억나.',
+    '돌고 돌아도 말랑함은 남아.',
+    '처음인데 처음 같지 않아.',
+    '보라빛 고리가 나를 감싸.',
   ],
   evolve: [
     '나… 변한 것 같아!',
@@ -1290,6 +1338,96 @@ function sndRebirth() { [1047, 784, 523, 392, 523, 784, 1047, 1568].forEach((f, 
 const slimeCv = $('slime-canvas');
 const slimeCtx = slimeCv.getContext('2d');
 
+function px(ctx, x, y, color, w = 1, h = 1) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, w, h);
+}
+
+function drawTinyStar(ctx, x, y, color = '#ffd75e') {
+  px(ctx, x, y - 1, '#fff8d6');
+  px(ctx, x - 1, y, color);
+  px(ctx, x, y, color);
+  px(ctx, x + 1, y, color);
+  px(ctx, x, y + 1, color);
+}
+
+function drawTraitOverlay(ctx, key, t = 0) {
+  if (!key) return;
+  if (key === 'muscle') {
+    px(ctx, 4, 8, '#8f2334', 8, 1);
+    px(ctx, 5, 7, '#ef5b66', 6, 1);
+    px(ctx, 12, 8, '#ef5b66', 1, 1);
+    px(ctx, 13, 7, '#8f2334', 1, 1);
+    px(ctx, 13, 9, '#8f2334', 1, 1);
+    px(ctx, 1, 11, '#ef5b66', 1, 2);
+    px(ctx, 14, 11, '#ef5b66', 1, 2);
+  } else if (key === 'ranch') {
+    px(ctx, 3, 4, '#8f6a2f', 10, 1);
+    px(ctx, 5, 2, '#d6b35b', 6, 1);
+    px(ctx, 4, 3, '#f0cf72', 8, 1);
+    px(ctx, 6, 4, '#f0cf72', 4, 1);
+    px(ctx, 11, 2, '#6ed26d', 1, 1);
+    px(ctx, 12, 1, '#3a9e4d', 1, 1);
+  } else if (key === 'star') {
+    drawTinyStar(ctx, 3, 4);
+    drawTinyStar(ctx, 12, 3, '#e8b73a');
+    px(ctx, 6, 9, '#fff8d6');
+    px(ctx, 11, 9, '#fff8d6');
+    px(ctx, 14, 7, '#ffd75e');
+  } else if (key === 'dream') {
+    px(ctx, 5, 3, '#5a9ad9', 6, 1);
+    px(ctx, 6, 2, '#8ed0ff', 5, 1);
+    px(ctx, 10, 1, '#5a9ad9', 2, 1);
+    px(ctx, 12, 2, '#ffffff');
+    px(ctx, 2, 5, '#dff5ff', 2, 1);
+    px(ctx, 1, 6, '#bfe8ff', 4, 1);
+    px(ctx, 3, 4, '#ffffff');
+  } else if (key === 'samsara') {
+    const pulse = Math.floor(t / 450) % 2;
+    ctx.save();
+    ctx.globalAlpha = pulse ? 0.55 : 0.35;
+    for (let y = 4; y < SLIME_MAP.length; y++) {
+      for (let x = 0; x < 16; x++) {
+        if (SLIME_MAP[y][x] !== '.' && x > 0) px(ctx, x - 1, y, '#b48aff');
+      }
+    }
+    ctx.restore();
+    px(ctx, 5, 2, '#d8c2ff', 6, 1);
+    px(ctx, 4, 3, '#8d5ce8');
+    px(ctx, 11, 3, '#8d5ce8');
+    px(ctx, 3, 8, '#d8c2ff');
+    px(ctx, 12, 8, '#d8c2ff');
+    px(ctx, 5, 14, '#8d5ce8', 6, 1);
+  }
+}
+
+function drawTraitPreview(ctx, key) {
+  const pal = { b: '#5ad95a', l: '#aef2a4', d: '#37a837', o: '#1b4a26' };
+  const colors = { o: pal.o, b: pal.b, l: pal.l, d: pal.d, w: '#ffffff', k: '#26203a', p: '#ff9fb2' };
+  ctx.clearRect(0, 0, 16, 17);
+  for (let y = 0; y < SLIME_MAP.length; y++) {
+    for (let x = 0; x < 16; x++) {
+      const c = SLIME_MAP[y][x];
+      if (c === '.') continue;
+      px(ctx, x, y, colors[c] || pal.b);
+    }
+  }
+  drawTraitOverlay(ctx, key, 0);
+}
+
+function traitPreviewDataUrl(key) {
+  const cv = document.createElement('canvas');
+  cv.width = 16;
+  cv.height = 17;
+  drawTraitPreview(cv.getContext('2d'), key);
+  return cv.toDataURL();
+}
+
+function traitPreviewHtml(tr, seen) {
+  if (!seen) return '<div class="codex-swatch" style="background:#00000044"></div>';
+  return `<img class="trait-preview" src="${traitPreviewDataUrl(tr.key)}" alt="${tr.name} 미리보기">`;
+}
+
 function drawSlime(t) {
   const stage = STAGES[stageIdx];
   let pal = stage.pal;
@@ -1330,6 +1468,7 @@ function drawSlime(t) {
       }
     }
   }
+  if (currentTrait) drawTraitOverlay(slimeCtx, currentTrait.key, t);
 }
 
 /* 코인 아이콘 (8x8) */
@@ -1836,9 +1975,10 @@ function buildRoomTab() {
   TRAITS.forEach(tr => {
     const seen = !!S.codex.traits[tr.key];
     const cell = document.createElement('div');
-    cell.className = 'codex-cell' + (seen ? ' seen' : '');
-    cell.innerHTML = `<div class="codex-swatch" style="background:${seen ? tr.pupil : '#00000044'}"></div>` +
-      (seen ? tr.name.replace(' 성향', '') : '???');
+    cell.className = 'codex-cell trait-cell' + (seen ? ' seen' : '');
+    cell.innerHTML = traitPreviewHtml(tr, seen) +
+      `<div>${seen ? tr.name.replace(' 성향', '') : '???'}</div>` +
+      `<div class="trait-desc">${seen ? tr.desc : '???'}</div>`;
     traitGrid.appendChild(cell);
   });
   shopList.appendChild(traitGrid);
