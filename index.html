@@ -499,6 +499,10 @@
   .story-entry .story-title { color: var(--gold); font-weight: bold; margin-bottom: 4px; font-size: 12px; }
   .story-entry.locked { opacity: .4; border-left-color: var(--border); }
 
+  .shop-syn { color: #d9b84a; }
+  .syn-line { font-size: 10px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
+  .syn-line.on { color: var(--green); }
+
   /* ── 토스트 ── */
   #toast {
     position: fixed;
@@ -594,7 +598,7 @@
     <div>총 클릭: <span id="stat-clicks">0</span> · 황금별: <span id="stat-stars">0</span></div>
     <div>누적 코인: <span id="stat-total">0</span></div>
     <div>클릭당: <span id="stat-power">1</span> 코인 · 업적 보너스: +<span id="stat-ach">0</span>%</div>
-    <div class="soul">젤리 영혼: <span id="stat-souls">0</span> (수입 +<span id="stat-soul-bonus">0</span>%) · 환생 <span id="stat-resets">0</span>회</div>
+    <div class="soul">젤리 영혼: <span id="stat-souls">0</span> 보유 / 총 <span id="stat-souls-total">0</span> (수입 +<span id="stat-soul-bonus">0</span>%) · 환생 <span id="stat-resets">0</span>회</div>
   </div>
 </div>
 
@@ -607,7 +611,7 @@
 
 /* ════════════════════════ 데이터 ════════════════════════ */
 
-const SAVE_VERSION = 4;
+const SAVE_VERSION = 5;
 const PRESTIGE_UNLOCK = 1e9;
 
 const PRODUCERS = [
@@ -681,6 +685,17 @@ const ACHIEVEMENT_SPRITE_LAYOUT = {
   allUp:     [{ x: 0, y: 4608, w: 256, h: 256 }],
   rebirth1:  [{ x: 0, y: 4864, w: 256, h: 256 }],
   rebirth3:  [{ x: 0, y: 5120, w: 256, h: 256 }],
+};
+
+const DECOR_SPRITE_ATLAS = 'assets/generated/sprites/slime-decor-ai/sprite-sheet-alpha.png';
+const DECOR_SPRITE_SHEET = { w: 384, h: 2304 };
+const DECOR_SPRITE_LAYOUT = {
+  cushion:  [{ x: 0, y: 0,    w: 384, h: 384 }],
+  pond:     [{ x: 0, y: 384,  w: 384, h: 384 }],
+  lamp:     [{ x: 0, y: 768,  w: 384, h: 384 }],
+  mat:      [{ x: 0, y: 1152, w: 384, h: 384 }],
+  fountain: [{ x: 0, y: 1536, w: 384, h: 384 }],
+  window:   [{ x: 0, y: 1920, w: 384, h: 384 }],
 };
 
 const UPGRADES = [
@@ -758,6 +773,58 @@ const STORY = [
     text: '모든 것이 사라지는 순간, 슬라임은 알았다. 끝은 끝이 아니라 씨앗이라는 것을. 슬라임은 더 깊은 층에서 다시 눈을 떴다.' },
 ];
 
+/* 친구 시너지: 보유 수에 따라 자동 해금되는 역할 보너스 */
+const SYNERGIES = {
+  chick: [
+    { at: 10,  desc: '클릭 코인 +5%' },
+    { at: 25,  desc: '콤보 배율 효과 +10%' },
+    { at: 50,  desc: '콤보 30 이상일 때 클릭 코인 +20%' },
+    { at: 100, desc: '병아리 축제: 60초마다 10초간 클릭 x2' },
+  ],
+  cat: [
+    { at: 10,  desc: '오프라인 보상 +10%' },
+    { at: 25,  desc: '오프라인 최대 시간 +1시간' },
+    { at: 50,  desc: '꿈꾸는 성향이 더 쉽게 깨어나요' },
+    { at: 100, desc: '복귀 시 10% 확률로 꿈 보너스 x2' },
+  ],
+  dog: [
+    { at: 10,  desc: '황금별 체류시간 +1초' },
+    { at: 25,  desc: '황금별 등장 간격 -5%' },
+    { at: 50,  desc: '황금별 코인 보상 +20%' },
+    { at: 100, desc: '황금별 등장 시 반짝임과 알림음' },
+  ],
+  rabbit: [
+    { at: 10,  desc: '미니 별똥별 +1개' },
+    { at: 25,  desc: '미니 별똥별 보상 +30%' },
+    { at: 50,  desc: '별의 할인 이벤트 확률 증가' },
+    { at: 100, desc: '별 이벤트 후 20% 확률로 미니 별똥별 추가' },
+  ],
+  unicorn: [
+    { at: 10,  desc: '장식 보너스 +10%' },
+    { at: 25,  desc: '새 성향 발견 시 코인 보너스' },
+    { at: 50,  desc: '도감 1칸당 전체 수입 +0.5%' },
+    { at: 100, desc: '성향 오라가 슬라임을 감싸요' },
+  ],
+  dragon: [
+    { at: 10,  desc: '광란 시간 +2초' },
+    { at: 25,  desc: '광란 배율 x7 → x8' },
+    { at: 50,  desc: '광란 중 클릭 코인 +25%' },
+    { at: 100, desc: '광란 종료 시 광란 수입의 10% 보너스' },
+  ],
+  whale: [
+    { at: 10,  desc: '오프라인 최대 시간 +2시간' },
+    { at: 25,  desc: '친구 파티 지속 +5초' },
+    { at: 50,  desc: '친구 생산 +10%' },
+    { at: 100, desc: '오프라인 보상 +15%' },
+  ],
+  planet: [
+    { at: 1,   desc: '행성 1개당 친구 생산 +1% (25개 초과는 +0.2%)' },
+    { at: 5,   desc: '환생 영혼 획득 +5%' },
+    { at: 10,  desc: '장식 보너스 +10%' },
+    { at: 25,  desc: '친구 생산 추가 +10%' },
+  ],
+};
+
 const ACHIEVEMENTS = [
   { id: 'click1',    icon: '👆', name: '첫 말랑',         desc: '슬라임을 처음 클릭하기' },
   { id: 'click100',  icon: '👏', name: '말랑 입문자',     desc: '총 100번 클릭하기' },
@@ -787,18 +854,18 @@ const ACH_CONDITIONS = {
   click100:  () => S.totalClicks >= 100,
   click1k:   () => S.totalClicks >= 1000,
   click10k:  () => S.totalClicks >= 10000,
-  combo30:   () => S.stats.bestCombo >= 30,
-  combo50:   () => S.stats.bestCombo >= 50,
+  combo30:   () => S.stats.lifetime.bestCombo >= 30,
+  combo50:   () => S.stats.lifetime.bestCombo >= 50,
   chick10:   () => S.producers.chick >= 10,
   chick50:   () => S.producers.chick >= 50,
   cat25:     () => S.producers.cat >= 25,
   friend100: () => PRODUCERS.reduce((a, p) => a + S.producers[p.id], 0) >= 100,
-  star1:     () => S.stats.starsClicked >= 1,
-  star10:    () => S.stats.starsClicked >= 10,
-  coin1e4:   () => S.totalEarned >= 1e4,
-  coin1e6:   () => S.totalEarned >= 1e6,
-  coin1e8:   () => S.totalEarned >= 1e8,
-  coin1e10:  () => S.totalEarned >= 1e10,
+  star1:     () => S.stats.lifetime.starsClicked >= 1,
+  star10:    () => S.stats.lifetime.starsClicked >= 10,
+  coin1e4:   () => S.stats.lifetime.earned >= 1e4,
+  coin1e6:   () => S.stats.lifetime.earned >= 1e6,
+  coin1e8:   () => S.stats.lifetime.earned >= 1e8,
+  coin1e10:  () => S.stats.lifetime.earned >= 1e10,
   evo1:      () => stageIdx >= 1,
   evoMax:    () => stageIdx >= STAGES.length - 1,
   allUp:     () => UPGRADES.every(u => S.upgrades[u.id]),
@@ -807,15 +874,16 @@ const ACH_CONDITIONS = {
 };
 
 /* 성향(분기 진화)과 대사 */
+/* 성향은 이번 생(run) 기준으로 판정한다 */
 const TRAITS = [
   { key: 'samsara', name: '윤회 성향', pupil: '#b48aff', cond: () => S.prestige.totalResets >= 3 },
-  { key: 'star',    name: '별빛 성향', pupil: '#e8b73a', cond: () => S.stats.starsClicked >= 15 },
+  { key: 'star',    name: '별빛 성향', pupil: '#e8b73a', cond: () => S.stats.run.starsClicked >= 15 },
   { key: 'muscle',  name: '근육 성향', pupil: '#d94f4f',
-    cond: () => earnShare('clickEarned') > 0.6 && S.totalClicks > 300 },
+    cond: () => earnShare('clickEarned') > 0.6 && S.stats.run.clicks > 300 },
   { key: 'ranch',   name: '목장 성향', pupil: '#3a9e4d',
     cond: () => earnShare('idleEarned') > 0.6 },
   { key: 'dream',   name: '꿈꾸는 성향', pupil: '#5a9ad9',
-    cond: () => earnShare('offlineEarned') > 0.25 },
+    cond: () => earnShare('offlineEarned') > dreamThreshold() },
 ];
 
 const QUIPS = {
@@ -901,14 +969,13 @@ function defaultState() {
     upgrades: {},
     achievements: {},
     stats: {
-      bestCombo: 0,
-      starsClicked: 0,
-      clickEarned: 0,
-      idleEarned: 0,
-      offlineEarned: 0,
+      // lifetime: 환생해도 유지 (업적 기준)
+      lifetime: { bestCombo: 0, starsClicked: 0, earned: 0 },
+      // run: 이번 생 한정 (성향·플레이스타일 기준), 환생 시 초기화
+      run: { clicks: 0, bestCombo: 0, starsClicked: 0, clickEarned: 0, idleEarned: 0, offlineEarned: 0 },
     },
     buffs: { discount: false },
-    prestige: { souls: 0, totalResets: 0, perks: {} },
+    prestige: { souls: 0, totalSoulsEarned: 0, totalResets: 0, perks: {} },
     decor: {},
     story: {},
     codex: { stages: {}, traits: {}, friends: {} },
@@ -923,8 +990,11 @@ let S = defaultState();
 
 let combo = 0;
 let comboTimer = 0;
-let frenzyTimer = 0;        // 광란 x7
+let frenzyTimer = 0;        // 광란 (드래곤 시너지에 따라 x7~x8)
+let frenzyEarned = 0;       // 광란 중 번 코인 (드래곤 100 시너지용)
 let partyTimer = 0;         // 친구 파티 x5 (자동 생산만)
+let festActive = 0;         // 병아리 축제 남은 시간 (클릭 x2)
+let festWait = 60;          // 다음 축제까지 남은 시간
 let currentTab = 'producers';
 let buyMode = '1';
 let stageIdx = 0;
@@ -986,6 +1056,22 @@ function achievementSpriteHtml(id, fallback, done) {
   return `<span class="sprite-icon ${className}" aria-hidden="true" style="${style}"></span>`;
 }
 
+function decorSpriteHtml(id, fallback, className = 'shop-sprite') {
+  const frames = DECOR_SPRITE_LAYOUT[id];
+  if (!frames) return fallback;
+  const r = frames[0];
+  const size = className.includes('room-decor-sprite') ? 78 : 60;
+  const scale = size / r.w;
+  const style = [
+    `width:${size}px`,
+    `height:${size}px`,
+    `background-image:url('${DECOR_SPRITE_ATLAS}')`,
+    `background-size:${DECOR_SPRITE_SHEET.w * scale}px ${DECOR_SPRITE_SHEET.h * scale}px`,
+    `background-position:-${r.x * scale}px -${r.y * scale}px`,
+  ].join(';');
+  return `<span class="sprite-icon ${className}" aria-hidden="true" style="${style}"></span>`;
+}
+
 function setProducerShopIcon(el, p, reveal) {
   const icon = el.querySelector('.shop-icon');
   icon.innerHTML = reveal ? producerSpriteHtml(p.id, p.icon) : '❓';
@@ -1012,9 +1098,22 @@ function fmtTime(sec) {
   return (sec / 86400).toFixed(1) + '일';
 }
 
+/* 모든 코인 획득은 여기로: lifetime/run 통계가 함께 기록된다.
+   kind: 'click' | 'idle' | 'offline' | 'event' */
+function earnCoins(gain, kind) {
+  S.coins += gain;
+  S.totalEarned += gain;
+  S.stats.lifetime.earned += gain;
+  if (kind === 'click') S.stats.run.clickEarned += gain;
+  else if (kind === 'idle') S.stats.run.idleEarned += gain;
+  else if (kind === 'offline') S.stats.run.offlineEarned += gain;
+  if (frenzyTimer > 0) frenzyEarned += gain;
+}
+
 function earnShare(key) {
-  const tot = S.stats.clickEarned + S.stats.idleEarned + S.stats.offlineEarned;
-  return tot > 0 ? S.stats[key] / tot : 0;
+  const r = S.stats.run;
+  const tot = r.clickEarned + r.idleEarned + r.offlineEarned;
+  return tot > 0 ? r[key] / tot : 0;
 }
 
 function producerCost(p, owned) {
@@ -1048,12 +1147,51 @@ function bulkInfo(p) {
 function perkLv(id) { return S.prestige.perks[id] || 0; }
 function perkCost(id) { return perkLv(id) + 1; }
 
+/* ── 친구 시너지 헬퍼 ── */
+function hasSyn(id, n) { return S.producers[id] >= n; }
+
+function nextSynergy(id) {
+  const list = SYNERGIES[id] || [];
+  return list.find(s => S.producers[id] < s.at) || null;
+}
+
+function codexEntryCount() {
+  return Object.keys(S.codex.stages).length + Object.keys(S.codex.traits).length +
+         Object.keys(S.codex.friends).length + Object.keys(S.story).length;
+}
+
+function decorAmp() {
+  return 1 + (hasSyn('unicorn', 10) ? 0.1 : 0) + (hasSyn('planet', 10) ? 0.1 : 0);
+}
+
+function planetMul() {
+  const n = S.producers.planet;
+  return 1 + 0.01 * Math.min(n, 25) + 0.002 * Math.max(0, n - 25);
+}
+
+function clickSynMul() {
+  let m = 1;
+  if (hasSyn('chick', 10)) m *= 1.05;
+  if (hasSyn('chick', 50) && combo >= 30) m *= 1.2;
+  if (hasSyn('dragon', 50) && frenzyTimer > 0) m *= 1.25;
+  if (festActive > 0) m *= 2;
+  return m;
+}
+
+function frenzyDuration() { return 20 + (hasSyn('dragon', 10) ? 2 : 0); }
+function partyDuration() { return 30 + (hasSyn('whale', 25) ? 5 : 0); }
+function offlineCapHours() { return 8 + (hasSyn('cat', 25) ? 1 : 0) + (hasSyn('whale', 10) ? 2 : 0); }
+function offlineSynMul() { return (hasSyn('cat', 10) ? 1.1 : 1) * (hasSyn('whale', 100) ? 1.15 : 1); }
+function dreamThreshold() { return hasSyn('cat', 50) ? 0.18 : 0.25; }
+
 function achCount() { return Object.keys(S.achievements).length; }
 
-function soulMul() { return 1 + S.prestige.souls * 0.05; }
+/* 영혼 보너스는 총 획득량 기준 — 특성을 사도 수입이 줄지 않는다 */
+function soulMul() { return 1 + S.prestige.totalSoulsEarned * 0.05; }
 
 function globalMul() {
-  return (1 + achCount() * 0.01) * soulMul();
+  const codexBonus = hasSyn('unicorn', 50) ? 1 + 0.005 * codexEntryCount() : 1;
+  return (1 + achCount() * 0.01) * soulMul() * codexBonus;
 }
 
 function comboWindow() { return 0.9 + 0.15 * perkLv('combo'); }
@@ -1065,25 +1203,25 @@ function effNeed(i) {
 }
 
 function soulsGain() {
-  return Math.floor(Math.sqrt(S.totalEarned / 1e8));
+  return Math.floor(Math.sqrt(S.totalEarned / 1e8) * (hasSyn('planet', 5) ? 1.05 : 1));
 }
 
 function decorClickMul() {
-  let m = 1;
-  for (const d of DECOR) if (S.decor[d.id] && d.boost.click) m += d.boost.click;
-  return m;
+  let sum = 0;
+  for (const d of DECOR) if (S.decor[d.id] && d.boost.click) sum += d.boost.click;
+  return 1 + sum * decorAmp();
 }
 
 function decorCpsMul() {
-  let m = 1;
-  for (const d of DECOR) if (S.decor[d.id] && d.boost.cps) m += d.boost.cps;
-  return m;
+  let sum = 0;
+  for (const d of DECOR) if (S.decor[d.id] && d.boost.cps) sum += d.boost.cps;
+  return 1 + sum * decorAmp();
 }
 
 function starLinger() {
   let bonus = 0;
   for (const d of DECOR) if (S.decor[d.id] && d.boost.star) bonus += d.boost.star;
-  return 10 + bonus;
+  return 10 + bonus * decorAmp() + (hasSyn('dog', 10) ? 1 : 0);
 }
 
 function clickPower() {
@@ -1095,7 +1233,7 @@ function clickPower() {
     if (u.type === 'clickCps') cpsPart += u.value;
   }
   const sticky = 1 + 0.25 * perkLv('sticky');
-  return add * mul * globalMul() * sticky * decorClickMul() + totalCps() * cpsPart;
+  return add * mul * globalMul() * sticky * decorClickMul() * clickSynMul() + totalCps() * cpsPart;
 }
 
 function cpsMulFactor() {
@@ -1103,7 +1241,10 @@ function cpsMulFactor() {
   for (const u of UPGRADES) {
     if (S.upgrades[u.id] && u.type === 'cpsMul') mul *= u.value;
   }
-  return mul * globalMul() * (1 + 0.2 * perkLv('promise')) * decorCpsMul();
+  return mul * globalMul() * (1 + 0.2 * perkLv('promise')) * decorCpsMul()
+    * planetMul()
+    * (hasSyn('whale', 50) ? 1.1 : 1)
+    * (hasSyn('planet', 25) ? 1.1 : 1);
 }
 
 function totalCps() {
@@ -1112,8 +1253,11 @@ function totalCps() {
   return base * cpsMulFactor();
 }
 
-function comboMul() { return 1 + Math.min(combo, 50) * 0.02; }
-function frenzyMul() { return frenzyTimer > 0 ? 7 : 1; }
+function comboMul() {
+  const amp = hasSyn('chick', 25) ? 1.1 : 1;
+  return 1 + Math.min(combo, 50) * 0.02 * amp;
+}
+function frenzyMul() { return frenzyTimer > 0 ? (hasSyn('dragon', 25) ? 8 : 7) : 1; }
 function partyMul() { return partyTimer > 0 ? 5 : 1; }
 
 /* ════════════════════════ 사운드 (WebAudio) ════════════════════════ */
@@ -1253,14 +1397,14 @@ const slimeWrap = $('slime-wrap');
 
 function doClick(x, y) {
   const gain = clickPower() * comboMul() * frenzyMul();
-  S.coins += gain;
-  S.totalEarned += gain;
+  earnCoins(gain, 'click');
   S.totalClicks++;
-  S.stats.clickEarned += gain;
+  S.stats.run.clicks++;
 
   combo++;
   comboTimer = comboWindow();
-  if (combo > S.stats.bestCombo) S.stats.bestCombo = combo;
+  if (combo > S.stats.run.bestCombo) S.stats.run.bestCombo = combo;
+  if (combo > S.stats.lifetime.bestCombo) S.stats.lifetime.bestCombo = combo;
 
   slimeCv.classList.remove('squish');
   void slimeCv.offsetWidth;
@@ -1396,10 +1540,14 @@ function recordCodex() {
     changed = true;
   }
   for (const p of PRODUCERS) {
-    if (S.producers[p.id] > 0 && !S.codex.friends[p.id]) {
-      S.codex.friends[p.id] = true;
+    const owned = S.producers[p.id];
+    if (owned <= 0) continue;
+    let entry = S.codex.friends[p.id];
+    if (!entry) {
+      entry = S.codex.friends[p.id] = { discovered: true, maxOwned: 0 };
       changed = true;
     }
+    if (owned > entry.maxOwned) entry.maxOwned = owned;  // 환생해도 최고 기록은 남는다
   }
   return changed;
 }
@@ -1430,7 +1578,7 @@ function renderDecor() {
     if (!S.decor[d.id]) continue;
     const el = document.createElement('div');
     el.className = 'decor' + (d.center ? ' center' : '');
-    el.innerHTML = itemSpriteHtml(d.id, d.icon, 'friend-sprite');
+    el.innerHTML = decorSpriteHtml(d.id, d.icon, 'room-decor-sprite');
     for (const k of ['left', 'right', 'top', 'bottom']) {
       if (d.pos[k] !== undefined) el.style[k] = d.pos[k];
     }
@@ -1456,7 +1604,7 @@ function playstyleName() {
   const click = earnShare('clickEarned');
   const idle = earnShare('idleEarned');
   const off = earnShare('offlineEarned');
-  if (S.stats.starsClicked >= 20 && click < 0.5) return '⭐ 별 사냥꾼';
+  if (S.stats.run.starsClicked >= 20 && click < 0.5) return '⭐ 별 사냥꾼';
   if (click > 0.55) return '💪 클릭왕';
   if (off > 0.3) return '🛌 꿈꾸는 방랑자';
   if (idle + off > 0.75) return '🐱 방치 장인';
@@ -1479,6 +1627,7 @@ function doPrestige() {
   if (!ok) return;
 
   S.prestige.souls += gain;
+  S.prestige.totalSoulsEarned += gain;
   S.prestige.totalResets++;
   S.coins = 0;
   S.totalEarned = 0;
@@ -1486,7 +1635,9 @@ function doPrestige() {
   PRODUCERS.forEach(p => S.producers[p.id] = 0);
   S.upgrades = {};
   S.buffs.discount = false;
+  S.stats.run = defaultState().stats.run;  // 이번 생 통계만 초기화
   combo = 0; comboTimer = 0; frenzyTimer = 0; partyTimer = 0;
+  frenzyEarned = 0; festActive = 0; festWait = 60;
   stageIdx = 0;
 
   sndRebirth();
@@ -1577,6 +1728,7 @@ function buildShop() {
           <div class="shop-name">${p.name}</div>
           <div class="shop-desc">${p.desc}</div>
           <div class="shop-desc shop-payback"></div>
+          <div class="shop-desc shop-syn"></div>
           <div class="shop-cost"></div>
         </div>
         <div class="shop-count"></div>`;
@@ -1641,7 +1793,7 @@ function buildRoomTab() {
     el.className = 'shop-item decor-item' + (owned ? ' maxed' : (S.coins < d.cost ? ' locked' : ''));
     el.dataset.id = d.id;
     el.innerHTML = `
-      <div class="shop-icon">${itemSpriteHtml(d.id, d.icon)}</div>
+      <div class="shop-icon">${decorSpriteHtml(d.id, d.icon)}</div>
       <div class="shop-info">
         <div class="shop-name">${d.name}</div>
         <div class="shop-desc">${d.desc}</div>
@@ -1697,18 +1849,33 @@ function buildRoomTab() {
   title4.textContent = `🐾 친구 도감 (${Object.keys(S.codex.friends).length}/${PRODUCERS.length})`;
   shopList.appendChild(title4);
 
-  const friendGrid = document.createElement('div');
-  friendGrid.className = 'codex-grid cols4';
   PRODUCERS.forEach(p => {
-    const seen = !!S.codex.friends[p.id];
-    const cell = document.createElement('div');
-    cell.className = 'codex-cell' + (seen ? ' seen' : '');
-    cell.innerHTML = seen
-      ? `${producerSpriteHtml(p.id, p.icon, 'friend-sprite')}<br>${p.name}`
-      : '❓<br>???';
-    friendGrid.appendChild(cell);
+    const entry = S.codex.friends[p.id];
+    const el = document.createElement('div');
+    el.className = 'shop-item ach-item' + (entry ? ' done' : '');
+    if (!entry) {
+      el.innerHTML = `
+        <div class="shop-icon">❓</div>
+        <div class="shop-info">
+          <div class="shop-name">???</div>
+          <div class="shop-desc">아직 만나지 못한 친구예요.</div>
+        </div>`;
+    } else {
+      const owned = S.producers[p.id];
+      const synLines = (SYNERGIES[p.id] || []).map(s => {
+        const on = owned >= s.at;
+        return `<div class="syn-line${on ? ' on' : ''}">${on ? '✓' : '□'} ${s.at}마리 — ${s.desc}</div>`;
+      }).join('');
+      el.innerHTML = `
+        <div class="shop-icon">${producerSpriteHtml(p.id, p.icon, 'friend-sprite')}</div>
+        <div class="shop-info">
+          <div class="shop-name">${p.name}</div>
+          <div class="shop-desc">최고 보유 ${entry.maxOwned}마리 · 현재 ${owned}마리</div>
+          ${synLines}
+        </div>`;
+    }
+    shopList.appendChild(el);
   });
-  shopList.appendChild(friendGrid);
 
   // 별의 기록
   const unlockedCount = Object.keys(S.story).length;
@@ -1732,8 +1899,9 @@ function buildPrestigeTab() {
   const info = document.createElement('div');
   info.id = 'prestige-info';
   info.innerHTML =
-    `🍮 젤리 영혼: <b>${S.prestige.souls}</b>개 · 모든 수입 +${(S.prestige.souls * 5)}%<br>` +
-    `환생 ${S.prestige.totalResets}회 · 현재 플레이스타일: ${playstyleName()}`;
+    `🍮 보유 영혼 <b>${S.prestige.souls}</b>개 · 총 획득 <b>${S.prestige.totalSoulsEarned}</b>개<br>` +
+    `모든 수입 +${S.prestige.totalSoulsEarned * 5}% (총 획득 기준 — 특성을 사도 줄지 않아요)<br>` +
+    `환생 ${S.prestige.totalResets}회 · 이번 생의 플레이스타일: ${playstyleName()}`;
   shopList.appendChild(info);
 
   // 환생 버튼
@@ -1794,6 +1962,17 @@ function refreshShop() {
       const reveal = S.totalEarned >= p.baseCost * 0.4 || S.producers[p.id] > 0;
       el.querySelector('.shop-name').textContent = reveal ? p.name : '???';
       setProducerShopIcon(el, p, reveal);
+
+      // 다음 시너지 표시 — "25마리까지만 더 사자"를 만드는 줄
+      const synEl = el.querySelector('.shop-syn');
+      if (reveal) {
+        const next = nextSynergy(p.id);
+        synEl.textContent = next
+          ? `다음 시너지: ${next.at}마리 — ${next.desc}`
+          : (SYNERGIES[p.id] ? '시너지 완성! ✨' : '');
+      } else {
+        synEl.textContent = '';
+      }
     }
   } else if (currentTab === 'upgrades') {
     for (const el of shopList.querySelectorAll('.shop-item')) {
@@ -1870,7 +2049,7 @@ let starTimer = 20 + Math.random() * 40;
 let starVisible = 0;
 
 function starInterval() {
-  return (40 + Math.random() * 60) * (1 - 0.08 * perkLv('starlight'));
+  return (40 + Math.random() * 60) * (1 - 0.08 * perkLv('starlight')) * (hasSyn('dog', 25) ? 0.95 : 1);
 }
 
 function starSpawnRect() {
@@ -1889,6 +2068,13 @@ function spawnStar() {
   const pos = starSpawnRect();
   starEl.style.left = pos.x + 'px';
   starEl.style.top = pos.y + 'px';
+  // 강아지 100: 별 등장을 놓치지 않게 반짝임 + 알림음
+  if (hasSyn('dog', 100)) {
+    starEl.style.filter = 'drop-shadow(0 0 24px #ffd75e)';
+    beep(1568, 0.15, 'triangle', 0.07);
+  } else {
+    starEl.style.filter = '';
+  }
 }
 
 function hideStar() {
@@ -1898,37 +2084,39 @@ function hideStar() {
 }
 
 const STAR_EVENTS = [
-  { w: 30, run: (e) => {
-      frenzyTimer = 20;
-      toast('⭐ <b>광란의 시간!</b> 20초간 모든 수입 x7!');
+  { w: () => 30, run: (e) => {
+      frenzyEarned = 0;
+      frenzyTimer = frenzyDuration();
+      toast(`⭐ <b>광란의 시간!</b> ${frenzyDuration()}초간 모든 수입 x${frenzyMul()}!`);
   }},
-  { w: 25, run: (e) => {
-      const bonus = Math.max(totalCps() * 90, clickPower() * 150, 50);
-      S.coins += bonus;
-      S.totalEarned += bonus;
+  { w: () => 25, run: (e) => {
+      let bonus = Math.max(totalCps() * 90, clickPower() * 150, 50);
+      if (hasSyn('dog', 50)) bonus *= 1.2;
+      earnCoins(bonus, 'event');
       spawnFloat(e.clientX, e.clientY, '+' + fmt(bonus), true);
       toast(`⭐ 행운의 보너스! <b>+${fmt(bonus)}</b> 코인!`);
   }},
-  { w: 20, run: (e) => {
-      partyTimer = 30;
-      toast('🎉 <b>친구 파티!</b> 30초간 자동 생산 x5!');
+  { w: () => 20, run: (e) => {
+      partyTimer = partyDuration();
+      toast(`🎉 <b>친구 파티!</b> ${partyDuration()}초간 자동 생산 x5!`);
   }},
-  { w: 15, run: (e) => {
+  { w: () => 15 + (hasSyn('rabbit', 50) ? 5 : 0), run: (e) => {
       S.buffs.discount = true;
       toast('🏷️ <b>별의 할인!</b> 다음 구매가 50% 할인돼요!');
   }},
-  { w: 10, run: (e) => {
+  { w: () => 10, run: (e) => {
       toast('🌠 <b>미니 별똥별!</b> 작은 별들을 빠르게 클릭하세요!');
       spawnMiniStars();
   }},
 ];
 
 function pickStarEvent() {
-  const total = STAR_EVENTS.reduce((a, ev) => a + ev.w, 0);
+  const weights = STAR_EVENTS.map(ev => ev.w());
+  const total = weights.reduce((a, w) => a + w, 0);
   let r = Math.random() * total;
-  for (const ev of STAR_EVENTS) {
-    r -= ev.w;
-    if (r <= 0) return ev;
+  for (let i = 0; i < STAR_EVENTS.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return STAR_EVENTS[i];
   }
   return STAR_EVENTS[0];
 }
@@ -1936,8 +2124,16 @@ function pickStarEvent() {
 starEl.addEventListener('pointerdown', e => {
   e.stopPropagation();
   sndStar();
-  S.stats.starsClicked++;
+  S.stats.run.starsClicked++;
+  S.stats.lifetime.starsClicked++;
   pickStarEvent().run(e);
+  // 로켓 토끼 100: 별 이벤트 후 20% 확률로 미니 별똥별 추가
+  if (hasSyn('rabbit', 100) && Math.random() < 0.2) {
+    setTimeout(() => {
+      toast('🐰 토끼들이 별똥별을 더 몰고 왔어요!');
+      spawnMiniStars();
+    }, 900);
+  }
   hideStar();
   checkEvolution();
   renderHud();
@@ -1945,7 +2141,8 @@ starEl.addEventListener('pointerdown', e => {
 });
 
 function spawnMiniStars() {
-  for (let i = 0; i < 5; i++) {
+  const count = 5 + (hasSyn('rabbit', 10) ? 1 : 0);
+  for (let i = 0; i < count; i++) {
     const img = document.createElement('img');
     img.src = starDataURL;
     img.className = 'mini-star';
@@ -1955,9 +2152,10 @@ function spawnMiniStars() {
     img.style.top = pos.y + 'px';
     img.addEventListener('pointerdown', ev => {
       ev.stopPropagation();
-      const bonus = Math.max(totalCps() * 8, clickPower() * 15, 25);
-      S.coins += bonus;
-      S.totalEarned += bonus;
+      let bonus = Math.max(totalCps() * 8, clickPower() * 15, 25);
+      if (hasSyn('rabbit', 25)) bonus *= 1.3;
+      if (hasSyn('dog', 50)) bonus *= 1.2;
+      earnCoins(bonus, 'event');
       spawnFloat(ev.clientX, ev.clientY, '+' + fmt(bonus), true);
       beep(1175, 0.1, 'triangle', 0.09);
       img.remove();
@@ -1972,19 +2170,18 @@ function spawnMiniStars() {
 
 function renderHud() {
   $('coin-num').textContent = fmt(S.coins);
-  const effCps = totalCps() * frenzyMul() * partyMul();
-  let suffix = '';
-  if (frenzyTimer > 0 && partyTimer > 0) suffix = ' (x35!)';
-  else if (frenzyTimer > 0) suffix = ' (x7!)';
-  else if (partyTimer > 0) suffix = ' (x5!)';
+  const effMul = frenzyMul() * partyMul();
+  const effCps = totalCps() * effMul;
+  const suffix = effMul > 1 ? ` (x${effMul}!)` : '';
   $('cps-display').textContent = '초당 ' + fmt(effCps) + ' 코인' + suffix;
   $('stat-clicks').textContent = S.totalClicks.toLocaleString();
-  $('stat-stars').textContent = S.stats.starsClicked;
+  $('stat-stars').textContent = S.stats.lifetime.starsClicked;
   $('stat-total').textContent = fmt(S.totalEarned);
   $('stat-power').textContent = fmt(clickPower() * comboMul() * frenzyMul());
   $('stat-ach').textContent = achCount();
   $('stat-souls').textContent = S.prestige.souls;
-  $('stat-soul-bonus').textContent = S.prestige.souls * 5;
+  $('stat-souls-total').textContent = S.prestige.totalSoulsEarned;
+  $('stat-soul-bonus').textContent = S.prestige.totalSoulsEarned * 5;
   $('stat-resets').textContent = S.prestige.totalResets;
   renderEvoProgress();
 }
@@ -1992,8 +2189,9 @@ function renderHud() {
 function renderBuffBanner() {
   const banner = $('buff-banner');
   const parts = [];
-  if (frenzyTimer > 0) parts.push(`⭐ 광란 x7 (${Math.ceil(frenzyTimer)}초)`);
+  if (frenzyTimer > 0) parts.push(`⭐ 광란 x${frenzyMul()} (${Math.ceil(frenzyTimer)}초)`);
   if (partyTimer > 0) parts.push(`🎉 파티 x5 (${Math.ceil(partyTimer)}초)`);
+  if (festActive > 0) parts.push(`🐤 축제 클릭 x2 (${Math.ceil(festActive)}초)`);
   if (parts.length) {
     banner.textContent = parts.join('  ');
     banner.style.display = 'block';
@@ -2021,16 +2219,57 @@ function save() {
 function migrateSave(data) {
   const base = defaultState();
   const out = Object.assign(base, data);
-  out.stats = Object.assign(defaultState().stats, data.stats || {});
+
+  // v4 이하: 평면 stats → lifetime/run 분리
+  const ds = defaultState().stats;
+  if (data.stats && data.stats.run) {
+    out.stats = {
+      lifetime: Object.assign({}, ds.lifetime, data.stats.lifetime || {}),
+      run: Object.assign({}, ds.run, data.stats.run || {}),
+    };
+  } else {
+    const old = data.stats || {};
+    out.stats = {
+      lifetime: {
+        bestCombo: old.bestCombo || 0,
+        starsClicked: old.starsClicked || 0,
+        earned: data.totalEarned || 0,  // 과거 생애 누적은 복원 불가, 현재 누적으로 근사
+      },
+      run: {
+        clicks: data.totalClicks || 0,
+        bestCombo: old.bestCombo || 0,
+        starsClicked: old.starsClicked || 0,
+        clickEarned: old.clickEarned || 0,
+        idleEarned: old.idleEarned || 0,
+        offlineEarned: old.offlineEarned || 0,
+      },
+    };
+  }
+
   out.buffs = Object.assign(defaultState().buffs, data.buffs || {});
   out.prestige = Object.assign(defaultState().prestige, data.prestige || {});
   out.prestige.perks = (data.prestige && data.prestige.perks) || {};
+  // v4 이하: 총 획득 영혼 = 보유 + 특성에 쓴 영혼 (비용 = 1+2+...+lv)
+  if (!out.prestige.totalSoulsEarned || out.prestige.totalSoulsEarned < out.prestige.souls) {
+    let spent = 0;
+    for (const k in out.prestige.perks) {
+      const lv = out.prestige.perks[k];
+      spent += lv * (lv + 1) / 2;
+    }
+    out.prestige.totalSoulsEarned = out.prestige.souls + spent;
+  }
   out.decor = data.decor || {};
   out.story = data.story || {};
   out.codex = Object.assign(defaultState().codex, data.codex || {});
   out.codex.stages = (data.codex && data.codex.stages) || {};
   out.codex.traits = (data.codex && data.codex.traits) || {};
   out.codex.friends = (data.codex && data.codex.friends) || {};
+  // v4 이하: boolean → { discovered, maxOwned } 객체
+  for (const k in out.codex.friends) {
+    if (out.codex.friends[k] === true) {
+      out.codex.friends[k] = { discovered: true, maxOwned: (data.producers && data.producers[k]) || 0 };
+    }
+  }
   out.achievements = data.achievements || {};
   out.producers = Object.assign({}, defaultState().producers, data.producers || {});
   out.upgrades = data.upgrades || {};
@@ -2044,14 +2283,16 @@ function load() {
     if (!raw) return;
     S = migrateSave(JSON.parse(raw));
 
-    // 오프라인 보상: 기본 50% + 말랑한 시간 특성, 최대 8시간
-    const away = Math.min((Date.now() - (S.lastSave || Date.now())) / 1000, 8 * 3600);
-    const offline = totalCps() * away * offlineRate();
+    // 오프라인 보상: 기본 50% + 말랑한 시간 특성 + 고양이/고래 시너지
+    const away = Math.min((Date.now() - (S.lastSave || Date.now())) / 1000, offlineCapHours() * 3600);
+    let offline = totalCps() * away * offlineRate() * offlineSynMul();
     if (offline >= 1) {
-      S.coins += offline;
-      S.totalEarned += offline;
-      S.stats.offlineEarned += offline;
-      setTimeout(() => toast(`💤 자리 비운 동안 친구들이 <b>${fmt(offline)}</b> 코인을 모았어요!`), 600);
+      let dream = false;
+      if (hasSyn('cat', 100) && Math.random() < 0.1) { offline *= 2; dream = true; }
+      earnCoins(offline, 'offline');
+      setTimeout(() => toast(dream
+        ? `🐱💤 고양이의 꿈 보너스! 친구들이 <b>${fmt(offline)}</b> 코인을 모았어요! (x2)`
+        : `💤 자리 비운 동안 친구들이 <b>${fmt(offline)}</b> 코인을 모았어요!`), 600);
     }
   } catch (e) {}
 }
@@ -2108,11 +2349,7 @@ function econTick() {
   dt = Math.min(dt, 3600); // 안전 상한
 
   const income = totalCps() * frenzyMul() * partyMul() * dt;
-  if (income > 0) {
-    S.coins += income;
-    S.totalEarned += income;
-    S.stats.idleEarned += income;
-  }
+  if (income > 0) earnCoins(income, 'idle');
 
   if (comboTimer > 0) {
     comboTimer -= dt;
@@ -2121,11 +2358,37 @@ function econTick() {
 
   if (frenzyTimer > 0) {
     frenzyTimer -= dt;
-    if (frenzyTimer <= 0) { frenzyTimer = 0; toast('광란의 시간 종료!'); }
+    if (frenzyTimer <= 0) {
+      frenzyTimer = 0;
+      // 드래곤 100: 광란 중 번 코인의 10%를 보너스로
+      if (hasSyn('dragon', 100) && frenzyEarned > 0) {
+        const b = frenzyEarned * 0.1;
+        earnCoins(b, 'event');
+        toast(`🐲 광란 종료! 드래곤의 선물 <b>+${fmt(b)}</b> 코인!`);
+      } else {
+        toast('광란의 시간 종료!');
+      }
+      frenzyEarned = 0;
+    }
   }
   if (partyTimer > 0) {
     partyTimer -= dt;
     if (partyTimer <= 0) { partyTimer = 0; toast('친구 파티 종료!'); }
+  }
+  // 병아리 100: 60초마다 10초간 클릭 x2 축제
+  if (hasSyn('chick', 100)) {
+    if (festActive > 0) {
+      festActive -= dt;
+      if (festActive <= 0) { festActive = 0; toast('병아리 축제 종료!'); }
+    } else {
+      festWait -= dt;
+      if (festWait <= 0) {
+        festActive = 10;
+        festWait = 60;
+        toast('🐤 <b>병아리 축제!</b> 10초간 클릭 x2!');
+        sndAch();
+      }
+    }
   }
 
   if (starVisible > 0) {
@@ -2157,8 +2420,21 @@ function econTick() {
     if ((tr && tr.key) !== (currentTrait && currentTrait.key)) {
       currentTrait = tr;
       renderStageName();
-      if (tr) toast(`✨ 슬라임에게 <b>${tr.name}</b>이 생겼어요!`);
+      if (tr) {
+        // 유니콘 25: 새 성향 첫 발견 시 코인 보너스
+        if (!S.codex.traits[tr.key] && hasSyn('unicorn', 25)) {
+          const b = Math.max(totalCps() * 120, clickPower() * 200, 100);
+          earnCoins(b, 'event');
+          toast(`✨ 슬라임에게 <b>${tr.name}</b>이 생겼어요!<br><small>🦄 유니콘의 축복 +${fmt(b)} 코인</small>`);
+        } else {
+          toast(`✨ 슬라임에게 <b>${tr.name}</b>이 생겼어요!`);
+        }
+      }
     }
+    // 유니콘 100: 성향 오라
+    slimeCv.style.filter = (currentTrait && hasSyn('unicorn', 100))
+      ? `drop-shadow(0 0 14px ${currentTrait.pupil})`
+      : '';
     recordCodex();
     checkStory();
   }

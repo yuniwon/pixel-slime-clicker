@@ -1,0 +1,128 @@
+{
+  "characterId": "slime-decor-ai",
+  "engine": "component-row",
+  "game_input": "sprite-sheet-alpha.png",
+  "degraded_static_fallback": false,
+  "curation_applied": false,
+  "sprite_sheet_alpha": "sprite-sheet-alpha.png",
+  "sprite_sheet_alpha_report": "sprite-sheet-alpha.report.json",
+  "base_image": null,
+  "cell": {
+    "shape": "square",
+    "width": 384,
+    "height": 384,
+    "safe_margin_x": 42,
+    "safe_margin_y": 42,
+    "size": 384,
+    "safe_margin": 42
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "animation": {
+    "cellWidth": 384,
+    "cellHeight": 384,
+    "columns": 1,
+    "rows": {
+      "cushion": {
+        "row": 0,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "pond": {
+        "row": 1,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "lamp": {
+        "row": 2,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "mat": {
+        "row": 3,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "fountain": {
+        "row": 4,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "window": {
+        "row": 5,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      }
+    }
+  },
+  "frame_layout": {
+    "sheetWidth": 384,
+    "sheetHeight": 2304,
+    "cellWidth": 384,
+    "cellHeight": 384,
+    "rows": {
+      "cushion": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "pond": [
+        {
+          "x": 0,
+          "y": 384,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "lamp": [
+        {
+          "x": 0,
+          "y": 768,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "mat": [
+        {
+          "x": 0,
+          "y": 1152,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "fountain": [
+        {
+          "x": 0,
+          "y": 1536,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "window": [
+        {
+          "x": 0,
+          "y": 1920,
+          "w": 384,
+          "h": 384
+        }
+      ]
+    }
+  }
+}

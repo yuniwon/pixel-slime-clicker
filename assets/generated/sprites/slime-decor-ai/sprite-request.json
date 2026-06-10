@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-decor-ai",
+    "description": "cozy room decoration objects for a cute slime clicker game",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 384,
+    "height": 384,
+    "safe_margin_x": 42,
+    "safe_margin_y": 42,
+    "size": 384,
+    "safe_margin": 42
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "cushion": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "soft jelly cushion object, translucent pudding-like seat with mint slime button detail, low wide silhouette"
+    },
+    "pond": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "small indoor lotus pond object, round teal water bowl with pink lotus and tiny lily pads"
+    },
+    "lamp": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "starlight lamp object, small warm table lamp with blue star shade and glowing yellow star motif painted on it"
+    },
+    "mat": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "nap mat object, rolled cozy blue yarn mat with soft pillow corner, low rectangular silhouette"
+    },
+    "fountain": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "coin fountain object, tiny stone fountain with gold coin water drops and green slime emblem"
+    },
+    "window": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "space window wall decoration, rounded square porthole window showing stars and small ringed planet"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}
