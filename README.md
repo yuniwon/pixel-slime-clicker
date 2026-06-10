@@ -65,5 +65,6 @@
 
 ## 에셋
 
-게임이 사용하는 것은 각 폴더의 `sprite-sheet-alpha.png` 3장뿐입니다.
+게임이 사용하는 것은 각 스프라이트 폴더의 `sprite-sheet-alpha.png`입니다.
+현재 친구, 아이템/특성, 업적, 장식 스프라이트 아틀라스를 사용합니다.
 생성 중간 산출물(raw/qa/frames/prompts/references)은 gitignore 처리되어 있습니다.

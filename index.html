@@ -905,10 +905,14 @@ const ACH_CONDITIONS = {
 };
 
 /* 성향(분기 진화)과 대사 */
-/* 성향은 이번 생(run) 기준으로 판정한다 */
+/* 성향은 이번 생(run) 기준으로 판정한다.
+   윤회는 행동 성향을 덮지 않는 메타 오라 — TRAITS 밖에서 별도 처리 */
+const SAMSARA_TRAIT = {
+  key: 'samsara', name: '윤회 성향', pupil: '#b48aff', desc: '보라 고리와 잔상',
+  cond: () => S.prestige.totalResets >= 3,
+};
+
 const TRAITS = [
-  { key: 'samsara', name: '윤회 성향', pupil: '#b48aff', desc: '보라 고리와 잔상',
-    cond: () => S.prestige.totalResets >= 3 },
   { key: 'star',    name: '별빛 성향', pupil: '#e8b73a', desc: '별가루와 별 눈빛',
     cond: () => S.stats.run.starsClicked >= 15 },
   { key: 'muscle',  name: '근육 성향', pupil: '#d94f4f', desc: '빨간 머리띠와 힘 픽셀',
@@ -1050,6 +1054,7 @@ let blinkTimer = 3;
 let blinking = 0;
 let currentTrait = null;    // 0.5초마다 갱신
 let quipTimer = 30;
+let silentTick = false;     // finalSave 중 토스트/말풍선 억제
 
 /* ════════════════════════ 유틸 ════════════════════════ */
 
@@ -1181,8 +1186,9 @@ function bulkInfo(p) {
     for (let k = 0; k < 10; k++) total += producerCost(p, owned + k);
     return { count: 10, cost: total * disc };
   }
+  // 상한 1000: 비용이 1.15^n 지수 성장이라 실질적으로 도달 불가능한 안전망
   let total = 0, count = 0;
-  for (let k = 0; k < 500; k++) {
+  for (let k = 0; k < 1000; k++) {
     const c = producerCost(p, owned + count) * disc;
     if (total + c > budget) break;
     total += c;
@@ -1441,7 +1447,7 @@ function drawSlime(t) {
   const colors = {
     o: pal.o, b: pal.b, l: pal.l, d: pal.d,
     w: '#ffffff',
-    k: currentTrait ? currentTrait.pupil : '#26203a',  // 성향에 따라 눈동자 색 변화
+    k: currentTrait ? currentTrait.pupil : (hasSamsaraAura() ? SAMSARA_TRAIT.pupil : '#26203a'),  // 성향에 따라 눈동자 색 변화
     p: '#ff9fb2', y: '#ffd75e',
   };
   slimeCtx.clearRect(0, 0, 16, 17);
@@ -1469,6 +1475,8 @@ function drawSlime(t) {
     }
   }
   if (currentTrait) drawTraitOverlay(slimeCtx, currentTrait.key, t);
+  // 윤회 오라는 행동 성향과 함께 겹쳐 보인다
+  if (hasSamsaraAura()) drawTraitOverlay(slimeCtx, 'samsara', t);
 }
 
 /* 코인 아이콘 (8x8) */
@@ -1517,6 +1525,7 @@ let starDataURL = '';
 
 let quipHideTimer = null;
 function showQuip(text) {
+  if (silentTick) return;
   const el = $('speech-bubble');
   el.textContent = text;
   el.classList.add('show');
@@ -1527,6 +1536,7 @@ function showQuip(text) {
 function randomQuip() {
   const pool = QUIPS.generic.slice();
   if (currentTrait && QUIPS[currentTrait.key]) pool.push(...QUIPS[currentTrait.key], ...QUIPS[currentTrait.key]);
+  if (hasSamsaraAura()) pool.push(...QUIPS.samsara);
   showQuip(pool[Math.floor(Math.random() * pool.length)]);
 }
 
@@ -1624,10 +1634,18 @@ function detectTrait() {
   return null;
 }
 
+function hasSamsaraAura() { return SAMSARA_TRAIT.cond(); }
+
+/* 도감 표시용: 행동 성향 4종 + 윤회 */
+const ALL_TRAITS = [...TRAITS, SAMSARA_TRAIT];
+
 function renderStageName() {
   const el = $('stage-name');
+  const aura = hasSamsaraAura() ? ' · <span class="trait" style="color:#b48aff">윤회의 고리</span>' : '';
   if (currentTrait) {
-    el.innerHTML = `${STAGES[stageIdx].name} · <span class="trait">${currentTrait.name}</span>`;
+    el.innerHTML = `${STAGES[stageIdx].name} · <span class="trait">${currentTrait.name}</span>${aura}`;
+  } else if (aura) {
+    el.innerHTML = STAGES[stageIdx].name + aura;
   } else {
     el.textContent = STAGES[stageIdx].name;
   }
@@ -1677,6 +1695,11 @@ function recordCodex() {
   if (currentTrait && !S.codex.traits[currentTrait.key]) {
     S.codex.traits[currentTrait.key] = true;
     changed = true;
+  }
+  if (hasSamsaraAura() && !S.codex.traits.samsara) {
+    S.codex.traits.samsara = true;
+    changed = true;
+    toast(`🌀 슬라임에게 <b>윤회의 고리</b>가 생겼어요!`);
   }
   for (const p of PRODUCERS) {
     const owned = S.producers[p.id];
@@ -1967,12 +1990,12 @@ function buildRoomTab() {
   // 성향 도감
   const title3 = document.createElement('div');
   title3.className = 'room-section-title';
-  title3.textContent = `✨ 성향 도감 (${Object.keys(S.codex.traits).length}/${TRAITS.length})`;
+  title3.textContent = `✨ 성향 도감 (${Object.keys(S.codex.traits).length}/${ALL_TRAITS.length})`;
   shopList.appendChild(title3);
 
   const traitGrid = document.createElement('div');
   traitGrid.className = 'codex-grid';
-  TRAITS.forEach(tr => {
+  ALL_TRAITS.forEach(tr => {
     const seen = !!S.codex.traits[tr.key];
     const cell = document.createElement('div');
     cell.className = 'codex-cell trait-cell' + (seen ? ' seen' : '');
@@ -2299,7 +2322,10 @@ function spawnMiniStars() {
       spawnFloat(ev.clientX, ev.clientY, '+' + fmt(bonus), true);
       beep(1175, 0.1, 'triangle', 0.09);
       img.remove();
+      checkEvolution();
+      checkAchievements();
       renderHud();
+      save();  // 보상 직후 닫아도 유실 없게
     }, { once: true });
     document.body.appendChild(img);
     setTimeout(() => img.remove(), 6000);
@@ -2342,6 +2368,7 @@ function renderBuffBanner() {
 
 let toastTimer = null;
 function toast(html) {
+  if (silentTick) return;  // 닫기/숨김 저장 중에는 토스트 생략
   const el = $('toast');
   el.innerHTML = html;   // 주의: 내부 고정 문자열만 전달할 것 (사용자 입력 금지)
   el.classList.add('show');
@@ -2470,7 +2497,16 @@ $('sound-btn').addEventListener('click', () => {
   save();
 });
 
-window.addEventListener('beforeunload', save);
+/* 닫기/숨김 직전 마지막 경과분까지 정산 후 저장 (토스트 없이) */
+function finalSave() {
+  econTick(true);
+  save();
+}
+window.addEventListener('beforeunload', finalSave);
+window.addEventListener('pagehide', finalSave);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') finalSave();
+});
 
 /* ════════════════════════ 메인 루프 ════════════════════════
    경제(수입·버프·타이머)는 econTick()으로 분리.
@@ -2481,7 +2517,16 @@ let lastEcon = performance.now();
 let saveAcc = 0;
 let achAcc = 0;
 
-function econTick() {
+function econTick(silent = false) {
+  silentTick = silent;
+  try {
+    econTickBody();
+  } finally {
+    silentTick = false;
+  }
+}
+
+function econTickBody() {
   const now = performance.now();
   let dt = (now - lastEcon) / 1000;
   lastEcon = now;
