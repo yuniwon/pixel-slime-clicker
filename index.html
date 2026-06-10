@@ -437,6 +437,68 @@
   }
   #stats-bar .soul { color: var(--soul); }
 
+  /* ── 슬라임 방 (장식) ── */
+  #decor-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .decor {
+    position: absolute;
+    font-size: 34px;
+    filter: drop-shadow(2px 2px 0 #00000055);
+    animation: decorbob 3.2s ease-in-out infinite alternate;
+  }
+  @keyframes decorbob {
+    from { transform: translateY(0); }
+    to { transform: translateY(-5px); }
+  }
+  .decor.center { transform: translateX(-50%); animation: none; }
+
+  .room-section-title {
+    font-size: 12px;
+    color: var(--gold);
+    margin: 14px 4px 8px;
+    letter-spacing: 1px;
+  }
+  .codex-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .codex-grid.cols4 { grid-template-columns: repeat(4, 1fr); }
+  .codex-cell {
+    background: var(--panel-light);
+    border: 2px solid var(--border);
+    text-align: center;
+    padding: 8px 2px 6px;
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.4;
+    min-height: 58px;
+  }
+  .codex-cell.seen { border-color: var(--gold); color: var(--text); }
+  .codex-swatch {
+    width: 22px; height: 22px;
+    margin: 0 auto 4px;
+    border: 2px solid #00000055;
+  }
+  .codex-cell .sprite-icon { margin-bottom: 2px; }
+  .story-entry {
+    background: var(--panel-light);
+    border: 3px solid var(--border);
+    border-left-color: var(--gold);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .story-entry .story-title { color: var(--gold); font-weight: bold; margin-bottom: 4px; font-size: 12px; }
+  .story-entry.locked { opacity: .4; border-left-color: var(--border); }
+
   /* ── 토스트 ── */
   #toast {
     position: fixed;
@@ -484,6 +546,7 @@
 <body>
 
 <div id="game-area">
+  <div id="decor-layer"></div>
   <div id="buff-banner"></div>
   <div id="title">픽셀 슬라임 클리커</div>
   <div id="stage-name">아기 초록 슬라임</div>
@@ -519,6 +582,7 @@
     <div class="tab" data-tab="upgrades" role="button">강화</div>
     <div class="tab" data-tab="achievements" role="button">업적</div>
     <div class="tab" data-tab="prestige" role="button">환생</div>
+    <div class="tab" data-tab="room" role="button">방</div>
   </div>
   <div id="buy-modes" class="on">
     <button class="mode-btn active" data-mode="1">x1</button>
@@ -543,7 +607,7 @@
 
 /* ════════════════════════ 데이터 ════════════════════════ */
 
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
 const PRESTIGE_UNLOCK = 1e9;
 
 const PRODUCERS = [
@@ -654,6 +718,44 @@ const PERKS = [
   { id: 'softtime',  icon: '🛌', name: '말랑한 시간', desc: '오프라인 보상 +10%p',     max: 5,  per: 0.10 },
   { id: 'combo',     icon: '🥁', name: '콤보 본능',   desc: '콤보 지속 +0.15초',       max: 5,  per: 0.15 },
   { id: 'evoseed',   icon: '🌱', name: '진화의 씨앗', desc: '진화 요구치 -5%',         max: 5,  per: 0.05 },
+];
+
+/* 슬라임 방 장식: 1회 구매, 환생해도 유지 */
+const DECOR = [
+  { id: 'cushion',  icon: '🍮', name: '젤리 쿠션', desc: '클릭 코인 +2%',            cost: 5e4,
+    pos: { left: '50%', bottom: '13%' }, center: true, boost: { click: 0.02 } },
+  { id: 'pond',     icon: '🪷', name: '작은 연못', desc: '친구 생산 +2%',            cost: 5e5,
+    pos: { left: '13%', bottom: '20%' }, boost: { cps: 0.02 } },
+  { id: 'lamp',     icon: '🪔', name: '별빛 램프', desc: '황금별이 3초 더 머물러요', cost: 5e6,
+    pos: { right: '15%', bottom: '24%' }, boost: { star: 3 } },
+  { id: 'mat',      icon: '🧶', name: '낮잠 매트', desc: '친구 생산 +3%',            cost: 5e7,
+    pos: { left: '19%', bottom: '44%' }, boost: { cps: 0.03 } },
+  { id: 'fountain', icon: '⛲', name: '코인 분수', desc: '클릭 코인 +5%',            cost: 5e8,
+    pos: { right: '17%', bottom: '47%' }, boost: { click: 0.05 } },
+  { id: 'window',   icon: '🪟', name: '우주 창문', desc: '친구 생산 +5%',            cost: 1e10,
+    pos: { right: '9%', top: '12%' }, boost: { cps: 0.05 } },
+];
+
+/* 별의 기록: 마일스톤마다 해금되는 짧은 이야기 */
+const STORY = [
+  { id: 'origin', title: '떨어진 별',
+    cond: () => true,
+    text: '아주 먼 옛날, 별 하나가 길을 잃고 떨어졌다. 떨어진 자리에는 작고 말랑한 초록 덩어리가 남아 있었다. 덩어리는 코인을 주워 먹으며 자라기 시작했다.' },
+  { id: 'sea', title: '하늘의 색',
+    cond: () => S.codex.stages[1],
+    text: '코인을 먹은 슬라임은 어느 날 바다의 색으로 변했다. 자신이 떨어지며 지나온 하늘의 색이었다.' },
+  { id: 'berry', title: '달콤한 꿈',
+    cond: () => S.codex.stages[2],
+    text: '친구들이 하나둘 모이자 슬라임은 처음으로 달콤한 꿈을 꿨다. 꿈속에서 모두가 함께 딸기를 나눠 먹고 있었다.' },
+  { id: 'king', title: '가벼운 왕관',
+    cond: () => S.codex.stages[3],
+    text: '왕관은 조금도 무겁지 않았다. 친구들의 마음으로 만들어진 것이었으니까.' },
+  { id: 'god', title: '우주를 보는 눈',
+    cond: () => S.codex.stages[4],
+    text: '슬라임은 이제 우주 전체를 본다. 하지만 여전히, 클릭 한 번에 웃는다.' },
+  { id: 'seed', title: '끝은 씨앗',
+    cond: () => S.prestige.totalResets >= 1,
+    text: '모든 것이 사라지는 순간, 슬라임은 알았다. 끝은 끝이 아니라 씨앗이라는 것을. 슬라임은 더 깊은 층에서 다시 눈을 떴다.' },
 ];
 
 const ACHIEVEMENTS = [
@@ -807,6 +909,9 @@ function defaultState() {
     },
     buffs: { discount: false },
     prestige: { souls: 0, totalResets: 0, perks: {} },
+    decor: {},
+    story: {},
+    codex: { stages: {}, traits: {}, friends: {} },
     soundOn: true,
     lastSave: Date.now(),
   };
@@ -963,6 +1068,24 @@ function soulsGain() {
   return Math.floor(Math.sqrt(S.totalEarned / 1e8));
 }
 
+function decorClickMul() {
+  let m = 1;
+  for (const d of DECOR) if (S.decor[d.id] && d.boost.click) m += d.boost.click;
+  return m;
+}
+
+function decorCpsMul() {
+  let m = 1;
+  for (const d of DECOR) if (S.decor[d.id] && d.boost.cps) m += d.boost.cps;
+  return m;
+}
+
+function starLinger() {
+  let bonus = 0;
+  for (const d of DECOR) if (S.decor[d.id] && d.boost.star) bonus += d.boost.star;
+  return 10 + bonus;
+}
+
 function clickPower() {
   let add = 1, mul = 1, cpsPart = 0;
   for (const u of UPGRADES) {
@@ -972,7 +1095,7 @@ function clickPower() {
     if (u.type === 'clickCps') cpsPart += u.value;
   }
   const sticky = 1 + 0.25 * perkLv('sticky');
-  return add * mul * globalMul() * sticky + totalCps() * cpsPart;
+  return add * mul * globalMul() * sticky * decorClickMul() + totalCps() * cpsPart;
 }
 
 function cpsMulFactor() {
@@ -980,7 +1103,7 @@ function cpsMulFactor() {
   for (const u of UPGRADES) {
     if (S.upgrades[u.id] && u.type === 'cpsMul') mul *= u.value;
   }
-  return mul * globalMul() * (1 + 0.2 * perkLv('promise'));
+  return mul * globalMul() * (1 + 0.2 * perkLv('promise')) * decorCpsMul();
 }
 
 function totalCps() {
@@ -1261,6 +1384,72 @@ function checkAchievements() {
   }
 }
 
+/* ════════════════════════ 도감 / 별의 기록 ════════════════════════ */
+
+function recordCodex() {
+  let changed = false;
+  for (let i = 0; i <= stageIdx; i++) {
+    if (!S.codex.stages[i]) { S.codex.stages[i] = true; changed = true; }
+  }
+  if (currentTrait && !S.codex.traits[currentTrait.key]) {
+    S.codex.traits[currentTrait.key] = true;
+    changed = true;
+  }
+  for (const p of PRODUCERS) {
+    if (S.producers[p.id] > 0 && !S.codex.friends[p.id]) {
+      S.codex.friends[p.id] = true;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+function checkStory() {
+  let newUnlock = false;
+  for (const st of STORY) {
+    if (S.story[st.id]) continue;
+    if (st.cond()) {
+      S.story[st.id] = true;
+      newUnlock = true;
+      toast(`📜 별의 기록에 <b>${st.title}</b>이(가) 추가되었어요!`);
+      beep(784, 0.12, 'triangle', 0.08);
+    }
+  }
+  if (newUnlock) {
+    save();
+    if (currentTab === 'room') buildShop();
+  }
+}
+
+/* ════════════════════════ 슬라임 방 (장식) ════════════════════════ */
+
+function renderDecor() {
+  const layer = $('decor-layer');
+  layer.innerHTML = '';
+  for (const d of DECOR) {
+    if (!S.decor[d.id]) continue;
+    const el = document.createElement('div');
+    el.className = 'decor' + (d.center ? ' center' : '');
+    el.innerHTML = itemSpriteHtml(d.id, d.icon, 'friend-sprite');
+    for (const k of ['left', 'right', 'top', 'bottom']) {
+      if (d.pos[k] !== undefined) el.style[k] = d.pos[k];
+    }
+    layer.appendChild(el);
+  }
+}
+
+function buyDecor(d) {
+  if (S.decor[d.id] || S.coins < d.cost) return;
+  S.coins -= d.cost;
+  S.decor[d.id] = true;
+  sndBuy();
+  toast(`${d.icon} <b>${d.name}</b>을(를) 방에 놓았어요!`);
+  renderDecor();
+  buildShop();
+  renderHud();
+  save();
+}
+
 /* ════════════════════════ 플레이스타일 ════════════════════════ */
 
 function playstyleName() {
@@ -1284,7 +1473,7 @@ function doPrestige() {
     `젤리 환생을 할까요?\n\n` +
     `+ 젤리 영혼 ${gain}개 획득 (영혼 1개당 모든 수입 +5%)\n` +
     `- 코인, 친구들, 강화가 초기화돼요\n` +
-    `- 업적, 영혼, 특성은 유지돼요\n\n` +
+    `- 업적, 영혼, 특성, 방 장식은 유지돼요\n\n` +
     `이번 생의 플레이스타일: ${style.replace(/^\S+ /, '')}`
   );
   if (!ok) return;
@@ -1431,10 +1620,112 @@ function buildShop() {
         <div class="shop-count">${done ? '✓' : ''}</div>`;
       shopList.appendChild(el);
     }
-  } else {
+  } else if (currentTab === 'prestige') {
     buildPrestigeTab();
+  } else {
+    buildRoomTab();
   }
   refreshShop();
+}
+
+function buildRoomTab() {
+  // 장식 상점
+  const title1 = document.createElement('div');
+  title1.className = 'room-section-title';
+  title1.textContent = '🏠 슬라임의 방 — 장식은 환생해도 유지돼요';
+  shopList.appendChild(title1);
+
+  for (const d of DECOR) {
+    const owned = !!S.decor[d.id];
+    const el = document.createElement('div');
+    el.className = 'shop-item decor-item' + (owned ? ' maxed' : (S.coins < d.cost ? ' locked' : ''));
+    el.dataset.id = d.id;
+    el.innerHTML = `
+      <div class="shop-icon">${itemSpriteHtml(d.id, d.icon)}</div>
+      <div class="shop-info">
+        <div class="shop-name">${d.name}</div>
+        <div class="shop-desc">${d.desc}</div>
+        <div class="shop-cost">${owned ? '배치 완료 ✓' : fmt(d.cost) + ' 코인'}</div>
+      </div>`;
+    if (!owned) el.addEventListener('click', () => buyDecor(d));
+    shopList.appendChild(el);
+  }
+
+  // 슬라임 도감
+  const title2 = document.createElement('div');
+  title2.className = 'room-section-title';
+  title2.textContent = `🧬 슬라임 도감 (${Object.keys(S.codex.stages).length}/${STAGES.length})`;
+  shopList.appendChild(title2);
+
+  const stageGrid = document.createElement('div');
+  stageGrid.className = 'codex-grid';
+  STAGES.forEach((st, i) => {
+    const seen = !!S.codex.stages[i];
+    const cell = document.createElement('div');
+    cell.className = 'codex-cell' + (seen ? ' seen' : '');
+    const sw = seen
+      ? (st.rainbow
+        ? '<div class="codex-swatch" style="background:linear-gradient(45deg,#f55,#fd5,#5f5,#5af,#a5f)"></div>'
+        : `<div class="codex-swatch" style="background:${st.pal.b}"></div>`)
+      : '<div class="codex-swatch" style="background:#00000044"></div>';
+    cell.innerHTML = sw + (seen ? st.name.replace(' 슬라임', '') : '???');
+    stageGrid.appendChild(cell);
+  });
+  shopList.appendChild(stageGrid);
+
+  // 성향 도감
+  const title3 = document.createElement('div');
+  title3.className = 'room-section-title';
+  title3.textContent = `✨ 성향 도감 (${Object.keys(S.codex.traits).length}/${TRAITS.length})`;
+  shopList.appendChild(title3);
+
+  const traitGrid = document.createElement('div');
+  traitGrid.className = 'codex-grid';
+  TRAITS.forEach(tr => {
+    const seen = !!S.codex.traits[tr.key];
+    const cell = document.createElement('div');
+    cell.className = 'codex-cell' + (seen ? ' seen' : '');
+    cell.innerHTML = `<div class="codex-swatch" style="background:${seen ? tr.pupil : '#00000044'}"></div>` +
+      (seen ? tr.name.replace(' 성향', '') : '???');
+    traitGrid.appendChild(cell);
+  });
+  shopList.appendChild(traitGrid);
+
+  // 친구 도감
+  const title4 = document.createElement('div');
+  title4.className = 'room-section-title';
+  title4.textContent = `🐾 친구 도감 (${Object.keys(S.codex.friends).length}/${PRODUCERS.length})`;
+  shopList.appendChild(title4);
+
+  const friendGrid = document.createElement('div');
+  friendGrid.className = 'codex-grid cols4';
+  PRODUCERS.forEach(p => {
+    const seen = !!S.codex.friends[p.id];
+    const cell = document.createElement('div');
+    cell.className = 'codex-cell' + (seen ? ' seen' : '');
+    cell.innerHTML = seen
+      ? `${producerSpriteHtml(p.id, p.icon, 'friend-sprite')}<br>${p.name}`
+      : '❓<br>???';
+    friendGrid.appendChild(cell);
+  });
+  shopList.appendChild(friendGrid);
+
+  // 별의 기록
+  const unlockedCount = Object.keys(S.story).length;
+  const title5 = document.createElement('div');
+  title5.className = 'room-section-title';
+  title5.textContent = `📜 별의 기록 (${unlockedCount}/${STORY.length})`;
+  shopList.appendChild(title5);
+
+  for (const st of STORY) {
+    const open = !!S.story[st.id];
+    const el = document.createElement('div');
+    el.className = 'story-entry' + (open ? '' : ' locked');
+    el.innerHTML = open
+      ? `<div class="story-title">${st.title}</div>${st.text}`
+      : `<div class="story-title">???</div>아직 기록되지 않은 이야기예요.`;
+    shopList.appendChild(el);
+  }
 }
 
 function buildPrestigeTab() {
@@ -1512,6 +1803,12 @@ function refreshShop() {
       el.querySelector('.shop-cost').textContent = fmt(cost) + ' 코인' + (S.buffs.discount ? ' (50%↓)' : '');
       el.classList.toggle('locked', S.coins < cost);
     }
+  } else if (currentTab === 'room') {
+    for (const el of shopList.querySelectorAll('.decor-item')) {
+      const d = DECOR.find(x => x.id === el.dataset.id);
+      if (!d || S.decor[d.id]) continue;
+      el.classList.toggle('locked', S.coins < d.cost);
+    }
   }
 }
 
@@ -1587,7 +1884,7 @@ function starSpawnRect() {
 }
 
 function spawnStar() {
-  starVisible = 10;
+  starVisible = starLinger();
   starEl.style.display = 'block';
   const pos = starSpawnRect();
   starEl.style.left = pos.x + 'px';
@@ -1728,6 +2025,12 @@ function migrateSave(data) {
   out.buffs = Object.assign(defaultState().buffs, data.buffs || {});
   out.prestige = Object.assign(defaultState().prestige, data.prestige || {});
   out.prestige.perks = (data.prestige && data.prestige.perks) || {};
+  out.decor = data.decor || {};
+  out.story = data.story || {};
+  out.codex = Object.assign(defaultState().codex, data.codex || {});
+  out.codex.stages = (data.codex && data.codex.stages) || {};
+  out.codex.traits = (data.codex && data.codex.traits) || {};
+  out.codex.friends = (data.codex && data.codex.friends) || {};
   out.achievements = data.achievements || {};
   out.producers = Object.assign({}, defaultState().producers, data.producers || {});
   out.upgrades = data.upgrades || {};
@@ -1856,6 +2159,8 @@ function econTick() {
       renderStageName();
       if (tr) toast(`✨ 슬라임에게 <b>${tr.name}</b>이 생겼어요!`);
     }
+    recordCodex();
+    checkStory();
   }
 
   saveAcc += dt;
@@ -1911,11 +2216,14 @@ for (let i = 0; i < 40; i++) {
 load();
 stageIdx = currentStageFor(S.totalEarned);
 currentTrait = detectTrait();
+recordCodex();
 renderStageName();
 $('sound-btn').textContent = S.soundOn ? '🔊' : '🔇';
 buildShop();
 rebuildFriends();
+renderDecor();
 renderHud();
+checkStory();
 requestAnimationFrame(loop);
 </script>
 </body>
