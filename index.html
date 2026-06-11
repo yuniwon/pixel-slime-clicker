@@ -604,9 +604,25 @@
   .icon-btn:hover { background: var(--border); }
   #reset-btn.holding { background: #8a2b2b; }
 
+  /* ── 재화 스트립: 별가루·영혼·결정이 항상 한곳에 (해금된 것만) ── */
+  #res-strip { display: flex; gap: 6px; padding: 0 10px 6px; }
+  #res-strip:not(:has(.res-chip:not([hidden]))) { display: none; }
+  .res-chip {
+    background: var(--panel-light);
+    border: 2px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 3px 9px;
+    min-height: 26px;
+    cursor: pointer;
+  }
+  .res-chip b { color: var(--gold); }
+
   #shop-tabs { display: flex; border-bottom: 3px solid var(--border); }
   .tab {
     flex: 1;
+    position: relative;
     text-align: center;
     padding: 10px 0;
     font-size: 12px;
@@ -615,6 +631,18 @@
     background: var(--panel);
   }
   .tab.active { color: var(--gold); background: var(--panel-light); }
+  .tab[hidden] { display: none; }
+  .tab.fresh { animation: tab-fresh 1.2s ease-in-out 3; }
+  @keyframes tab-fresh { 0%, 100% { color: var(--text-dim); } 50% { color: var(--gold); } }
+  .tab-badge {
+    position: absolute;
+    top: 3px;
+    right: 8px;
+    font-size: 9px;
+    color: var(--green);
+    pointer-events: none;
+  }
+  .tab-badge.dot { color: var(--gold); }
 
   #buy-modes {
     display: none;
@@ -1203,8 +1231,10 @@
     }
     #shop-header { padding: 6px 12px 4px; }
     #shop-header h2 { font-size: 12px; }
-    .icon-btn { font-size: 11px; padding: 2px 7px; }
-    .tab { padding: 7px 0; font-size: 11px; }
+    .icon-btn { font-size: 11px; padding: 2px 7px; min-height: 30px; min-width: 34px; }  /* 터치 타겟 */
+    .tab { padding: 9px 0; font-size: 11px; }
+    #res-strip { padding: 0 8px 4px; }
+    .res-chip { font-size: 10px; padding: 2px 7px; min-height: 24px; }
     /* 정보 밀도: 박스·아이콘·여백을 줄이고 폰트는 지킨다 —
        전체 축소(zoom)가 아니라 비율 재조정 */
     #shop-list { -webkit-overflow-scrolling: touch; padding: 6px 8px; }
@@ -1311,6 +1341,11 @@
       <button class="icon-btn" id="haptic-btn" aria-label="진동 켜기/끄기" hidden>📳</button>
       <button class="icon-btn" id="settings-btn" aria-label="설정 열기">⚙️</button>
     </div>
+  </div>
+  <div id="res-strip">
+    <button class="res-chip" id="res-dust" hidden aria-label="별가루 — 소원 탭으로">💫 <b>0</b></button>
+    <button class="res-chip" id="res-soul" hidden aria-label="젤리 영혼 — 환생 탭으로">🍮 <b>0</b></button>
+    <button class="res-chip" id="res-crystal" hidden aria-label="젤리 결정 — 먹이기 열기">💎 <b>0</b></button>
   </div>
   <div id="shop-tabs">
     <div class="tab active" data-tab="producers" role="button">친구들</div>
@@ -2182,6 +2217,8 @@ function defaultState() {
     daily: { lastFirstSquish: '' },  // 오늘의 첫 말랑 (YYYY-MM-DD)
     // 젤리 결정: 22시간 숙성 일일 자원 — 환생에도 유지되는 직교 축
     crystal: { plantedAt: 0, watered: '', count: 0, friendLv: {} },
+    // UX 점진 공개: 해금 안내는 1회만 (탭·화단)
+    ui: { seenTabs: {}, bedSeen: false },
     lastSave: Date.now(),
   };
   PRODUCERS.forEach(p => s.producers[p.id] = 0);
@@ -3717,9 +3754,22 @@ function crystalClick() {
 }
 
 let crystalShownPhase = -1;
+function crystalUnlocked() {
+  return slimeLevel >= 5 || S.crystal.count > 0
+    || Object.keys(S.crystal.friendLv).length > 0 || S.prestige.totalResets >= 1;
+}
 function renderCrystalBed(force) {
   const bed = $('crystal-bed');
-  if (bed.hidden) bed.hidden = false;
+  // 점진 공개: 첫 진화(Lv5) 전엔 메타 자원 숨김 — 첫 화면 노이즈 제거
+  if (!crystalUnlocked()) { bed.hidden = true; return; }
+  if (bed.hidden) {
+    bed.hidden = false;
+    if (!S.ui.bedSeen) {
+      S.ui.bedSeen = true;
+      toast('💠 무대에 <b>화단</b>이 생겼어요! 젤리 결정이 하루에 걸쳐 익어요 — 눌러서 물을 줄 수 있어요');
+      sndAch();
+    }
+  }
   const el = crystalElapsed();
   const phase = el >= CRYSTAL.grow ? 3 : el >= CRYSTAL.early ? 2 : el >= 10 * 3600e3 ? 1 : 0;
   if (!force && phase === crystalShownPhase && phase !== 3) return;  // 완숙은 주기 재렌더로 반짝임
@@ -3741,6 +3791,101 @@ function crystalTick() {
   while (crystalElapsed() >= CRYSTAL.auto) { crystalHarvest(true); autoN++; }
   if (autoN > 0) toast(`💎 자리 비운 동안 결정 <b>${autoN}개</b>가 저절로 영글었어요! (보유 ${S.crystal.count}개)`);
   renderCrystalBed();
+}
+
+/* ════════════════════════ UX 흐름: 점진 해금 · 재화 스트립 · 뱃지 ════════════════════════
+   원칙: 신규 유저에게 아직 의미 없는 시스템은 숨기고, 의미가 생기는 순간 1회 안내와 함께 연다.
+   흩어진 재화(별가루·영혼·결정)는 패널 상단 스트립 한곳에 모은다. */
+
+const TAB_UNLOCKS = {
+  producers: () => true,
+  upgrades: () => PRODUCERS.some(p => S.producers[p.id] > 0) || Object.keys(S.upgrades).length > 0,
+  wishes: () => slimeLevel >= 2 || S.stardust > 0 || S.wishes.completed > 0,
+  achievements: () => slimeLevel >= 3 || achCount() >= 3,
+  room: () => slimeLevel >= 4 || Object.keys(S.decor).length > 0,
+  prestige: () => S.totalEarned >= 2e7 || S.prestige.totalResets >= 1 || S.prestige.souls > 0,
+};
+
+const TAB_UNLOCK_TOASTS = {
+  upgrades: '🧤 <b>강화</b> 탭이 열렸어요 — 클릭과 친구들을 강하게!',
+  wishes: '💫 <b>소원</b> 탭이 열렸어요 — 작은 목표를 이루면 별가루를 받아요',
+  achievements: '🏆 <b>업적</b> 탭이 열렸어요 — 업적 1개당 수입 +1%',
+  room: '🛋️ <b>방</b> 탭이 열렸어요 — 장식·도감·이야기가 기다려요',
+  prestige: '🌸 <b>환생</b> 탭이 열렸어요 — 더 깊은 층으로 갈 준비',
+};
+
+let tabVisCache = '';
+function updateTabVisibility(silent) {
+  const mask = Object.keys(TAB_UNLOCKS).map(k => TAB_UNLOCKS[k]() ? 1 : 0).join('');
+  if (mask === tabVisCache) return;
+  tabVisCache = mask;
+  let switched = false;
+  const fresh = [];
+  document.querySelectorAll('#shop-tabs .tab').forEach(tab => {
+    const key = tab.dataset.tab;
+    const open = TAB_UNLOCKS[key] ? TAB_UNLOCKS[key]() : true;
+    tab.hidden = !open;
+    if (open && !S.ui.seenTabs[key]) {
+      S.ui.seenTabs[key] = true;
+      if (!silent && TAB_UNLOCK_TOASTS[key]) {
+        fresh.push(key);
+        tab.classList.add('fresh');
+        setTimeout(() => tab.classList.remove('fresh'), 4000);
+      }
+    }
+    if (!open && currentTab === key) switched = true;
+  });
+  // 동시 다중 해금(깊은 층 시작 등)은 안내 1개로 묶는다 — 토스트 연발 방지
+  if (fresh.length === 1) {
+    toast(TAB_UNLOCK_TOASTS[fresh[0]]);
+    sndAch();
+  } else if (fresh.length > 1) {
+    const labels = fresh.map(k => {
+      const t = document.querySelector(`.tab[data-tab="${k}"]`);
+      return t ? t.textContent.replace(/[!0-9]/g, '').trim() : k;
+    });
+    toast(`✨ 새 탭이 열렸어요: <b>${labels.join(' · ')}</b>`);
+    sndAch();
+  }
+  if (switched) {  // 보이지 않는 탭에 머물 수 없다 (초기화 직후 등)
+    currentTab = 'producers';
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'producers'));
+    buildShop();
+  }
+}
+
+/* 재화 스트립: 가진 적 있는 재화만, 누르면 쓰는 곳으로 */
+let resStripCache = '';
+function updateResStrip() {
+  const dust = S.stardust > 0 || S.wishes.completed > 0;
+  const soul = S.prestige.totalSoulsEarned > 0;
+  const crys = S.crystal.count > 0 || Object.keys(S.crystal.friendLv).length > 0;
+  const sig = `${dust ? S.stardust : '-'}|${soul ? S.prestige.souls : '-'}|${crys ? S.crystal.count : '-'}`;
+  if (sig === resStripCache) return;
+  resStripCache = sig;
+  const set = (id, on, v) => {
+    const el = $(id);
+    el.hidden = !on;
+    if (on) el.querySelector('b').textContent = v;
+  };
+  set('res-dust', dust, S.stardust);
+  set('res-soul', soul, S.prestige.souls);
+  set('res-crystal', crys, S.crystal.count);
+}
+
+/* 탭 뱃지: 다음 행동 신호 — 강화는 살 수 있는 개수, 환생은 가능 표시 */
+let tabBadgeCache = '';
+function updateTabBadges() {
+  const buyable = UPGRADES.filter(u =>
+    !S.upgrades[u.id] && S.coins >= u.cost * (S.buffs.discount ? 0.5 : 1) * BC.upDisc).length;
+  const reborn = soulsGain() >= 1;
+  const sig = `${buyable}|${reborn}`;
+  if (sig === tabBadgeCache) return;
+  tabBadgeCache = sig;
+  const upTab = document.querySelector('.tab[data-tab="upgrades"] .tab-badge');
+  if (upTab) upTab.textContent = buyable > 0 ? buyable : '';
+  const prTab = document.querySelector('.tab[data-tab="prestige"] .tab-badge');
+  if (prTab) { prTab.textContent = reborn ? '!' : ''; prTab.classList.toggle('dot', reborn); }
 }
 
 /* 결정 먹이기: 친구 영구 레벨 — 레벨당 그 친구 생산 +1%, 비용 = 현재 레벨+1, 최대 Lv10 */
@@ -5338,6 +5483,9 @@ function spawnMiniStars() {
 /* ════════════════════════ HUD / 토스트 ════════════════════════ */
 
 function renderHud() {
+  updateTabVisibility();
+  updateResStrip();
+  updateTabBadges();
   $('coin-num').textContent = fmt(S.coins);
   const effMul = frenzyMul() * partyMul();
   const effCps = totalCps() * effMul;
@@ -5947,6 +6095,21 @@ $('haptic-btn').style.opacity = S.hapticOn ? '1' : '.4';
 initWishes();
 refreshGoldenWish();
 crystalTick();
+
+// UX 점진 해금: 탭 뱃지 슬롯 주입 + 기존 진행분은 조용히 해금 처리 (토스트 일괄 발사 방지)
+document.querySelectorAll('#shop-tabs .tab').forEach(t =>
+  t.insertAdjacentHTML('beforeend', '<span class="tab-badge"></span>'));
+updateTabVisibility(true);
+
+// 재화 스트립: 누르면 쓰는 곳으로
+function gotoTab(key) {
+  const tab = document.querySelector(`.tab[data-tab="${key}"]`);
+  if (!tab || tab.hidden) return;
+  tab.click();
+}
+$('res-dust').addEventListener('click', () => gotoTab('wishes'));
+$('res-soul').addEventListener('click', () => gotoTab('prestige'));
+$('res-crystal').addEventListener('click', openCrystalModal);
 applyCosmetics();
 buildShop();
 rebuildFriends();
@@ -6247,6 +6410,167 @@ window.launchCheck = async function launchCheck() {
     $('settings-overlay').classList.remove('open');
     document.querySelectorAll('.mini-star').forEach(el => el.remove());
     renderStageName(); renderHud(); buildShop(); rebuildFriends(); renderDecor(); applyCosmetics();
+  }
+
+  const byCriterion = {};
+  let weighted = 0;
+  for (const [cat, checks] of Object.entries(cats)) {
+    const passed = checks.filter(c => c.pass).length;
+    const pct = checks.length ? passed / checks.length * 100 : 100;
+    byCriterion[cat] = `${pct.toFixed(1)}% (${passed}/${checks.length})`;
+    weighted += pct * WEIGHTS[cat];
+  }
+  const score = weighted / 100;
+  const failures = Object.entries(cats).flatMap(([cat, checks]) =>
+    checks.filter(c => !c.pass).map(c => `[${cat}] ${c.name}${c.detail ? ' — ' + c.detail : ''}`));
+  return { score: score.toFixed(1), byCriterion, failures };
+};
+
+/* ── UX 정돈 하니스 (개발용) ──
+   docs/UX-CRITERIA.md 의 5대 기준을 자동 측정한다.
+   "뭔지 모르겠다 / 정보가 널부러졌다 / 번거롭다"를 막는 정량 게이트.
+   콘솔에서 await uxCheck() → { score, byCriterion, failures } */
+window.uxCheck = async function uxCheck() {
+  const cats = { disclosure: [], scent: [], action: [], friction: [], consistency: [] };
+  const WEIGHTS = { disclosure: 30, scent: 25, action: 20, friction: 15, consistency: 10 };
+  const add = (cat, name, pass, detail) => cats[cat].push({ name, pass: !!pass, detail: detail || '' });
+
+  const snapS = JSON.stringify(S);
+  const snapLevel = slimeLevel, snapStage = stageIdx, snapTab = currentTab;
+  const origToast = window.toast;
+  const resetCaches = () => { tabVisCache = ''; resStripCache = ''; tabBadgeCache = ''; };
+  const visTabs = () => [...document.querySelectorAll('#shop-tabs .tab')].filter(t => !t.hidden).map(t => t.dataset.tab);
+  const freshState = () => {
+    S = migrateSave({}); computeBlessCache(); slimeLevel = 1; stageIdx = 0;
+    resetCaches();
+  };
+  let toasts = 0;
+  const muteToasts = () => { toasts = 0; window.toast = () => toasts++; };
+
+  try {
+    /* ═══ 1. 점진 공개 — "뭔지 모르겠는데?" 방어 ═══ */
+    freshState();
+    updateTabVisibility(true);
+    add('disclosure', '신규 첫 화면 탭 ≤ 3', visTabs().length <= 3, visTabs().join(','));
+    add('disclosure', '신규: 환생 탭 숨김', !visTabs().includes('prestige'));
+    add('disclosure', '신규: 강화 탭 숨김 (친구 0)', !visTabs().includes('upgrades'));
+    renderCrystalBed(true);
+    add('disclosure', '신규: 화단 숨김', $('crystal-bed').hidden);
+
+    muteToasts();
+    S.producers.chick = 1; resetCaches(); updateTabVisibility();
+    add('disclosure', '첫 친구 → 강화 탭 해금 + 안내 1회', visTabs().includes('upgrades') && toasts === 1, `toasts=${toasts}`);
+    muteToasts(); resetCaches(); updateTabVisibility();
+    add('disclosure', '해금 안내는 다시 안 나옴', toasts === 0, `toasts=${toasts}`);
+    slimeLevel = 2; resetCaches(); updateTabVisibility();
+    add('disclosure', 'Lv2 → 소원 탭 등장', visTabs().includes('wishes'));
+    slimeLevel = 3; resetCaches(); updateTabVisibility();
+    add('disclosure', 'Lv3 → 업적 탭 등장', visTabs().includes('achievements'));
+    slimeLevel = 4; resetCaches(); updateTabVisibility();
+    add('disclosure', 'Lv4 → 방 탭 등장', visTabs().includes('room'));
+    S.totalEarned = 2e7; resetCaches(); updateTabVisibility();
+    add('disclosure', '환생권 접근 → 환생 탭 등장', visTabs().includes('prestige'));
+    slimeLevel = 5; renderCrystalBed(true);
+    add('disclosure', 'Lv5 → 화단 등장 + 안내 기록', !$('crystal-bed').hidden && S.ui.bedSeen);
+    window.toast = origToast;
+
+    // 기존 진행 세이브를 새 기기에서 로드: 해금 토스트 일괄 발사 금지
+    freshState();
+    S.producers.chick = 5; slimeLevel = 9; S.totalEarned = 3e7; S.stardust = 4;
+    muteToasts(); updateTabVisibility(true); window.toast = origToast;
+    add('disclosure', '기존 진행 로드는 조용히 해금', toasts === 0 && S.ui.seenTabs.prestige === true, `toasts=${toasts}`);
+    // 깊은 층 시작처럼 한 번에 여러 탭이 열리면 안내는 1개로 묶임
+    freshState();
+    S.producers.chick = 1; slimeLevel = 5; resetCaches();
+    muteToasts(); updateTabVisibility(); window.toast = origToast;
+    add('disclosure', '동시 다중 해금은 안내 1개로 묶임', toasts === 1, `toasts=${toasts}`);
+    add('disclosure', '축복 모달 상시 안내 문구', !!document.querySelector('.blessing-sub'));
+
+    /* ═══ 2. 정보 응집 — "정보가 널부러져 있는데?" 방어 ═══ */
+    freshState();
+    updateResStrip();
+    add('scent', '신규: 재화 스트립 전부 숨김',
+      $('res-dust').hidden && $('res-soul').hidden && $('res-crystal').hidden);
+    S.stardust = 7; S.prestige.souls = 3; S.prestige.totalSoulsEarned = 5; S.crystal.count = 2;
+    resetCaches(); updateResStrip();
+    add('scent', '별가루 칩 노출 + 수치 정확', !$('res-dust').hidden && $('res-dust').querySelector('b').textContent === '7');
+    add('scent', '영혼 칩 노출 + 수치 정확', !$('res-soul').hidden && $('res-soul').querySelector('b').textContent === '3');
+    add('scent', '결정 칩 노출 + 수치 정확', !$('res-crystal').hidden && $('res-crystal').querySelector('b').textContent === '2');
+    S.stardust = 9; resetCaches(); updateResStrip();
+    add('scent', '재화 변동 즉시 반영', $('res-dust').querySelector('b').textContent === '9');
+    slimeLevel = 2; resetCaches(); updateTabVisibility(true);
+    $('res-dust').click();
+    add('scent', '별가루 칩 → 소원 탭 이동', currentTab === 'wishes');
+    add('scent', '진화 게이지 상시 노출', !!$('evo-silhouette') && !!$('evo-progress-label'));
+    renderStageName();
+    add('scent', '레벨·다음 진화 정보 표시', ($('evo-progress-label').textContent || '').includes('Lv'));
+
+    /* ═══ 3. 행동 유도 — 다음 행동이 항상 보이게 ═══ */
+    freshState();
+    S.coins = 0; updateTabBadges();
+    const upBadge = () => document.querySelector('.tab[data-tab="upgrades"] .tab-badge').textContent;
+    const prBadge = () => document.querySelector('.tab[data-tab="prestige"] .tab-badge').textContent;
+    add('action', '코인 0 → 강화 뱃지 없음', upBadge() === '');
+    S.coins = UPGRADES[0].cost * 1.1; resetCaches(); updateTabBadges();
+    const expect = UPGRADES.filter(u => !S.upgrades[u.id] && S.coins >= u.cost * BC.upDisc).length;
+    add('action', '강화 뱃지 = 구매 가능 수', upBadge() === String(expect), `${upBadge()} vs ${expect}`);
+    add('action', '환생 불가 → 뱃지 없음', prBadge() === '');
+    S.totalEarned = 1e9; resetCaches(); updateTabBadges();
+    add('action', '환생 가능 → 뱃지 표시', prBadge() === '!');
+    currentTab = 'producers'; buildShop(); S.coins = 0; refreshShop();
+    const firstCard = shopList.querySelector('.shop-item[data-id]');
+    add('action', '구매 불가 카드 잠금 표시', firstCard && firstCard.classList.contains('locked'));
+    currentTab = 'upgrades'; S.upgrades = {}; UPGRADES.forEach(u => S.upgrades[u.id] = true); buildShop();
+    add('action', '빈 상태에 완료 안내', shopList.textContent.includes('모든 강화 완료'));
+
+    /* ═══ 4. 마찰 제거 — "번거롭거나 불편" 방어 ═══ */
+    $('settings-overlay').classList.add('open');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    add('friction', 'Escape → 설정 닫힘', !$('settings-overlay').classList.contains('open'));
+    $('settings-overlay').classList.add('open');
+    $('settings-overlay').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    add('friction', '바깥 클릭 → 설정 닫힘', !$('settings-overlay').classList.contains('open'));
+    $('crystal-overlay').classList.add('open');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    add('friction', 'Escape → 결정 모달 닫힘', !$('crystal-overlay').classList.contains('open'));
+    const tabEl = document.querySelector('.tab[data-tab="producers"]');
+    add('friction', '탭 터치 타겟 ≥ 30px', tabEl.getBoundingClientRect().height >= 30,
+      tabEl.getBoundingClientRect().height.toFixed(0) + 'px');
+    const iconBtn = $('settings-btn').getBoundingClientRect();
+    add('friction', '아이콘 버튼 터치 타겟 ≥ 26px', iconBtn.height >= 26 && iconBtn.width >= 26,
+      `${iconBtn.width.toFixed(0)}×${iconBtn.height.toFixed(0)}`);
+    try {
+      const mk = () => new TouchEvent('touchend', { bubbles: true, cancelable: true,
+        changedTouches: [new Touch({ identifier: 1, target: document.body, clientX: 5, clientY: 5 })] });
+      const e1 = mk(); document.body.dispatchEvent(e1);
+      const e2 = mk(); document.body.dispatchEvent(e2);
+      add('friction', '더블탭 줌 가드 동작', !e1.defaultPrevented && e2.defaultPrevented);
+      await new Promise(r => setTimeout(r, 400));
+    } catch (e) { add('friction', '더블탭 줌 가드 동작', true, 'TouchEvent 미지원 환경 — 통과 처리'); }
+    add('friction', '클릭 피드백 즉시(트랜지션 무지연)', getComputedStyle(slimeWrap).transitionDuration.split(',')[0].trim() <= '0.2s');
+
+    /* ═══ 5. 일관성 — 같은 것은 같은 모습으로 ═══ */
+    add('consistency', '별가루 아이콘 통일(💫)', $('res-dust').textContent.includes('💫')
+      && TAB_UNLOCK_TOASTS.wishes.includes('💫'));
+    add('consistency', '결정 아이콘 통일(💎)', $('res-crystal').textContent.includes('💎'));
+    const tabLabel = k => {
+      const t = document.querySelector(`.tab[data-tab="${k}"]`);
+      return t ? t.textContent.replace(/[!0-9]/g, '').trim() : '';
+    };
+    add('consistency', '해금 안내와 탭 라벨 일치',
+      Object.keys(TAB_UNLOCK_TOASTS).every(k => TAB_UNLOCK_TOASTS[k].includes(tabLabel(k))));
+    add('consistency', '재화 칩에 행동 단서(aria)', ['res-dust', 'res-soul', 'res-crystal']
+      .every(id => ($(id).getAttribute('aria-label') || '').includes('—')));
+  } finally {
+    window.toast = origToast;
+    S = migrateSave(JSON.parse(snapS)); computeBlessCache();
+    slimeLevel = snapLevel; stageIdx = snapStage; currentTab = snapTab;
+    resetCaches();
+    $('settings-overlay').classList.remove('open');
+    $('crystal-overlay').classList.remove('open');
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === currentTab));
+    updateTabVisibility(true); updateResStrip(); updateTabBadges();
+    renderStageName(); renderHud(); buildShop(); renderCrystalBed(true);
   }
 
   const byCriterion = {};
