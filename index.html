@@ -346,6 +346,46 @@
   }
   @keyframes starwobble { from { transform: rotate(-12deg) scale(1);} to { transform: rotate(12deg) scale(1.12);} }
 
+  /* ── 먹구름 손님 ── */
+  #raincloud {
+    position: fixed;
+    width: 108px;
+    height: 72px;
+    cursor: pointer;
+    z-index: 61;
+    display: none;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 4px 10px #00000088);
+  }
+  #raincloud.drift { animation: cloud-bob 2.4s ease-in-out infinite; }
+  @keyframes cloud-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  #raincloud.challenge { animation: cloud-shake .35s ease-in-out infinite; }
+  @keyframes cloud-shake {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+  #raincloud img { width: 100%; height: 100%; image-rendering: pixelated; }
+  #cloud-bar-outer {
+    position: absolute;
+    top: -16px; left: 4px; right: 4px;
+    height: 9px;
+    background: #00000088;
+    border: 2px solid #2a3140;
+    display: none;
+  }
+  #raincloud.challenge #cloud-bar-outer { display: block; }
+  #cloud-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #7fc4ff, #ffd75e); }
+  .raindrop {
+    position: fixed;
+    width: 4px; height: 9px;
+    background: #7fc4ff;
+    pointer-events: none;
+    z-index: 60;
+  }
+
   .mini-star {
     position: fixed;
     width: 32px; height: 32px;
@@ -894,6 +934,9 @@
 </div>
 
 <canvas id="golden-star" width="16" height="16" aria-label="황금별"></canvas>
+<div id="raincloud" role="button" aria-label="먹구름 손님">
+  <div id="cloud-bar-outer"><div id="cloud-bar"></div></div>
+</div>
 <div id="evo-flash"></div>
 <div id="toast"></div>
 
@@ -1353,6 +1396,7 @@ const NEWS = [
   { cond: () => S.stardust >= 10, text: '별가루 부자 등장. 용처는 전부 꾸미기였다고.' },
   { cond: () => !!S.cosmetics.equipped.bg, text: '하늘 색이 바뀌었지만 아무도 놀라지 않음. 흔한 일.' },
   { cond: () => S.wishes.completed >= 5, text: '소원 성취 전문 슬라임, 비결은 "그냥 꾸준히".' },
+  { cond: () => (S.stats.lifetime.cloudsSoothed || 0) > 0, text: '먹구름 손님, 간식 들고 재방문 예고.' },
 ];
 
 /* 진화 축복: 진화할 때마다 3택 1, 이번 생 한정.
@@ -1419,7 +1463,7 @@ function defaultState() {
     achievements: {},
     stats: {
       // lifetime: 환생해도 유지 (업적 기준)
-      lifetime: { bestCombo: 0, starsClicked: 0, earned: 0 },
+      lifetime: { bestCombo: 0, starsClicked: 0, earned: 0, cloudsSoothed: 0 },
       // run: 이번 생 한정 (성향·플레이스타일 기준), 환생 시 초기화
       run: { clicks: 0, bestCombo: 0, starsClicked: 0, clickEarned: 0, idleEarned: 0, offlineEarned: 0 },
     },
@@ -1506,6 +1550,11 @@ const SPRITE_ATLASES = {
   },
   cosmetics: {
     src: 'assets/generated/sprites/slime-cosmetics-ai/sprite-sheet-alpha.png',
+    sheet: null,
+    layout: {},
+  },
+  guests: {
+    src: 'assets/generated/sprites/slime-guests-ai/sprite-sheet-alpha.png',
     sheet: null,
     layout: {},
   },
@@ -1954,6 +2003,32 @@ let starDataURL = '';
     c.fillStyle = col[ch]; c.fillRect(x, y, 1, 1);
   }));
   starDataURL = cv.toDataURL();
+})();
+
+/* 먹구름 손님 (20x10 픽셀) — guests 아틀라스 생성 전 캔버스 폴백 */
+const CLOUD_DATA_URL = (() => {
+  const map = [
+    '......oooooo........',
+    '....oocccccoo..oo...',
+    '..ooclccccccoooccoo.',
+    '.occcccccccccccccco.',
+    'occcwkcccccccwkccclo',
+    'occcwkcccccccwkcccco',
+    'occccccccoocccccccco',
+    '.occcccccccccccccco.',
+    '..ooccccccccccccoo..',
+    '....oooooooooooo....',
+  ];
+  const col = { o: '#2a3140', c: '#6b7a99', l: '#93a3c4', w: '#ffffff', k: '#26203a' };
+  const cv = document.createElement('canvas');
+  cv.width = 20; cv.height = 10;
+  const ctx = cv.getContext('2d');
+  map.forEach((row, y) => [...row].forEach((ch, x) => {
+    if (ch === '.') return;
+    ctx.fillStyle = col[ch];
+    ctx.fillRect(x, y, 1, 1);
+  }));
+  return cv.toDataURL();
 })();
 
 /* ════════════════════════ 말풍선 ════════════════════════ */
@@ -2874,6 +2949,7 @@ function buildRoomTab() {
     ['마중 나간 별', S.stats.lifetime.starsClicked + '개'],
     ['이뤄준 소원', S.wishes.completed + '개'],
     ['거쳐온 생', (S.prestige.totalResets + 1) + '번째'],
+    ['달래준 먹구름', (S.stats.lifetime.cloudsSoothed || 0) + '번'],
     ['가장 아낀 친구', bestFriend ? `${bestFriend.name} (${bestFriend.max}마리)` : '아직 없어요'],
   ];
   const album = document.createElement('div');
@@ -3160,6 +3236,97 @@ starEl.addEventListener('pointerdown', e => {
   renderHud();
   save();
 });
+
+/* ════════════════════════ 먹구름 손님 ════════════════════════
+   무손실 액티브 이벤트: 두드려서 비를 털면 큰 보상,
+   실패해도 위로 간식, 무시해도 아무 일 없음 */
+
+const cloudEl = $('raincloud');
+let cloudTimer = 150 + Math.random() * 150;  // 첫 등장 2.5~5분
+let cloudState = 'hidden';                    // hidden | drift | challenge
+let cloudLife = 0;
+let cloudTime = 0;
+let cloudClicks = 0;
+let cloudNeed = 0;
+
+function spawnCloud() {
+  cloudState = 'drift';
+  cloudLife = 14;
+  const pos = starSpawnRect();
+  cloudEl.style.left = pos.x + 'px';
+  cloudEl.style.top = pos.y + 'px';
+  cloudEl.classList.add('drift');
+  cloudEl.classList.remove('challenge');
+  cloudEl.style.display = 'block';
+  toast('☁️ <b>먹구름 손님</b>이 찾아왔어요! 두드리면 비를 털어줄 수 있어요');
+  beep(294, 0.12, 'triangle', 0.07);
+}
+
+function hideCloud() {
+  cloudState = 'hidden';
+  cloudEl.style.display = 'none';
+  $('cloud-bar').style.width = '0%';
+  cloudTimer = 200 + Math.random() * 200;
+}
+
+cloudEl.addEventListener('pointerdown', e => {
+  e.stopPropagation();
+  if (cloudState === 'drift') {
+    cloudState = 'challenge';
+    cloudClicks = 0;
+    cloudNeed = Math.min(30, 12 + stageIdx * 3 + S.prestige.totalResets * 2);
+    cloudTime = 10;
+    cloudEl.classList.remove('drift');
+    cloudEl.classList.add('challenge');
+    toast(`☁️ 10초 안에 <b>${cloudNeed}번</b> 두드려서 비를 털어내자!`);
+    beep(330, 0.1);
+  } else if (cloudState === 'challenge') {
+    cloudClicks++;
+    spawnRaindrops(e.clientX, e.clientY);
+    beep(392 + cloudClicks * 8, 0.05);
+    $('cloud-bar').style.width = Math.min(100, cloudClicks / cloudNeed * 100) + '%';
+    if (cloudClicks >= cloudNeed) cloudSuccess();
+  }
+});
+
+function spawnRaindrops(x, y) {
+  for (let i = 0; i < 3; i++) {
+    const d = document.createElement('div');
+    d.className = 'raindrop';
+    d.style.left = (x - 22 + Math.random() * 44) + 'px';
+    d.style.top = y + 'px';
+    d.animate([
+      { transform: 'translateY(0)', opacity: 1 },
+      { transform: `translateY(${40 + Math.random() * 40}px)`, opacity: 0 },
+    ], { duration: 450 + Math.random() * 250, easing: 'ease-in' });
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 750);
+  }
+}
+
+function cloudSuccess() {
+  const bonus = Math.max(totalCps() * 180, clickPower() * 250, 200);
+  earnCoins(bonus, 'event');
+  S.stardust += 3;
+  S.stats.lifetime.cloudsSoothed = (S.stats.lifetime.cloudsSoothed || 0) + 1;
+  confettiBurst();
+  sndStar();
+  toast(`🌤️ 비가 그쳤어요! <b>+${fmt(bonus)}</b> 코인과 별가루 3개!`);
+  showQuip('먹구름도 사실은 말랑했어.');
+  hideCloud();
+  checkEvolution();
+  renderHud();
+  save();
+}
+
+function cloudFail() {
+  const consol = Math.max(totalCps() * 15, 30);
+  earnCoins(consol, 'event');
+  toast(`☁️ 먹구름이 떠나며 간식을 두고 갔어요 <b>+${fmt(consol)}</b>`);
+  hideCloud();
+  renderHud();
+  save();
+}
 
 function spawnMiniStars() {
   const count = 5 + (hasSyn('rabbit', 10) ? 1 : 0) + (hasBless('minirain') ? 2 : 0);
@@ -3521,6 +3688,18 @@ function econTickBody() {
     newsTimer = 26 + Math.random() * 22;
   }
 
+  // 먹구름 손님
+  if (cloudState === 'hidden') {
+    cloudTimer -= dt;
+    if (cloudTimer <= 0) spawnCloud();
+  } else if (cloudState === 'drift') {
+    cloudLife -= dt;
+    if (cloudLife <= 0) hideCloud();
+  } else if (cloudState === 'challenge') {
+    cloudTime -= dt;
+    if (cloudTime <= 0) cloudFail();
+  }
+
   checkEvolution();
 
   achAcc += dt;
@@ -3608,6 +3787,10 @@ for (let i = 0; i < 40; i++) {
   if (Math.random() < 0.3) { s.style.width = '6px'; s.style.height = '6px'; }
   document.body.appendChild(s);
 }
+
+// 먹구름 비주얼: guests 아틀라스 생성 전엔 캔버스 픽셀 폴백
+cloudEl.insertAdjacentHTML('beforeend',
+  spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' }));
 
 load();
 stageIdx = currentStageFor(S.totalEarned);

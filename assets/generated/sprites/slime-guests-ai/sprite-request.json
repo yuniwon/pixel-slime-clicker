@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-guests-ai",
+    "description": "cute visiting guest characters for a cozy slime clicker game, starting with a grumpy-but-soft rain cloud",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 896,
+    "height": 896,
+    "safe_margin_x": 96,
+    "safe_margin_y": 96,
+    "size": 896,
+    "safe_margin": 96
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [255, 0, 255],
+    "selection": "manual"
+  },
+  "states": {
+    "raincloud": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "small grumpy rain cloud creature with two round eyes and a flat pouty mouth, slate blue-gray puffy body, gentle bobbing between the two frames, tiny raindrop hanging from its underside"
+    },
+    "raincloud-happy": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "the same rain cloud creature now relieved and happy, closed smiling eyes, small sun peeking from behind its puff, no raindrops"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

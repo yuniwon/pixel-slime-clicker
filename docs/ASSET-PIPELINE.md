@@ -61,6 +61,7 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | slime-blessings-ai | 16 (진화 축복) | ✅ 작성됨 | `SPRITE_ATLASES.blessings` |
 | slime-wishes-ai | 7 (소원 타입) | ✅ 작성됨 | `SPRITE_ATLASES.wishes` |
 | slime-cosmetics-ai | 11 (꾸미기) | ✅ 작성됨 | `SPRITE_ATLASES.cosmetics` |
+| slime-guests-ai | 2 (먹구름 손님: raincloud 2프레임 + raincloud-happy) | ✅ 작성됨 | `SPRITE_ATLASES.guests` |
 
 ## 캔버스 직접 렌더 (스프라이트 교체 대상 아님)
 
