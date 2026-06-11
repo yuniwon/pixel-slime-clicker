@@ -974,7 +974,8 @@
     <h2>★ 상점 ★</h2>
     <span id="discount-badge">⭐ 다음 구매 50% 할인!</span>
     <div>
-      <button class="icon-btn" id="sound-btn" aria-label="소리 켜기/끄기">🔊</button>
+      <button class="icon-btn" id="music-btn" aria-label="음악 켜기/끄기">🎵</button>
+      <button class="icon-btn" id="sound-btn" aria-label="효과음 켜기/끄기">🔊</button>
       <button class="icon-btn" id="settings-btn" aria-label="설정 열기">⚙️</button>
     </div>
   </div>
@@ -1728,6 +1729,7 @@ function defaultState() {
     playTime: 0,        // 함께한 시간(초) — 앨범용
     createdAt: Date.now(),
     soundOn: true,
+    musicOn: true,
     lastSave: Date.now(),
   };
   PRODUCERS.forEach(p => s.producers[p.id] = 0);
@@ -2193,6 +2195,73 @@ function sndStar()  { [880, 1175, 1568].forEach((f, i) => setTimeout(() => beep(
 function sndAch()   { [659, 880, 1319].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.09), i * 90)); }
 function sndPerfect() { [784, 1047, 1568, 2093].forEach((f, i) => setTimeout(() => beep(f, 0.1, 'triangle', 0.1), i * 55)); }
 function sndRebirth() { [1047, 784, 523, 392, 523, 784, 1047, 1568].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'triangle', 0.1), i * 130)); }
+
+/* ── BGM: 프로시저럴 칩튠 자장가 (에셋 없음) ──
+   C장조 펜타토닉 8분음표 패턴 4종 순환, 광란 중엔 한 옥타브 위 + 가벼운 박자 */
+let musicTimer = null;
+let musicNextTime = 0;
+let musicBar = 0;
+
+const MUSIC = {
+  bpm: 72,
+  scale: [262, 294, 330, 392, 440, 523],   // C4 D4 E4 G4 A4 C5
+  bass: [131, 98, 110, 131],               // C3 G2 A2 C3
+  patterns: [
+    [0, 2, 4, -1, 3, 2, 0, -1],
+    [2, 3, 4, -1, 5, 4, 3, -1],
+    [4, 3, 2, 0, -1, 2, 1, -1],
+    [0, 1, 2, -1, 1, 0, -1, -1],
+  ],
+};
+
+function musicNote(freq, t, dur, type, vol) {
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(vol, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g);
+  g.connect(audioCtx.destination);
+  o.start(t);
+  o.stop(t + dur);
+}
+
+function scheduleMusicBar(t) {
+  const beat = 60 / MUSIC.bpm;
+  const eighth = beat / 2;
+  const pat = MUSIC.patterns[musicBar % MUSIC.patterns.length];
+  const frenzy = frenzyTimer > 0;
+  pat.forEach((idx, i) => {
+    if (idx < 0) return;
+    musicNote(MUSIC.scale[idx] * (frenzy ? 2 : 1), t + i * eighth, eighth * 0.9, 'triangle', 0.022);
+  });
+  const bf = MUSIC.bass[musicBar % MUSIC.bass.length];
+  musicNote(bf, t, beat * 1.8, 'sine', 0.03);
+  musicNote(bf * 1.5, t + beat * 2, beat * 1.8, 'sine', 0.02);
+  if (frenzy) for (let i = 0; i < 4; i++) musicNote(2093, t + i * beat, 0.03, 'square', 0.006);
+  musicBar++;
+  return beat * 4;
+}
+
+function musicTick() {
+  if (!S.musicOn || !audioCtx || document.hidden) return;
+  while (musicNextTime < audioCtx.currentTime + 0.45) {
+    if (musicNextTime < audioCtx.currentTime) musicNextTime = audioCtx.currentTime + 0.05;
+    musicNextTime += scheduleMusicBar(musicNextTime);
+  }
+}
+
+function startMusic() {
+  if (musicTimer) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch (e) { return; }
+  musicNextTime = 0;
+  musicTimer = setInterval(musicTick, 250);
+}
 
 /* ════════════════════════ 슬라임 렌더링 ════════════════════════ */
 
@@ -4263,7 +4332,8 @@ function migrateSave(data) {
   out.challenge = Object.assign({ active: null, startedAt: 0 }, data.challenge || {});
   out.codex.challenges = (data.codex && data.codex.challenges) || {};
 
-  // v9 이하: 우주 씨앗 + 텔레메트리
+  // v9 이하: 우주 씨앗 + 텔레메트리 + 음악 설정
+  out.musicOn = data.musicOn !== false;
   out.cosmicSeed = !!data.cosmicSeed;
   out.telemetry = Object.assign(defaultState().telemetry, data.telemetry || {});
   if (!Array.isArray(out.telemetry.sessionLengths)) out.telemetry.sessionLengths = [];
@@ -4310,6 +4380,20 @@ $('sound-btn').addEventListener('click', () => {
   $('sound-btn').textContent = S.soundOn ? '🔊' : '🔇';
   if (S.soundOn) beep(660, 0.08);
   save();
+});
+
+$('music-btn').addEventListener('click', () => {
+  S.musicOn = !S.musicOn;
+  $('music-btn').textContent = S.musicOn ? '🎵' : '🎵̸';
+  $('music-btn').style.opacity = S.musicOn ? '1' : '.4';
+  if (S.musicOn) startMusic();
+  save();
+});
+
+// 브라우저 오디오 정책: 첫 입력 후에만 재생 가능
+window.addEventListener('pointerdown', function musicKick() {
+  if (S.musicOn) startMusic();
+  window.removeEventListener('pointerdown', musicKick);
 });
 
 /* ── 설정 모달: 세이브 내보내기/가져오기 ── */
@@ -4628,6 +4712,7 @@ currentTrait = detectTrait();
 recordCodex();
 renderStageName();
 $('sound-btn').textContent = S.soundOn ? '🔊' : '🔇';
+$('music-btn').style.opacity = S.musicOn ? '1' : '.4';
 initWishes();
 applyCosmetics();
 buildShop();
