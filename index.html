@@ -363,6 +363,39 @@
     100% { transform: translateY(-110px); opacity: 0; }
   }
 
+  /* ── 콤보 승급: 경계를 넘는 그 한 클릭의 연출 ── */
+  #tier-ring {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 180px; height: 180px;
+    margin: -90px 0 0 -90px;
+    border: 3px solid var(--gold);
+    border-radius: 50%;
+    transform: scale(0);
+    opacity: 0;
+    pointer-events: none;
+  }
+  #tier-ring.go { animation: tier-ring .35s ease-out; }
+  @keyframes tier-ring {
+    0% { transform: scale(.12); opacity: .95; }
+    100% { transform: scale(1.2); opacity: 0; }
+  }
+  #tier-flash {
+    position: fixed;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 40;
+  }
+  #tier-flash.go { animation: tier-flash .25s ease-out; }
+  @keyframes tier-flash { 0% { opacity: .16; } 100% { opacity: 0; } }
+  #slime-wrap.tier-up { animation: tier-punch .18s ease-out; }
+  @keyframes tier-punch {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.09); }   /* 70ms 지점 — 히트스톱 체감 */
+    100% { transform: scale(1); }
+  }
+
   #buff-banner {
     position: absolute;
     top: 12px; left: 50%;
@@ -1053,6 +1086,7 @@
     #slime-canvas { width: 108px; height: 115px; }
     #slime-shadow { width: 72px; height: 13px; margin-top: -10px; }
     #combo-aura { width: 170px; height: 170px; }
+    #tier-ring { width: 110px; height: 110px; margin: -55px 0 0 -55px; }
     /* 이벤트 손님들: 무대 크기에 맞는 비율로 */
     #golden-star { width: 44px; height: 44px; }
     #raincloud { width: 76px; height: 51px; }
@@ -1154,6 +1188,7 @@
   <div id="news-ticker" aria-live="polite"></div>
   <div id="slime-wrap" role="button" tabindex="0" aria-label="슬라임 클릭 (스페이스/엔터 키로도 가능)">
     <div id="combo-aura"></div>
+    <div id="tier-ring"></div>
     <div id="speech-bubble"></div>
     <canvas id="slime-canvas" width="16" height="17"></canvas>
     <div id="slime-shadow"></div>
@@ -1178,6 +1213,7 @@
     <div>
       <button class="icon-btn" id="music-btn" aria-label="음악 켜기/끄기">🎵</button>
       <button class="icon-btn" id="sound-btn" aria-label="효과음 켜기/끄기">🔊</button>
+      <button class="icon-btn" id="haptic-btn" aria-label="진동 켜기/끄기" hidden>📳</button>
       <button class="icon-btn" id="settings-btn" aria-label="설정 열기">⚙️</button>
     </div>
   </div>
@@ -1212,6 +1248,7 @@
   <div id="starlet-hint"></div>
 </div>
 <div id="evo-flash"></div>
+<div id="tier-flash"></div>
 <div id="toast"></div>
 
 <div id="blessing-overlay">
@@ -1980,6 +2017,8 @@ function defaultState() {
     createdAt: Date.now(),
     soundOn: true,
     musicOn: true,
+    hapticOn: true,     // 클릭 진동 (지원 기기 한정)
+    daily: { lastFirstSquish: '' },  // 오늘의 첫 말랑 (YYYY-MM-DD)
     lastSave: Date.now(),
   };
   PRODUCERS.forEach(p => s.producers[p.id] = 0);
@@ -2457,6 +2496,30 @@ function updateComboVisual() {
     p.style.background = tier.t >= 3 ? 'var(--gold)' : 'var(--pink)';
   });
 }
+/* 콤보 승급: 경계(18/45/70%)를 넘는 그 한 클릭에 연출을 몰아준다 */
+const TIER_ARPS = [null, [523, 659], [659, 784, 988], [784, 988, 1319, 1568]];
+function comboTierUp(t) {
+  const tier = comboTier();
+  slimeWrap.classList.remove('tier-up');
+  void slimeWrap.offsetWidth;
+  slimeWrap.classList.add('tier-up');           // 히트스톱 펀치
+  const ring = $('tier-ring');
+  ring.style.borderColor = tier.color;
+  ring.classList.remove('go'); void ring.offsetWidth; ring.classList.add('go');
+  const flash = $('tier-flash');
+  flash.style.background = tier.color;          // 흰색 아닌 단계색 틴트 — 코지 톤
+  flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+  (TIER_ARPS[t] || []).forEach((f, i) => setTimeout(() => beep(f, 0.09, 'triangle', 0.07), i * 50));
+  haptic([10, 30, 10, 30, 20]);
+}
+
+/* 불타는 콤보를 자연 타임아웃으로 잃었을 때만 — 환생/도전 리셋은 직접 0 대입이라 안 탄다 */
+function comboLost() {
+  const r = slimeCv.getBoundingClientRect();
+  spawnFloat(r.left + r.width / 2, r.top, '🌫️ 열기가 식었어요', false, false);
+  beep(196, 0.18, 'sine', 0.025);  // 극소 볼륨 한숨
+}
+
 function frenzyMul() { return frenzyTimer > 0 ? (hasSyn('dragon', 25) ? 8 : 7) + BC.frenzyMulAdd : 1; }
 function partyMul() { return partyTimer > 0 ? 5 : 1; }
 
@@ -2478,7 +2541,46 @@ function beep(freq, dur = 0.07, type = 'square', vol = 0.08) {
   } catch (e) { /* 오디오 미지원 환경 무시 */ }
 }
 
-function sndClick() { beep(420 + Math.min(combo, 50) * 14, 0.06); }
+/* 음계 클릭: 클릭음을 BGM과 같은 C 펜타토닉으로 양자화 — 연타가 그대로 연주가 된다.
+   트랜지언트(노이즈) + 바디(음계) + 스파클(10콤보마다 옥타브 위) 3레이어 */
+let noiseBuf = null;
+function clickNoise(vol) {
+  if (!noiseBuf) {  // 버퍼는 1회만 생성 — 매 클릭 생성 시 GC 스터터
+    noiseBuf = audioCtx.createBuffer(1, Math.ceil(audioCtx.sampleRate * 0.004), audioCtx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const src = audioCtx.createBufferSource();
+  const g = audioCtx.createGain();
+  src.buffer = noiseBuf;
+  g.gain.value = vol;
+  src.connect(g); g.connect(audioCtx.destination);
+  src.start();
+}
+
+function sndClick() {
+  if (!S.soundOn) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    clickNoise(0.05);
+  } catch (e) { return; }
+  // 바디: 콤보 10마다 펜타토닉 한 칸 위, 50+는 한 옥타브 위 — 항상 BGM과 협화
+  const idx = Math.min(MUSIC.scale.length - 1, Math.floor(combo / 10));
+  const oct = combo >= 50 ? 2 : 1;
+  beep(MUSIC.scale[idx] * oct, 0.06, 'square', 0.07);
+  // 스파클: 10의 배수 콤보를 밟는 클릭만 반짝
+  if (combo > 0 && combo % 10 === 0) beep(MUSIC.scale[idx] * oct * 2, 0.09, 'triangle', 0.04);
+}
+
+/* 햅틱: 안드로이드 즉발, iOS는 자동 no-op. 단발이 패턴 재생을 중간에 끊지 않게 가드 */
+let hapticPatternUntil = 0;
+function haptic(pattern) {
+  if (!S.hapticOn || !navigator.vibrate) return;
+  const now = Date.now();
+  if (!Array.isArray(pattern) && now < hapticPatternUntil) return;
+  if (Array.isArray(pattern)) hapticPatternUntil = now + pattern.reduce((a, b) => a + b, 0) + 150;
+  try { navigator.vibrate(pattern); } catch (e) { /* 권한/지원 문제 무시 */ }
+}
 function sndBuy()   { beep(523, 0.08); setTimeout(() => beep(784, 0.1), 70); }
 function sndEvo()   { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.15, 'triangle', 0.1), i * 110)); }
 function sndStar()  { [880, 1175, 1568].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.1), i * 80)); }
@@ -2872,6 +2974,42 @@ function showNews() {
 
 const slimeWrap = $('slime-wrap');
 
+/* ── 오늘의 첫 말랑: 하루의 첫 클릭이 그날 가장 기분 좋은 클릭 ── */
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+const MORNING_QUIPS = [
+  '좋은 아침! 오늘도 말랑말랑하게 시작해요',
+  '기다리고 있었어요! 오늘의 첫 말랑이에요',
+  '오늘 하루도 폭신하게 흘러가길!',
+  '첫 말랑은 언제나 제일 시원해요~',
+  '어서 와요! 친구들도 다들 반가워해요',
+  '오늘은 어떤 별이 떨어질까요?',
+  '새 하루, 새 말랑! 잘 부탁해요',
+  '슬라임 점프! …는 못 하지만 마음은 점프!',
+];
+
+function firstSquishOfDay(x, y) {
+  S.daily.lastFirstSquish = todayKey();
+  S.telemetry.firstSquishes = (S.telemetry.firstSquishes || 0) + 1;
+  const bonus = Math.max(clickPower() * 50, totalCps() * 45, 100);
+  earnCoins(bonus, 'event');
+  S.stardust += 2;
+  // 콤보 따끈 단계에서 출발 — 손이 풀린 채로 시작
+  combo = Math.max(combo, Math.ceil(BC.comboCap * 0.2));
+  comboTimer = comboWindow();
+  updateComboVisual();
+  confettiBurst();
+  sndPerfect();
+  haptic([12, 40, 12]);
+  spawnFloat(x, y - 34, '🌅 오늘의 첫 말랑! +' + fmt(bonus), true, true);
+  toast(`🌅 <b>오늘의 첫 말랑!</b> +${fmt(bonus)} 코인 · 별가루 +2`);
+  showQuip(MORNING_QUIPS[new Date().getDate() % MORNING_QUIPS.length]);
+  save();
+}
+
 function doClick(x, y) {
   // 퍼펙트 말랑: 3% 확률로 x5 — 손맛용 잭팟 (작은 행운 축복 +2%p)
   const perfect = Math.random() < (0.03 + BC.perfectAdd + upSum('perfAdd')) * (BC.perfectX2 ? 2 : 1);
@@ -2881,12 +3019,16 @@ function doClick(x, y) {
   S.totalClicks++;
   S.stats.run.clicks++;
 
+  const tierBefore = comboTier().t;
   combo++;
   if (combo < BC.comboStart) combo = BC.comboStart;
   if (perfect && BC.perfectCombo) combo += BC.perfectCombo;
   comboTimer = comboWindow();
   if (combo > S.stats.run.bestCombo) S.stats.run.bestCombo = combo;
   if (combo > S.stats.lifetime.bestCombo) S.stats.lifetime.bestCombo = combo;
+  // 콤보 단계 승급: 다단 점프여도 최고 단계 연출 1회만
+  const tierAfter = comboTier().t;
+  if (tierAfter > tierBefore) comboTierUp(tierAfter);
 
   slimeCv.classList.remove('squish');
   void slimeCv.offsetWidth;
@@ -2897,10 +3039,17 @@ function doClick(x, y) {
     spawnSparks(x, y);
     spawnSparks(x, y);
     sndPerfect();
+    haptic([12, 40, 12]);
   } else {
     spawnFloat(x, y, '+' + fmt(gain), frenzyTimer > 0);
     spawnSparks(x, y);
     sndClick();
+    haptic(8);
+  }
+
+  // 오늘의 첫 말랑: 하루의 첫 클릭은 보장된 한 방 (로드 직후 2.5초는 오프라인 토스트에 양보)
+  if (S.daily && S.daily.lastFirstSquish !== todayKey() && performance.now() > 2500) {
+    firstSquishOfDay(x, y);
   }
   // 코인 카운터 팝
   const coinEl = $('coin-display');
@@ -4960,6 +5109,15 @@ $('music-btn').addEventListener('click', () => {
   save();
 });
 
+/* 진동 토글: 지원 기기에서만 노출 */
+if (navigator.vibrate) $('haptic-btn').hidden = false;
+$('haptic-btn').addEventListener('click', () => {
+  S.hapticOn = !S.hapticOn;
+  $('haptic-btn').style.opacity = S.hapticOn ? '1' : '.4';
+  if (S.hapticOn) try { navigator.vibrate(20); } catch (e) {}
+  save();
+});
+
 // 브라우저 오디오 정책: 첫 입력 후에만 재생 가능
 window.addEventListener('pointerdown', function musicKick() {
   if (S.musicOn) startMusic();
@@ -5059,7 +5217,10 @@ function econTickBody() {
 
   if (comboTimer > 0 && !BC.comboEternal) {  // 영원한 박자: 콤보 시간 미적용
     comboTimer -= dt;
-    if (comboTimer <= 0) combo = 0;
+    if (comboTimer <= 0) {
+      if (comboTier().t >= 3) comboLost();  // 불타는을 놓친 순간만 알림
+      combo = 0;
+    }
   }
 
   if (frenzyTimer > 0) {
@@ -5334,6 +5495,7 @@ recordCodex();
 renderStageName();
 $('sound-btn').textContent = S.soundOn ? '🔊' : '🔇';
 $('music-btn').style.opacity = S.musicOn ? '1' : '.4';
+$('haptic-btn').style.opacity = S.hapticOn ? '1' : '.4';
 initWishes();
 applyCosmetics();
 buildShop();
