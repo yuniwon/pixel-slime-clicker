@@ -755,18 +755,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
-    padding: 7px 14px;
+    gap: clamp(10px, 0.9vw, 24px);
+    padding: clamp(5px, 0.45vw, 14px) 14px;
     background: #00000033;
     border-top: 2px solid #ffffff0d;
     cursor: pointer;
   }
   #trophy-shelf .shelf-label {
-    font-size: 14px;
+    font-size: clamp(11px, 0.72vw, 28px);
     color: var(--text-dim);
     white-space: nowrap;
   }
-  #trophy-shelf .trophy { width: 38px; height: 38px; display: inline-block; }
+  /* QHD에서 ≈44px — 구버전 22px의 200% 체감 기준 */
+  #trophy-shelf .trophy { width: clamp(28px, 1.7vw, 66px); height: clamp(28px, 1.7vw, 66px); display: inline-block; }
   #trophy-shelf .trophy.dim { filter: grayscale(1) brightness(.35); }
   #trophy-shelf .trophy.fresh { animation: trophy-pop .5s ease-out; }
   @keyframes trophy-pop {
@@ -862,11 +863,12 @@
     left: 0;
     right: 0;
     text-align: center;
-    font-size: 17px;
+    /* 해상도 무관 균일 비율: QHD(2560)에서 ≈23px — 구버전 11px의 200% 체감 기준 */
+    font-size: clamp(13px, 0.9vw, 36px);
     color: var(--text-dim);
     background: #00000044;
     border-bottom: 2px solid #ffffff0d;
-    padding: 9px 16px;
+    padding: clamp(7px, 0.55vw, 18px) 16px;
     text-shadow: 1px 1px 0 #00000088;
     opacity: 0;
     transition: opacity 1.2s ease;
