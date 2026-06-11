@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>픽셀 슬라임 클리커</title>
+<meta name="description" content="귀여운 도트 슬라임을 클릭해서 키우는 무료 방치형 클리커 게임. 친구들을 모으고, 진화시키고, 별을 잡으세요!">
+<link rel="canonical" href="https://yuniwon.github.io/pixel-slime-clicker/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="픽셀 슬라임 클리커">
+<meta property="og:description" content="귀여운 도트 슬라임을 클릭해서 키우는 무료 방치형 클리커 게임. 친구들을 모으고, 진화시키고, 별을 잡으세요!">
+<meta property="og:url" content="https://yuniwon.github.io/pixel-slime-clicker/">
+<meta property="og:image" content="https://yuniwon.github.io/pixel-slime-clicker/icons/icon-512.png">
+<meta property="og:locale" content="ko_KR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="픽셀 슬라임 클리커">
+<meta name="twitter:description" content="귀여운 도트 슬라임을 클릭해서 키우는 무료 방치형 클리커 게임">
+<meta name="twitter:image" content="https://yuniwon.github.io/pixel-slime-clicker/icons/icon-512.png">
 <meta name="theme-color" content="#1a1033">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -34,6 +46,7 @@
 
   body {
     font-family: 'Galmuri11', 'DungGeunMo', 'Courier New', monospace;
+    font-variant-numeric: tabular-nums;  /* 코인 카운터 자릿수 흔들림 방지 */
     background:
       radial-gradient(ellipse at 50% 120%, var(--stage-glow, #3d2566) 0%, transparent 60%),
       linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
@@ -2592,7 +2605,10 @@ function comboTier() {
   return { t: 0, label: '말랑', color: '#9d8ac4', r };
 }
 
-/* 콤보 칩·오라·열기 파티클 갱신 — 클릭 즉시 + 매 프레임 */
+/* 콤보 칩·오라·열기 파티클 갱신 — 클릭 즉시 + 매 프레임.
+   매 프레임은 composite 속성(opacity/transform)만 — 페인트 비용(그라디언트·클래스)은
+   단계가 바뀔 때만 갱신 (fixing-motion-performance) */
+let auraTierShown = -1;
 function updateComboVisual() {
   const tier = comboTier();
   const cbox = $('combo-box');
@@ -2610,12 +2626,15 @@ function updateComboVisual() {
   }
   aura.style.opacity = tier.r;
   aura.style.transform = `translate(-50%,-50%) scale(${1 + tier.r * 0.45})`;
-  aura.style.background = `radial-gradient(circle, ${tier.t >= 3 ? '#ffd75e66' : '#ff8ac455'} 0%, ${tier.t >= 3 ? '#ff8ac433' : '#ff8ac422'} 38%, transparent 65%)`;
-  aura.classList.toggle('pulse', tier.t >= 2);
-  slimeWrap.classList.toggle('heat', tier.t >= 2);
-  document.querySelectorAll('.heat-particle').forEach(p => {
-    p.style.background = tier.t >= 3 ? 'var(--gold)' : 'var(--pink)';
-  });
+  if (tier.t !== auraTierShown) {
+    auraTierShown = tier.t;
+    aura.style.background = `radial-gradient(circle, ${tier.t >= 3 ? '#ffd75e66' : '#ff8ac455'} 0%, ${tier.t >= 3 ? '#ff8ac433' : '#ff8ac422'} 38%, transparent 65%)`;
+    aura.classList.toggle('pulse', tier.t >= 2);
+    slimeWrap.classList.toggle('heat', tier.t >= 2);
+    document.querySelectorAll('.heat-particle').forEach(p => {
+      p.style.background = tier.t >= 3 ? 'var(--gold)' : 'var(--pink)';
+    });
+  }
 }
 /* 콤보 승급: 경계(18/45/70%)를 넘는 그 한 클릭에 연출을 몰아준다 */
 const TIER_ARPS = [null, [523, 659], [659, 784, 988], [784, 988, 1319, 1568]];
@@ -3200,6 +3219,14 @@ $('crystal-overlay').addEventListener('click', e => {
 });
 
 window.addEventListener('keydown', e => {
+  // Escape: 열려 있는 설정/결정 모달 닫기 (a11y — 키보드로 빠져나갈 길)
+  if (e.key === 'Escape') {
+    for (const id of ['settings-overlay', 'crystal-overlay']) {
+      const ov = $(id);
+      if (ov.classList.contains('open')) { ov.classList.remove('open'); e.preventDefault(); return; }
+    }
+    return;
+  }
   if (e.code !== 'Space' && e.code !== 'Enter') return;
   const tag = (e.target.tagName || '').toLowerCase();
   if (tag === 'button' || tag === 'input') return;
