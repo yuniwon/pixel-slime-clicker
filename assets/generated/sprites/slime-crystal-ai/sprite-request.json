@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-crystal-ai",
+    "description": "jelly crystal growing in a tiny garden bed for a cozy clicker game - a translucent violet-pink gem that ripens over a day, planted in a small soil mound with sparkles",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 384,
+    "height": 384,
+    "safe_margin_x": 42,
+    "safe_margin_y": 42,
+    "size": 384,
+    "safe_margin": 42
+  },
+  "chroma_key": {
+    "name": "green",
+    "hex": "#00FF00",
+    "rgb": [
+      0,
+      255,
+      0
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "seed": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "tiny crystal seed just planted in a small soil mound, only a faint violet glint peeking out"
+    },
+    "sprout": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "small jelly crystal sprouting from the soil mound, half-grown translucent violet gem"
+    },
+    "bud": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "nearly ripe jelly crystal, large faceted violet-pink gem on the soil mound with small sparkles"
+    },
+    "ripe": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "fully ripe glowing jelly crystal on the soil mound, frame 2 with brighter glow and an extra sparkle for a shimmer loop"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

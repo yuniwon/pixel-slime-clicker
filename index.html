@@ -996,6 +996,84 @@
     justify-content: center;
   }
   #settings-overlay.open { display: flex; }
+
+  /* ── 젤리 결정: 화단 + 먹이기 모달 ── */
+  #crystal-bed {
+    position: absolute;
+    left: 14px;
+    bottom: clamp(46px, 4.2vw, 100px);  /* 기록의 선반 위 */
+    z-index: 4;
+    cursor: pointer;
+    text-align: center;
+    padding: 6px;
+  }
+  #crystal-visual {
+    display: block;
+    font-size: clamp(26px, 2vw, 44px);
+    filter: drop-shadow(0 2px 4px #00000088);
+    transition: filter .4s;
+  }
+  #crystal-bed.ripe #crystal-visual {
+    animation: crystal-pulse 1.6s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px #b48aff) drop-shadow(0 2px 4px #00000088);
+  }
+  @keyframes crystal-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+  }
+  #crystal-label {
+    display: block;
+    font-size: clamp(9px, 0.62vw, 16px);
+    color: var(--text-dim);
+    text-shadow: 1px 1px 0 #000c;
+    margin-top: 2px;
+  }
+  #crystal-bed.ripe #crystal-label { color: var(--gold); }
+  #crystal-overlay {
+    position: fixed;
+    inset: 0;
+    background: #000000aa;
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  #crystal-overlay.open { display: flex; }
+  #crystal-modal {
+    background: var(--panel);
+    border: 4px solid var(--border);
+    box-shadow: 6px 6px 0 #00000066;
+    width: min(420px, 92vw);
+    max-height: 86vh;
+    overflow-y: auto;
+    padding: 18px;
+  }
+  #crystal-modal h3 { color: var(--gold); font-size: 15px; margin-bottom: 8px; letter-spacing: 1px; }
+  #crystal-count-line { font-size: 12px; color: var(--text); margin-bottom: 12px; line-height: 1.6; }
+  .crystal-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 4px;
+    border-bottom: 2px solid #ffffff0d;
+    font-size: 12px;
+  }
+  .crystal-row .cr-name { flex: 1; }
+  .crystal-row .cr-lv { color: var(--green); font-size: 11px; }
+  .crystal-row button {
+    background: var(--panel-light);
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  .crystal-row button:disabled { border-color: var(--border); color: var(--text-dim); cursor: default; }
+  /* 황금 소원 카드 */
+  .wish-item.golden { border-color: var(--gold); background: #ffd75e14; }
+  .wish-item.golden.done { border-color: var(--green); }
+  #crystal-banner { border-color: #b48aff; cursor: pointer; }
   #settings-modal {
     background: var(--panel);
     border: 4px solid var(--border);
@@ -1204,6 +1282,10 @@
     <div id="combo-bar-outer"><div id="combo-bar"></div></div>
   </div>
   <div id="trophy-shelf" role="button" aria-label="기록의 선반 — 업적 보기"></div>
+  <div id="crystal-bed" role="button" aria-label="젤리 결정 화단" hidden>
+    <span id="crystal-visual">🌱</span>
+    <span id="crystal-label"></span>
+  </div>
 </div>
 
 <div id="shop">
@@ -1259,6 +1341,17 @@
     <div class="settings-row">
       <button class="settings-btn" id="blessing-reroll">🔁 리롤</button>
       <button class="settings-btn" id="blessing-skip">괜찮아 (+1💫)</button>
+    </div>
+  </div>
+</div>
+
+<div id="crystal-overlay">
+  <div id="crystal-modal">
+    <h3>💎 젤리 결정</h3>
+    <div id="crystal-count-line"></div>
+    <div id="crystal-list"></div>
+    <div class="settings-row">
+      <button class="settings-btn" id="close-crystal-btn">닫기</button>
     </div>
   </div>
 </div>
@@ -1640,6 +1733,26 @@ const WISH_TYPES = [
     text: () => '강화 1개 구매하기' },
 ];
 
+/* 황금 소원: 하루 1개, 일반의 ~3배 목표 + 손님 연동 — 보상은 별가루 5 (경제 중립 유지) */
+const GOLDEN_WISH_TYPES = [
+  { type: 'click',   icon: '👆', make: wc => ({ target: Math.min(180 + wc * 30, 1500) }),
+    text: w => `슬라임 ${fmt(w.target)}번 클릭하기` },
+  { type: 'combo',   icon: '⚡', make: wc => ({ target: Math.min(30 + Math.floor(wc / 2) * 5, 70) }),
+    text: w => `콤보 ${w.target} 달성하기` },
+  { type: 'star',    icon: '⭐', make: () => ({ target: 3 }),
+    text: () => '황금별 3개 잡기' },
+  { type: 'cloud',   icon: '☁️', make: () => ({ target: 2 }),
+    text: () => '먹구름 손님 2번 달래기' },
+  { type: 'starlet', icon: '🌠', make: () => ({ target: 1 }),
+    text: () => '길 잃은 별똥이 1번 인도하기' },
+  { type: 'perfect', icon: '💥', make: () => ({ target: 5 }),
+    text: () => '퍼펙트 말랑 5번 터뜨리기' },
+  { type: 'hire',    icon: '🐾', make: wc => ({ target: Math.min(18 + wc * 4, 100) }),
+    text: w => `친구 ${w.target}마리 고용하기` },
+  { type: 'earn',    icon: '💰', make: () => ({ target: Math.max(500, Math.round(totalCps() * 450 + clickPower() * 240)) }),
+    text: w => `코인 ${fmt(w.target)} 모으기` },
+];
+
 /* 별가루 코스메틱: 전부 표현 전용, 보너스 없음 */
 const COSMETICS = [
   { id: 'aura-pink',   slot: 'aura',     icon: '💗', name: '핑크 오라',    desc: '슬라임이 분홍빛으로 빛나요',   cost: 10, value: '#ff8ac4' },
@@ -2019,6 +2132,8 @@ function defaultState() {
     musicOn: true,
     hapticOn: true,     // 클릭 진동 (지원 기기 한정)
     daily: { lastFirstSquish: '' },  // 오늘의 첫 말랑 (YYYY-MM-DD)
+    // 젤리 결정: 22시간 숙성 일일 자원 — 환생에도 유지되는 직교 축
+    crystal: { plantedAt: 0, watered: '', count: 0, friendLv: {} },
     lastSave: Date.now(),
   };
   PRODUCERS.forEach(p => s.producers[p.id] = 0);
@@ -2042,6 +2157,7 @@ let blinkTimer = 3;
 let blinking = 0;
 let currentTrait = null;    // 0.5초마다 갱신
 let quipTimer = 30;
+let crystalCheckTimer = 6;  // 결정 숙성·황금 소원 자정 교체 점검 (20초 주기)
 let silentTick = false;     // finalSave 중 토스트/말풍선 억제
 let hintFriendShown = false; // 온보딩: 첫 친구 고용 힌트 (세션당 1회)
 let newsTimer = 16;          // 말랑 뉴스 다음 표시까지
@@ -2141,6 +2257,11 @@ const SPRITE_ATLASES = {
       'starlet':         [{ x: 0, y: 1792, w: 896, h: 896 }, { x: 896, y: 1792, w: 896, h: 896 }],
       'starlet-happy':   [{ x: 0, y: 2688, w: 896, h: 896 }],
     },
+  },
+  crystal: {
+    src: 'assets/generated/sprites/slime-crystal-ai/sprite-sheet-alpha.png',
+    sheet: null,   // 생성 대기 — 이모지 폴백
+    layout: {},
   },
 };
 
@@ -2453,7 +2574,7 @@ function cpsMulFactor() {
 
 function totalCps() {
   let base = 0;
-  for (const p of PRODUCERS) base += p.cps * S.producers[p.id];
+  for (const p of PRODUCERS) base += p.cps * S.producers[p.id] * (1 + 0.01 * crystalLv(p.id));
   return base * cpsMulFactor();
 }
 
@@ -3040,6 +3161,7 @@ function doClick(x, y) {
     spawnSparks(x, y);
     sndPerfect();
     haptic([12, 40, 12]);
+    wishEvent('perfect', 1);
   } else {
     spawnFloat(x, y, '+' + fmt(gain), frenzyTimer > 0);
     spawnSparks(x, y);
@@ -3067,8 +3189,14 @@ function doClick(x, y) {
 /* 무대 어디를 눌러도 말랑 — 정중앙 저격 불필요.
    별·먹구름·별똥이·선반 등 인터랙티브 요소는 자기 핸들러가 우선 */
 $('game-area').addEventListener('pointerdown', e => {
-  if (e.target.closest('#golden-star, #raincloud, #starlet, #trophy-shelf, .mini-star')) return;
+  if (e.target.closest('#golden-star, #raincloud, #starlet, #trophy-shelf, #crystal-bed, .mini-star')) return;
   doClick(e.clientX, e.clientY);
+});
+
+$('crystal-bed').addEventListener('click', crystalClick);
+$('close-crystal-btn').addEventListener('click', () => $('crystal-overlay').classList.remove('open'));
+$('crystal-overlay').addEventListener('click', e => {
+  if (e.target.id === 'crystal-overlay') $('crystal-overlay').classList.remove('open');
 });
 
 window.addEventListener('keydown', e => {
@@ -3382,10 +3510,172 @@ function wishEvent(type, amount) {
       sndAch();
     }
   }
+  // 황금 소원: 하루 1개의 큰 소원
+  const g = S.wishes.golden;
+  if (g && !g.done && g.date === todayKey() && g.type === type) {
+    if (type === 'combo') g.progress = Math.max(g.progress, amount);
+    else g.progress += amount;
+    if (g.progress >= g.target) {
+      g.done = true;
+      S.stardust += g.reward;
+      S.wishes.completed++;
+      completedAny = true;
+      toast(`🌟 <b>황금 소원 성취!</b> ${goldenWishText(g)}<br><small>별가루 +${g.reward}</small>`);
+      sndStar();
+    }
+  }
   if (completedAny) {
     initWishes();
     save();
     if (currentTab === 'wishes') buildShop();
+  }
+}
+
+/* ── 황금 소원: 날짜 시드로 매일 1개, 자정 교체, 미완 페널티 없음 ── */
+function dateSeed(key) {
+  let h = 0;
+  for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return h;
+}
+
+function goldenWishText(w) {
+  const tpl = GOLDEN_WISH_TYPES.find(t => t.type === w.type);
+  return tpl ? tpl.text(w) : '';
+}
+
+function refreshGoldenWish() {
+  const today = todayKey();
+  if (S.wishes.golden && S.wishes.golden.date === today) return;
+  const seed = dateSeed(today);
+  for (let i = 0; i < GOLDEN_WISH_TYPES.length; i++) {
+    const tpl = GOLDEN_WISH_TYPES[(seed + i) % GOLDEN_WISH_TYPES.length];
+    // 완료 불가 템플릿 폴백: 손님 계열은 첫 환생 전엔 페이스가 느려 일반형으로
+    if ((tpl.type === 'cloud' || tpl.type === 'starlet') && S.prestige.totalResets < 1 && S.totalEarned < 1e6) continue;
+    const made = tpl.make(S.wishes.completed);
+    S.wishes.golden = {
+      date: today, type: tpl.type, icon: tpl.icon,
+      target: made.target, progress: 0, reward: 5, done: false,
+    };
+    return;
+  }
+}
+
+/* ── 젤리 결정: 22시간 숙성 일일 자원 (Date.now() 기반, 오프라인 진행) ── */
+const CRYSTAL = {
+  early: 20 * 3600e3,   // 조기 수확 가능 (성공률 60%→)
+  grow:  22 * 3600e3,   // 완숙 (100%)
+  auto:  26 * 3600e3,   // 자동 수확 — 놓침 방지
+  water: 2 * 3600e3,    // 하루 1회 물 주기 단축량
+};
+
+function crystalLv(id) { return S.crystal.friendLv[id] || 0; }
+function crystalElapsed() { return Date.now() - S.crystal.plantedAt; }
+
+function crystalHarvest(auto) {
+  S.crystal.count++;
+  S.crystal.plantedAt = auto ? S.crystal.plantedAt + CRYSTAL.auto : Date.now();
+  if (!auto) {
+    confettiBurst();
+    sndAch();
+    toast(`💎 <b>젤리 결정 수확!</b> 보유 ${S.crystal.count}개<br><small>친구들 탭에서 친구에게 먹여보세요</small>`);
+  }
+  save();
+}
+
+function crystalClick() {
+  const el = crystalElapsed();
+  if (el >= CRYSTAL.grow) { crystalHarvest(false); renderCrystalBed(true); return; }
+  if (el >= CRYSTAL.early) {
+    // 조기 수확 도박: 시간 경과형 성공률 60%→100%
+    const p = 0.6 + 0.4 * (el - CRYSTAL.early) / (CRYSTAL.grow - CRYSTAL.early);
+    if (!confirm(`아직 덜 익었어요. 지금 따면 성공 확률 ${Math.round(p * 100)}%!\n실패하면 결정이 부서져요. 딸까요?`)) return;
+    if (Math.random() < p) {
+      crystalHarvest(false);
+    } else {
+      S.crystal.plantedAt = Date.now();
+      toast('💔 결정이 부서졌어요… 새 결정이 자라기 시작해요');
+      beep(196, 0.2, 'sine', 0.04);
+      save();
+    }
+    renderCrystalBed(true);
+    return;
+  }
+  // 아직 어린 결정: 하루 1회 물 주기 = 2시간 단축
+  if (S.crystal.watered !== todayKey()) {
+    S.crystal.watered = todayKey();
+    S.crystal.plantedAt -= CRYSTAL.water;
+    spawnSparks(innerWidth * 0.08, innerHeight * 0.8);
+    toast('💧 물을 주었어요! 결정이 <b>2시간</b> 빨리 익어요');
+    beep(523, 0.1, 'triangle', 0.06);
+    save();
+  } else {
+    toast(`💠 결정이 자라는 중… <b>${Math.round(crystalElapsed() / CRYSTAL.grow * 100)}%</b> (오늘 물은 이미 줬어요)`);
+  }
+  renderCrystalBed(true);
+}
+
+let crystalShownPhase = -1;
+function renderCrystalBed(force) {
+  const bed = $('crystal-bed');
+  if (bed.hidden) bed.hidden = false;
+  const el = crystalElapsed();
+  const phase = el >= CRYSTAL.grow ? 3 : el >= CRYSTAL.early ? 2 : el >= 10 * 3600e3 ? 1 : 0;
+  if (!force && phase === crystalShownPhase) return;
+  crystalShownPhase = phase;
+  const ids = ['seed', 'sprout', 'bud', 'ripe'];
+  const emo = ['🌱', '🌿', '💠', '💎'];
+  $('crystal-visual').innerHTML = spriteHtml('crystal', ids[phase], emo[phase], { size: 44, className: 'sprite-icon' });
+  $('crystal-label').textContent = phase === 3 ? '익었어요!'
+    : phase === 2 ? Math.round(el / CRYSTAL.grow * 100) + '%'
+    : Math.round(el / CRYSTAL.grow * 100) + '%';
+  bed.classList.toggle('ripe', phase >= 2);
+}
+
+function crystalTick() {
+  if (!S.crystal.plantedAt) { S.crystal.plantedAt = Date.now(); save(); }
+  // 26시간 넘긴 결정은 자동 수확 (장기 부재 = 사이클당 1개)
+  let autoN = 0;
+  while (crystalElapsed() >= CRYSTAL.auto) { crystalHarvest(true); autoN++; }
+  if (autoN > 0) toast(`💎 자리 비운 동안 결정 <b>${autoN}개</b>가 저절로 영글었어요! (보유 ${S.crystal.count}개)`);
+  renderCrystalBed();
+}
+
+/* 결정 먹이기: 친구 영구 레벨 — 레벨당 그 친구 생산 +1%, 비용 = 현재 레벨+1, 최대 Lv10 */
+const CRYSTAL_LV_CAP = 10;
+
+function openCrystalModal() {
+  $('crystal-overlay').classList.add('open');
+  renderCrystalModal();
+}
+
+function renderCrystalModal() {
+  $('crystal-count-line').innerHTML =
+    `보유 <b style="color:var(--gold)">${S.crystal.count}개</b> · 먹이면 그 친구의 생산이 <b>영구 +1%</b>씩 늘어요 (환생에도 유지!)`;
+  const list = $('crystal-list');
+  list.innerHTML = '';
+  for (const p of PRODUCERS) {
+    const lv = crystalLv(p.id);
+    const cost = lv + 1;
+    const row = document.createElement('div');
+    row.className = 'crystal-row';
+    const maxed = lv >= CRYSTAL_LV_CAP;
+    row.innerHTML = `
+      <span style="font-size:20px">${spriteHtml('friends', p.id, p.icon, { size: 28, className: 'sprite-icon' })}</span>
+      <span class="cr-name">${p.name} <span class="cr-lv">Lv.${lv}${lv > 0 ? ` (+${lv}%)` : ''}</span></span>
+      <button data-id="${p.id}" ${maxed || S.crystal.count < cost ? 'disabled' : ''}>
+        ${maxed ? 'MAX' : `💎${cost}`}
+      </button>`;
+    row.querySelector('button').addEventListener('click', () => {
+      if (lv >= CRYSTAL_LV_CAP || S.crystal.count < cost) return;
+      S.crystal.count -= cost;
+      S.crystal.friendLv[p.id] = lv + 1;
+      sndBuy();
+      toast(`💎 <b>${p.name}</b>이(가) 결정을 먹고 반짝! 생산 <b>+${lv + 1}%</b> 영구`);
+      renderCrystalModal();
+      if (currentTab === 'producers') buildShop();
+      save();
+    });
+    list.appendChild(row);
   }
 }
 
@@ -4035,6 +4325,20 @@ function buildShop() {
   $('buy-modes').classList.toggle('on', currentTab === 'producers');
 
   if (currentTab === 'producers') {
+    // 젤리 결정 배너: 결정을 갖고 있으면 친구들 탭 맨 위에
+    if (S.crystal.count > 0 || Object.keys(S.crystal.friendLv).length > 0) {
+      const banner = document.createElement('div');
+      banner.className = 'shop-item';
+      banner.id = 'crystal-banner';
+      banner.innerHTML = `
+        <div class="shop-icon">💎</div>
+        <div class="shop-info">
+          <div class="shop-name">젤리 결정 ${S.crystal.count}개</div>
+          <div class="shop-desc">친구에게 먹이면 생산이 영구로 늘어요 — 눌러서 먹이기</div>
+        </div>`;
+      banner.addEventListener('click', openCrystalModal);
+      shopList.appendChild(banner);
+    }
     for (const p of PRODUCERS) {
       const el = document.createElement('div');
       el.className = 'shop-item';
@@ -4104,6 +4408,23 @@ function buildWishesTab() {
   dust.id = 'stardust-display';
   dust.innerHTML = `💫 별가루 <b>${S.stardust}</b>개 · 이룬 소원 ${S.wishes.completed}개`;
   shopList.appendChild(dust);
+
+  // 황금 소원: 하루 1개의 큰 소원 — 맨 위 금테 카드
+  refreshGoldenWish();
+  const g = S.wishes.golden;
+  if (g) {
+    const el = document.createElement('div');
+    el.className = 'shop-item wish-item golden' + (g.done ? ' done' : '');
+    el.dataset.golden = '1';
+    el.innerHTML = `
+      <div class="shop-icon">${spriteHtml('wishes', g.type, g.icon, { size: 54 })}</div>
+      <div class="shop-info">
+        <div class="shop-name">🌟 오늘의 황금 소원 — ${goldenWishText(g)}</div>
+        <div class="wish-bar-outer"><div class="wish-bar"></div></div>
+        <div class="wish-reward">${g.done ? '✅ 오늘 성취! 내일 새 소원이 와요' : `진행 <span class="wish-progress"></span> · 보상 별가루 +${g.reward}`}</div>
+      </div>`;
+    shopList.appendChild(el);
+  }
 
   const title1 = document.createElement('div');
   title1.className = 'room-section-title';
@@ -4437,8 +4758,10 @@ function refreshShop() {
       el.querySelector('.shop-count').textContent = S.producers[p.id] || '';
 
       const oneCost = producerCost(p) * (S.buffs.discount ? 0.5 : 1);
-      const oneCps = p.cps * cpsMulFactor();
-      el.querySelector('.shop-payback').textContent = `초당 +${fmt(p.cps)} · 회수 ${fmtTime(oneCost / oneCps)}`;
+      const crysMul = 1 + 0.01 * crystalLv(p.id);
+      const oneCps = p.cps * crysMul * cpsMulFactor();
+      el.querySelector('.shop-payback').textContent = `초당 +${fmt(p.cps * crysMul)} · 회수 ${fmtTime(oneCost / oneCps)}`
+        + (crystalLv(p.id) > 0 ? ` · 💎Lv.${crystalLv(p.id)}` : '');
 
       const affordable = buyMode === 'max' ? info.count > 0 : S.coins >= info.cost;
       el.classList.toggle('locked', !affordable);
@@ -4476,12 +4799,12 @@ function refreshShop() {
     const dust = $('stardust-display');
     if (dust) dust.innerHTML = `💫 별가루 <b>${S.stardust}</b>개 · 이룬 소원 ${S.wishes.completed}개`;
     for (const el of shopList.querySelectorAll('.wish-item')) {
-      const w = S.wishes.active[el.dataset.idx];
+      const w = el.dataset.golden ? S.wishes.golden : S.wishes.active[el.dataset.idx];
       if (!w) continue;
-      const pct = Math.min(100, w.progress / w.target * 100);
+      const pct = w.done ? 100 : Math.min(100, w.progress / w.target * 100);
       el.querySelector('.wish-bar').style.width = pct + '%';
-      el.querySelector('.wish-progress').textContent =
-        `${fmt(Math.min(w.progress, w.target))} / ${fmt(w.target)}`;
+      const prog = el.querySelector('.wish-progress');
+      if (prog) prog.textContent = `${fmt(Math.min(w.progress, w.target))} / ${fmt(w.target)}`;
     }
     for (const el of shopList.querySelectorAll('.cosmetic-item')) {
       const c = COSMETICS.find(x => x.id === el.dataset.id);
@@ -4756,6 +5079,7 @@ function cloudSuccess() {
   earnCoins(bonus, 'event');
   S.stardust += 2;
   S.stats.lifetime.cloudsSoothed = (S.stats.lifetime.cloudsSoothed || 0) + 1;
+  wishEvent('cloud', 1);
   confettiBurst();
   sndStar();
   toast(`🌤️ 비가 그쳤어요! <b>+${fmt(bonus)}</b> 코인과 별가루 2개!`);
@@ -4864,6 +5188,7 @@ function starletArrive() {
   S.stardust += 1;
   S.stats.lifetime.starletsHelped = (S.stats.lifetime.starletsHelped || 0) + 1;
   S.telemetry.starletsHelped = (S.telemetry.starletsHelped || 0) + 1;
+  wishEvent('starlet', 1);
 
   spawnSparks(starletX + 28, starletY + 28);
   sndStar();
@@ -5197,9 +5522,10 @@ function econTick(silent = false) {
 }
 
 function gamePaused() {
-  // 축복 선택·설정 중에는 시간이 멈춘다 — 광란 중에도 찬찬히 고를 수 있게
+  // 축복 선택·설정·결정 먹이기 중에는 시간이 멈춘다 — 광란 중에도 찬찬히 고를 수 있게
   return $('blessing-overlay').classList.contains('open')
-    || $('settings-overlay').classList.contains('open');
+    || $('settings-overlay').classList.contains('open')
+    || $('crystal-overlay').classList.contains('open');
 }
 
 function econTickBody() {
@@ -5275,6 +5601,18 @@ function econTickBody() {
   if (quipTimer <= 0) {
     randomQuip();
     quipTimer = 40 + Math.random() * 40;
+  }
+
+  // 젤리 결정 숙성 + 황금 소원 자정 교체
+  crystalCheckTimer -= dt;
+  if (crystalCheckTimer <= 0) {
+    crystalCheckTimer = 20;
+    crystalTick();
+    if (S.wishes.golden && S.wishes.golden.date !== todayKey()) {
+      refreshGoldenWish();
+      if (currentTab === 'wishes') buildShop();
+      toast('🌟 새로운 <b>황금 소원</b>이 도착했어요!');
+    }
   }
 
   // 말랑 뉴스 (26~48초 간격)
@@ -5497,6 +5835,8 @@ $('sound-btn').textContent = S.soundOn ? '🔊' : '🔇';
 $('music-btn').style.opacity = S.musicOn ? '1' : '.4';
 $('haptic-btn').style.opacity = S.hapticOn ? '1' : '.4';
 initWishes();
+refreshGoldenWish();
+crystalTick();
 applyCosmetics();
 buildShop();
 rebuildFriends();
