@@ -28,6 +28,8 @@
     --soul: #b48aff;
   }
 
+  /* iOS Safari가 텍스트를 임의로 키우는 것 차단 — "확대된 느낌"의 주범 */
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   html, body { height: 100%; height: 100dvh; overflow: hidden; }
 
   body {
@@ -1038,16 +1040,25 @@
       padding-top: 30px;  /* 말랑뉴스 스트립 전용 공간 — 제목과 겹침 방지 */
       justify-content: flex-start;
     }
-    #title { font-size: 15px; margin-top: 2px; }
-    #stage-name { font-size: 11px; margin-bottom: 5px; }
-    #evo-progress-outer { width: 200px; height: 10px; }
-    #evo-progress-label { font-size: 10px; }
-    #coin-display { font-size: 20px; }
-    #coin-icon { width: 20px; height: 20px; }
-    #cps-display { font-size: 11px; margin-top: 2px; }
-    #slime-wrap { margin: 8px 0 4px; }
-    #slime-canvas { width: 132px; height: 140px; }
-    #slime-shadow { width: 90px; height: 16px; margin-top: -12px; }
+    #title { font-size: 13px; margin-top: 2px; }
+    #stage-name { font-size: 10px; margin-bottom: 4px; }
+    #evo-silhouette { width: 26px; height: 28px; }
+    #evo-progress-label { font-size: 9px; }
+    #coin-display { font-size: 17px; gap: 6px; }
+    #coin-icon { width: 17px; height: 17px; }
+    #cps-display { font-size: 10px; margin-top: 1px; }
+    #slime-wrap { margin: 6px 0 2px; }
+    #slime-canvas { width: 108px; height: 115px; }
+    #slime-shadow { width: 72px; height: 13px; margin-top: -10px; }
+    #combo-aura { width: 170px; height: 170px; }
+    /* 이벤트 손님들: 무대 크기에 맞는 비율로 */
+    #golden-star { width: 44px; height: 44px; }
+    #raincloud { width: 76px; height: 51px; }
+    #cloud-hint { font-size: 10px; top: -30px; }
+    #starlet { width: 44px; height: 44px; }
+    #starlet-hint { font-size: 10px; top: -28px; }
+    .mini-star { width: 24px; height: 24px; }
+    .decor { font-size: 24px; }
     #combo-box { height: 34px; margin-top: 4px; }
     #combo-label { font-size: 12px; }
     #combo-bar-outer { width: 140px; height: 8px; }
@@ -1063,12 +1074,20 @@
       min-height: 0;
       padding-bottom: env(safe-area-inset-bottom);
     }
-    #shop-header { padding: 8px 12px 6px; }
-    #shop-header h2 { font-size: 13px; }
-    .icon-btn { font-size: 12px; padding: 3px 8px; }
-    .tab { padding: 8px 0; font-size: 11px; }
-    #shop-list { -webkit-overflow-scrolling: touch; }
-    #stats-bar { padding: 6px 12px; font-size: 10px; line-height: 1.5; }
+    #shop-header { padding: 6px 12px 4px; }
+    #shop-header h2 { font-size: 12px; }
+    .icon-btn { font-size: 11px; padding: 2px 7px; }
+    .tab { padding: 7px 0; font-size: 11px; }
+    /* 정보 밀도: 리스트를 80%로 — 한 화면에 항목이 더 많이 보인다 */
+    #shop-list { -webkit-overflow-scrolling: touch; zoom: 0.8; }
+    #stats-bar {
+      padding: 4px 10px;
+      font-size: 9px;
+      line-height: 1.4;
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: 10px;
+    }
     /* 토스트: 모바일에선 뉴스 스트립 아래 */
     #toast {
       bottom: auto;
@@ -2828,7 +2847,12 @@ function doClick(x, y) {
   renderHud();
 }
 
-slimeWrap.addEventListener('pointerdown', e => doClick(e.clientX, e.clientY));
+/* 무대 어디를 눌러도 말랑 — 정중앙 저격 불필요.
+   별·먹구름·별똥이·선반 등 인터랙티브 요소는 자기 핸들러가 우선 */
+$('game-area').addEventListener('pointerdown', e => {
+  if (e.target.closest('#golden-star, #raincloud, #starlet, #trophy-shelf, .mini-star')) return;
+  doClick(e.clientX, e.clientY);
+});
 
 window.addEventListener('keydown', e => {
   if (e.code !== 'Space' && e.code !== 'Enter') return;
