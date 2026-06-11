@@ -2943,6 +2943,7 @@ let blessGuardUntil = 0;
 function openBlessingModal() {
   rerollCost = rerollBase();
   if (!renderBlessingCards()) return;
+  updateBlessingSub();
   $('blessing-overlay').classList.add('open');
   // 연타 중 오터치 방지: 잠깐 입력 잠금 + 흐리게 표시
   blessGuardUntil = performance.now() + 700;
@@ -2961,6 +2962,14 @@ function rerollBlessings() {
   save();
 }
 
+function updateBlessingSub() {
+  const sub = document.querySelector('#blessing-modal .blessing-sub');
+  if (sub) {
+    sub.textContent = '진화한 슬라임이 축복을 하나 고를 수 있어요 (이번 생 한정)'
+      + (pendingBlessings > 1 ? ` · 남은 선택 ${pendingBlessings}개` : '');
+  }
+}
+
 function pickBlessing(b) {
   if (performance.now() < blessGuardUntil) return;
   S.runBlessings.push(b.id);
@@ -2970,7 +2979,7 @@ function pickBlessing(b) {
   const r = RARITY[b.rarity];
   toast(`${b.icon} <b style="color:${r.color}">[${r.name}] ${b.name}</b>의 축복을 받았어요!`);
   if (b.rarity === 'legendary') { confettiBurst(); sndRebirth(); }
-  closeBlessingModal();
+  afterBlessingChoice();
 }
 
 function skipBlessing() {
@@ -2980,20 +2989,39 @@ function skipBlessing() {
     S.stardust += 1;  // 패스에도 작은 보상 — 모든 선택이 유의미하게
     toast('💫 이번엔 괜찮아 — 별가루 +1');
   }
-  closeBlessingModal();
+  afterBlessingChoice();
+}
+
+/* 선택 처리 후: 남은 선택이 있으면 모달을 닫지 않고 카드만 새로 —
+   빠른 레벨업 구간에서 모달이 연속으로 떴다 닫히는 마찰 제거 */
+function afterBlessingChoice() {
+  pendingBlessings = Math.max(0, pendingBlessings - 1);
+  save();
+  if (pendingBlessings > 0) {
+    rerollCost = rerollBase();
+    renderBlessingCards();
+    updateBlessingSub();
+    blessGuardUntil = performance.now() + 350;
+    const modal = $('blessing-modal');
+    modal.classList.add('guarding');
+    setTimeout(() => modal.classList.remove('guarding'), 350);
+  } else {
+    closeBlessingModal();
+  }
 }
 
 function closeBlessingModal() {
   $('blessing-overlay').classList.remove('open');
-  pendingBlessings = Math.max(0, pendingBlessings - 1);
+  pendingBlessings = 0;
   save();
-  if (pendingBlessings > 0) setTimeout(openBlessingModal, 400);
   if (currentTab === 'prestige' || currentTab === 'room') buildShop();
 }
 
 function queueBlessing(count) {
   pendingBlessings += count;
-  if (!$('blessing-overlay').classList.contains('open')) {
+  if ($('blessing-overlay').classList.contains('open')) {
+    updateBlessingSub();  // 이미 고르는 중이면 남은 개수만 갱신
+  } else {
     setTimeout(openBlessingModal, 900);  // 레벨업 연출 먼저
   }
 }
@@ -3969,7 +3997,7 @@ function spawnStar() {
   S.telemetry.starsSeen++;
   // 첫 황금별 안내
   if (S.stats.lifetime.starsClicked === 0) {
-    toast('⭐ <b>황금별</b>이 떴어요! 사라지기 전에 눌러보세요 — 좋은 일이 생겨요');
+    toast('⭐ <b>황금별</b>이 떴어요! 누르면 광란·코인 보너스 같은 <b>행운 이벤트</b>가 터져요');
   }
   const pos = starSpawnRect();
   starEl.style.left = pos.x + 'px';
@@ -4081,9 +4109,9 @@ function spawnCloud() {
   cloudEl.classList.add('drift');
   cloudEl.classList.remove('challenge');
   cloudEl.style.display = 'block';
-  $('cloud-hint').textContent = '👆 눌러서 비를 털어줘!';
+  $('cloud-hint').textContent = '👆 두드리면 코인+별가루!';
   S.telemetry.cloudsSeen++;
-  toast('☁️ <b>먹구름 손님</b>이 찾아왔어요!');
+  toast('☁️ <b>먹구름 손님</b>! 빠르게 두드려 비를 털면 <b>코인과 별가루</b>를 받아요');
   beep(294, 0.12, 'triangle', 0.07);
 }
 
@@ -4913,7 +4941,7 @@ window.launchCheck = async function launchCheck() {
       if (lt[L] && lt[L - 1]) ivs.push(parseFloat(lt[L]) - parseFloat(lt[L - 1]));
     }
     add('pacing', '갈증 곡선(후반 간격 증가)', ivs.length >= 3 && ivs[ivs.length - 1] > ivs[0], JSON.stringify(ivs.map(v => v.toFixed(1))));
-    add('pacing', '첫 런 강화 소진 ≤60%', parseInt(rep.upgradesBought) <= 15, rep.upgradesBought);
+    add('pacing', '첫 런 강화 소진 ≤68% (최소 8개 잔존)', parseInt(rep.upgradesBought) <= 17, rep.upgradesBought);
     add('pacing', '영혼 배율 소프트캡(3000영혼 ≤ x30)', smAt(3000) <= 30, 'x' + smAt(3000).toFixed(1));
     add('pacing', '영혼 획득 로그화(45조 런 ≤ 200)', (() => { const d = Math.log10(4.5e13 / 6e7); return Math.floor(1 + 3 * Math.pow(d, 2.2)) <= 200; })());
     let leg = 0;
