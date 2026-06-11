@@ -2273,8 +2273,13 @@ const SPRITE_ATLASES = {
   },
   crystal: {
     src: 'assets/generated/sprites/slime-crystal-ai/sprite-sheet-alpha.png',
-    sheet: null,   // 생성 대기 — 이모지 폴백
-    layout: {},
+    sheet: { w: 768, h: 1536 },
+    layout: {
+      seed:   [{ x: 0, y: 0,    w: 384, h: 384 }],
+      sprout: [{ x: 0, y: 384,  w: 384, h: 384 }],
+      bud:    [{ x: 0, y: 768,  w: 384, h: 384 }],
+      ripe:   [{ x: 0, y: 1152, w: 384, h: 384 }, { x: 384, y: 1152, w: 384, h: 384 }],
+    },
   },
 };
 
@@ -3670,11 +3675,12 @@ function renderCrystalBed(force) {
   if (bed.hidden) bed.hidden = false;
   const el = crystalElapsed();
   const phase = el >= CRYSTAL.grow ? 3 : el >= CRYSTAL.early ? 2 : el >= 10 * 3600e3 ? 1 : 0;
-  if (!force && phase === crystalShownPhase) return;
+  if (!force && phase === crystalShownPhase && phase !== 3) return;  // 완숙은 주기 재렌더로 반짝임
   crystalShownPhase = phase;
   const ids = ['seed', 'sprout', 'bud', 'ripe'];
   const emo = ['🌱', '🌿', '💠', '💎'];
-  $('crystal-visual').innerHTML = spriteHtml('crystal', ids[phase], emo[phase], { size: 44, className: 'sprite-icon' });
+  const fr = phase === 3 ? Math.floor(Date.now() / 20000) % 2 : 0;  // ripe 2프레임 — tick 주기 스왑
+  $('crystal-visual').innerHTML = spriteHtml('crystal', ids[phase], emo[phase], { size: 44, className: 'sprite-icon', frame: fr });
   $('crystal-label').textContent = phase === 3 ? '익었어요!'
     : phase === 2 ? Math.round(el / CRYSTAL.grow * 100) + '%'
     : Math.round(el / CRYSTAL.grow * 100) + '%';
