@@ -17,19 +17,19 @@
     "safe_margin": 42
   },
   "chroma_key": {
-    "name": "magenta",
-    "hex": "#FF00FF",
-    "rgb": [255, 0, 255],
+    "name": "green",
+    "hex": "#00FF00",
+    "rgb": [0, 255, 0],
     "selection": "manual"
   },
   "states": {
     "aura-pink": {
       "frames": 1, "fps": 1, "loop": false,
-      "action": "soft pink glowing ring orb icon, halo of pink light around a small jelly bead"
+      "action": "vivid bubblegum pink glowing ring orb icon, highly saturated hot pink halo around a small pink jelly bead, the pink must stay strongly pink"
     },
     "aura-mint": {
       "frames": 1, "fps": 1, "loop": false,
-      "action": "soft mint green glowing ring orb icon, halo of mint light around a small jelly bead"
+      "action": "pale aqua-teal glowing ring orb icon, halo of seafoam cyan light around a small jelly bead, leaning blue-cyan rather than pure green"
     },
     "aura-gold": {
       "frames": 1, "fps": 1, "loop": false,
@@ -49,7 +49,7 @@
     },
     "bubble-pink": {
       "frames": 1, "fps": 1, "loop": false,
-      "action": "pink speech bubble icon with a small ribbon bow on the corner"
+      "action": "vivid bubblegum pink speech bubble icon with a small hot pink ribbon bow on the corner, highly saturated pink"
     },
     "bubble-gold": {
       "frames": 1, "fps": 1, "loop": false,
@@ -57,7 +57,7 @@
     },
     "pt-heart": {
       "frames": 1, "fps": 1, "loop": false,
-      "action": "burst of three small pink hearts icon, click particle set"
+      "action": "burst of three small vivid hot pink hearts icon, highly saturated pink, click particle set"
     },
     "pt-star": {
       "frames": 1, "fps": 1, "loop": false,

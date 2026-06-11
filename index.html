@@ -1018,7 +1018,8 @@ const ITEM_SPRITE_LAYOUT = {
   snack3:    [{ x: 0, y: 4096, w: 512, h: 512 }],
   click1:    [{ x: 0, y: 4608, w: 512, h: 512 }],
   click2:    [{ x: 0, y: 5120, w: 512, h: 512 }],
-  prestige:  [{ x: 0, y: 5632, w: 512, h: 512 }],
+  // prestige: 핑크 회색화 — 보라 묘사로 재생성 후 복구 예정 (이모지 폴백)
+
   sticky:    [{ x: 0, y: 6144, w: 512, h: 512 }],
   promise:   [{ x: 0, y: 6656, w: 512, h: 512 }],
   starlight: [{ x: 0, y: 7168, w: 512, h: 512 }],
@@ -1555,7 +1556,7 @@ const SPRITE_ATLASES = {
       napecon:     [{ x: 0, y: 4224, w: 384, h: 384 }],
       dustsense:   [{ x: 0, y: 4608, w: 384, h: 384 }],
       slowcrown:   [{ x: 0, y: 4992, w: 384, h: 384 }],
-      soulwhisper: [{ x: 0, y: 5376, w: 384, h: 384 }],
+      // soulwhisper: 핑크 회색화 — 라벤더 묘사로 재생성 후 복구 예정
       warmstart:   [{ x: 0, y: 5760, w: 384, h: 384 }],
     },
   },
@@ -1576,15 +1577,14 @@ const SPRITE_ATLASES = {
     src: 'assets/generated/sprites/slime-cosmetics-ai/sprite-sheet-alpha.png',
     sheet: { w: 384, h: 4224 },
     layout: {
-      'aura-pink':   [{ x: 0, y: 0,    w: 384, h: 384 }],
+      // 핑크 계열(aura-pink, bubble-pink, pt-heart)은 마젠타 크로마 충돌로
+      // 회색화되어 임시 제외 — 이모지 폴백. green 크로마 재생성 후 복구 예정
       'aura-mint':   [{ x: 0, y: 384,  w: 384, h: 384 }],
       'aura-gold':   [{ x: 0, y: 768,  w: 384, h: 384 }],
       'bg-dawn':     [{ x: 0, y: 1152, w: 384, h: 384 }],
       'bg-abyss':    [{ x: 0, y: 1536, w: 384, h: 384 }],
       'bg-aurora':   [{ x: 0, y: 1920, w: 384, h: 384 }],
-      'bubble-pink': [{ x: 0, y: 2304, w: 384, h: 384 }],
       'bubble-gold': [{ x: 0, y: 2688, w: 384, h: 384 }],
-      'pt-heart':    [{ x: 0, y: 3072, w: 384, h: 384 }],
       'pt-star':     [{ x: 0, y: 3456, w: 384, h: 384 }],
       'pt-note':     [{ x: 0, y: 3840, w: 384, h: 384 }],
     },

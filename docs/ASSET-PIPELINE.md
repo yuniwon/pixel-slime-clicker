@@ -49,7 +49,13 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | 상점/시스템 아이콘 | 384×384 또는 512×512 | 1 | 42~56 | items, decor, blessings |
 | 소형 뱃지 | 256×256 | 1 | 28 | achievements |
 
-- **chroma key**: magenta `#FF00FF` 고정
+- **chroma key — 색 충돌 규칙 (중요)**: 크로마 색과 비슷한 계열의 에셋은 생성 단계에서
+  **회색으로 죽는다** (실측: magenta 크로마에서 핑크 에셋 전부 회색화, 알파는 정상).
+  - 시트에 **핑크/마젠타 계열** 에셋 포함 → chroma **green `#00FF00`** 사용
+  - 시트에 **녹색 계열** 에셋 포함 → chroma **magenta `#FF00FF`** 사용
+  - 둘 다 포함 → 시트를 색군별로 분리하거나, 한쪽 에셋의 묘사 색을 우회
+    (예: 핑크 영혼 → 라벤더 보라)
+  - 생성 후 반드시 대표 셀의 평균색을 확인할 것 (회색 rgb(140±20,140±20,140±20) = 실패)
 - **style 문자열**: 기존 요청서의 것을 그대로 복사 (게임 전체 톤 통일). 변경 금지
 - **state 이름 = 코드의 id**: 코드 데이터(`BLESSINGS[].id` 등)와 글자 단위로 일치해야 자동 연결됨
 - 새 항목 추가 시: 코딩팀이 데이터에 id+이모지 추가 → 같은 커밋에서 sprite-request.json의 `states`에 동일 키로 action 설명 추가
@@ -58,9 +64,10 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 
 | 아틀라스 | states | 상태 |
 |---|---|---|
-| slime-blessings-ai | 16 (진화 축복) | ✅ 생성·연결 완료 |
+| slime-blessings-ai | 16 (진화 축복) | ⚠️ 연결됨, soulwhisper 회색화 → 라벤더 묘사로 재생성 대기 |
 | slime-wishes-ai | 7 (소원 타입) | ✅ 생성·연결 완료 |
-| slime-cosmetics-ai | 11 (꾸미기) | ✅ 생성·연결 완료 |
+| slime-cosmetics-ai | 11 (꾸미기) | ⚠️ 부분 연결 (핑크 3종 폴백) → green 크로마로 재생성 대기 |
+| slime-items-ai | 18 (강화/특성) | ⚠️ prestige 회색화 → 보라 묘사로 재생성 대기 |
 | slime-guests-ai | 2 (먹구름 손님: raincloud 2프레임 + raincloud-happy) | ⏳ 요청서 작성됨, 생성 대기 |
 
 ## 캔버스 직접 렌더 (스프라이트 교체 대상 아님)
