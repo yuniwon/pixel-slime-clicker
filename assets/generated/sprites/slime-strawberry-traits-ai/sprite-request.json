@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-strawberry-traits-ai",
+    "description": "the strawberry PINK slime from slime-main-ai wearing its trait outfit, baked so the accessory follows the body curve. Same chunky blob body, pose and face as slime-main-ai's strawberry stage. Separate sheet on GREEN chroma because pink dies on magenta (measured three times). Accessory must contact the body: hat brim wraps the head, headband follows the forehead, sparkles float around the silhouette never covering the face.",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 768,
+    "height": 768,
+    "safe_margin_x": 84,
+    "safe_margin_y": 84,
+    "size": 768,
+    "safe_margin": 84
+  },
+  "chroma_key": {
+    "name": "green",
+    "hex": "#00FF00",
+    "rgb": [
+      0,
+      255,
+      0
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "strawberry_muscle": { "frames": 2, "fps": 2, "loop": true, "action": "strawberry pink slime wearing a red training headband snug around its forehead following the head curve, idle loop, frame 2 soft berry bounce" },
+    "strawberry_ranch": { "frames": 2, "fps": 2, "loop": true, "action": "strawberry pink slime wearing a straw farmer hat snugly on its head, brim wrapping the head curve, idle loop, frame 2 soft berry bounce" },
+    "strawberry_star": { "frames": 2, "fps": 2, "loop": true, "action": "strawberry pink slime with golden star sparkles floating around its silhouette (never on the face), frame 2 sparkles shifted for a twinkle loop" },
+    "strawberry_dream": { "frames": 2, "fps": 2, "loop": true, "action": "strawberry pink slime wearing a soft blue nightcap with white pom-pom, sleepy expression, idle loop, frame 2 soft bounce" }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

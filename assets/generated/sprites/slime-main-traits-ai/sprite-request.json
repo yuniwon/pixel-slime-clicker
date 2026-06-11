@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-main-traits-ai",
+    "description": "the main slime from slime-main-ai WEARING its trait outfit, baked per evolution stage so the accessory follows the body's curve naturally (runtime overlays looked pasted-on). Same chunky blob body, pose, face and proportions as slime-main-ai. The accessory must make contact with the body: hat brims wrap the head curve, headbands follow the forehead, sparkles float AROUND the silhouette never covering the face. For the crowned stages (gold king, god) integrate the accessory WITH the crown naturally (headband sits below the crown, straw hat tilted at an angle beside/behind the crown).",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 768,
+    "height": 768,
+    "safe_margin_x": 84,
+    "safe_margin_y": 84,
+    "size": 768,
+    "safe_margin": 84
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "baby_green_muscle": { "frames": 2, "fps": 2, "loop": true, "action": "baby green slime wearing a red training headband snug around its forehead following the head curve, idle loop, frame 2 soft bounce" },
+    "baby_green_ranch": { "frames": 2, "fps": 2, "loop": true, "action": "baby green slime wearing a straw farmer hat snugly on top of its head, brim wrapping the head curve, tiny sprout on the brim, idle loop, frame 2 soft bounce" },
+    "baby_green_star": { "frames": 2, "fps": 2, "loop": true, "action": "baby green slime with small golden star sparkles floating around its silhouette (never on the face), frame 2 with sparkles shifted for a twinkle loop" },
+    "baby_green_dream": { "frames": 2, "fps": 2, "loop": true, "action": "baby green slime wearing a soft blue nightcap drooping to the right with a white pom-pom, sleepy half-closed eyes, idle loop, frame 2 soft bounce" },
+    "sea_muscle": { "frames": 2, "fps": 2, "loop": true, "action": "sea blue slime wearing a red training headband snug around its forehead following the head curve, idle loop, frame 2 gentle watery bob" },
+    "sea_ranch": { "frames": 2, "fps": 2, "loop": true, "action": "sea blue slime wearing a straw farmer hat snugly on its head, brim wrapping the head curve, idle loop, frame 2 gentle watery bob" },
+    "sea_star": { "frames": 2, "fps": 2, "loop": true, "action": "sea blue slime with golden star sparkles floating around its silhouette (never on the face), frame 2 sparkles shifted for a twinkle loop" },
+    "sea_dream": { "frames": 2, "fps": 2, "loop": true, "action": "sea blue slime wearing a soft blue nightcap with white pom-pom, sleepy expression, idle loop, frame 2 gentle bob" },
+    "gold_king_muscle": { "frames": 2, "fps": 2, "loop": true, "action": "gold king slime with its small crown, wearing a red training headband around the forehead BELOW the crown, idle loop, frame 2 royal bounce" },
+    "gold_king_ranch": { "frames": 2, "fps": 2, "loop": true, "action": "gold king slime with its small crown, a straw farmer hat tilted at a jaunty angle beside the crown, idle loop, frame 2 royal bounce" },
+    "gold_king_star": { "frames": 2, "fps": 2, "loop": true, "action": "gold king slime with crown, golden star sparkles floating around its silhouette (never covering crown or face), frame 2 sparkles shifted for a twinkle loop" },
+    "gold_king_dream": { "frames": 2, "fps": 2, "loop": true, "action": "gold king slime with crown, a soft blue nightcap drooping behind the crown, sleepy expression, idle loop, frame 2 royal bounce" },
+    "god_muscle": { "frames": 2, "fps": 2, "loop": true, "action": "legendary rainbow god slime with crown, red training headband around the forehead below the crown, idle loop, frame 2 cosmic bounce" },
+    "god_ranch": { "frames": 2, "fps": 2, "loop": true, "action": "legendary rainbow god slime with crown, straw farmer hat tilted beside the crown, idle loop, frame 2 cosmic bounce" },
+    "god_star": { "frames": 2, "fps": 2, "loop": true, "action": "legendary rainbow god slime with crown, golden star sparkles floating around its silhouette (never covering crown or face), frame 2 sparkles shifted for a twinkle loop" },
+    "god_dream": { "frames": 2, "fps": 2, "loop": true, "action": "legendary rainbow god slime with crown, soft blue nightcap drooping behind the crown, sleepy expression, idle loop, frame 2 cosmic bounce" }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}
