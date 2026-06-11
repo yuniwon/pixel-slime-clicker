@@ -1078,8 +1078,33 @@
     #shop-header h2 { font-size: 12px; }
     .icon-btn { font-size: 11px; padding: 2px 7px; }
     .tab { padding: 7px 0; font-size: 11px; }
-    /* 정보 밀도: 리스트를 80%로 — 한 화면에 항목이 더 많이 보인다 */
-    #shop-list { -webkit-overflow-scrolling: touch; zoom: 0.8; }
+    /* 정보 밀도: 박스·아이콘·여백을 줄이고 폰트는 지킨다 —
+       전체 축소(zoom)가 아니라 비율 재조정 */
+    #shop-list { -webkit-overflow-scrolling: touch; padding: 6px 8px; }
+    .shop-item { padding: 6px 8px; gap: 8px; margin-bottom: 5px; border-width: 2px; }
+    .shop-icon { width: 40px; min-width: 40px; font-size: 24px; }
+    /* scale은 시각만 줄인다 — 음수 마진으로 레이아웃 footprint도 40px로 */
+    .shop-icon .sprite-icon { transform: scale(.62); transform-origin: center; margin: -12px; }
+    .shop-name { font-size: 13px; }
+    .shop-desc { font-size: 10px; margin-top: 1px; line-height: 1.3; }
+    .shop-desc.flavor { display: none; }  /* 감성 설명은 모바일에서 생략 — 기능 정보만 */
+    .shop-cost { font-size: 11px; margin-top: 2px; }
+    .shop-count { font-size: 16px; min-width: 26px; }
+    .syn-line { font-size: 9px; margin-top: 2px; }
+    .buy-modes .mode-btn, .mode-btn { padding: 3px 0; font-size: 11px; }
+    #buy-modes { padding: 5px 8px 0; }
+    .room-section-title { margin: 8px 2px 6px; font-size: 11px; }
+    .codex-cell { min-height: 46px; padding: 5px 2px 4px; font-size: 9px; }
+    .codex-swatch { width: 16px; height: 16px; margin-bottom: 2px; }
+    .story-entry { padding: 7px 9px; margin-bottom: 5px; font-size: 10px; }
+    .album-box { padding: 6px 10px; }
+    .album-row { font-size: 10px; padding: 3px 0; }
+    .wish-bar-outer { margin-top: 4px; }
+    .wish-reward { font-size: 10px; margin-top: 2px; }
+    #ach-summary, #stardust-display, #prestige-info { font-size: 11px; padding: 3px 0 6px; }
+    .blessing-card { padding: 8px 10px; margin-bottom: 6px; gap: 9px; }
+    .blessing-card .b-icon { font-size: 22px; }
+    .blessing-card .b-icon .sprite-icon { transform: scale(.7); transform-origin: center; }
     #stats-bar {
       padding: 4px 10px;
       font-size: 9px;
@@ -3811,7 +3836,7 @@ function buildShop() {
         <div class="shop-icon">${producerSpriteHtml(p.id, p.icon)}</div>
         <div class="shop-info">
           <div class="shop-name">${p.name}</div>
-          <div class="shop-desc">${p.desc}</div>
+          <div class="shop-desc flavor">${p.desc}</div>
           <div class="shop-desc shop-payback"></div>
           <div class="shop-desc shop-syn"></div>
           <div class="shop-cost"></div>
