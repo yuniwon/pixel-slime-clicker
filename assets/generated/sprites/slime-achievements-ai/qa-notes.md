@@ -4,7 +4,7 @@ sprite_gen_done=slime-achievements-ai
 folder=C:\dev\game2\assets\generated\sprites\slime-achievements-ai
 engine=component-row
 files=sprite-request,raw,frames,atlas,manifest
-qa_note=Pass: 21 single-frame achievement badges were generated at 256px cells, extracted cleanly, composed into a manifest-backed alpha atlas, and verified in the browser with locked and unlocked states.
+qa_note=Pass: 37 single-frame achievement badges were generated at 256px cells, extracted cleanly, and composed into a manifest-backed alpha atlas.
 
 ## State Verdicts
 
@@ -29,3 +29,19 @@ qa_note=Pass: 21 single-frame achievement badges were generated at 256px cells, 
 - allUp: pass, trophy badge is readable.
 - rebirth1: pass, jelly blossom rebirth badge is readable.
 - rebirth3: pass, reincarnation swirl badge is readable.
+- click50k: pass, many-hands click badge is readable.
+- click200k: pass, jelly volcano click badge is readable.
+- life1e12: pass, coin tower badge is readable.
+- life1e15: pass, coin galaxy badge is readable.
+- level25: pass, chart sprout badge is readable.
+- level30: pass, rocket cloud badge is readable.
+- level40: pass, slime galaxy badge is readable.
+- reset5: pass, five-suns rebirth badge is readable.
+- reset10: pass, infinity rebirth badge is readable.
+- allCh: pass, challenge medal badge is readable.
+- legendB: pass, radiant gold card badge is readable.
+- bless20: pass, scroll collector badge is readable.
+- wish25: pass, star vending badge is readable.
+- wish100: pass, rainbow star-pile badge is readable.
+- cloud10: pass, cloud counselor badge is readable.
+- friend300: pass, stadium kingdom badge is readable.

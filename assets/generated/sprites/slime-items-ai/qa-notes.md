@@ -4,7 +4,7 @@ sprite_gen_done=slime-items-ai
 folder=C:\dev\game2\assets\generated\sprites\slime-items-ai
 engine=component-row
 files=sprite-request,raw,frames,atlas,manifest
-qa_note=Pass: 18 single-frame shop and prestige icons extracted cleanly, composed into a manifest-backed alpha atlas, and verified in the browser with no console warnings or errors.
+qa_note=Pass: 33 single-frame shop and prestige icons extracted cleanly and composed into a manifest-backed alpha atlas.
 
 ## State Verdicts
 
@@ -26,3 +26,18 @@ qa_note=Pass: 18 single-frame shop and prestige icons extracted cleanly, compose
 - softtime: pass, readable pillow clock perk icon.
 - combo: pass, readable drum combo perk icon.
 - evoseed: pass, readable sprouting seed perk icon.
+- instinct: pass, readable crystal ball intuition perk icon.
+- glove4: pass, readable galaxy glove icon.
+- glove5: pass, readable nebula glove icon.
+- hand4: pass, readable rainbow fingertip talisman icon.
+- hand5: pass, readable cosmic fingertip talisman icon.
+- snack4: pass, readable galaxy donut production icon.
+- snack5: pass, readable star honey jar production icon.
+- snack6: pass, readable cosmic cake production icon.
+- click3: pass, readable antenna click bonus icon.
+- combo1u: pass, readable metronome combo upgrade icon.
+- star1u: pass, readable telescope star upgrade icon.
+- star2u: pass, readable magnet star upgrade icon.
+- perfect1: pass, readable oil bottle perfect-click icon.
+- gold1: pass, readable golden slime statue icon.
+- gold2: pass, readable crown polish tin icon.

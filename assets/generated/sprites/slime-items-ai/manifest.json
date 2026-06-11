@@ -138,12 +138,102 @@
         "frames": 1,
         "fps": 1,
         "loop": false
+      },
+      "instinct": {
+        "row": 18,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "glove4": {
+        "row": 19,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "glove5": {
+        "row": 20,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "hand4": {
+        "row": 21,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "hand5": {
+        "row": 22,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "snack4": {
+        "row": 23,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "snack5": {
+        "row": 24,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "snack6": {
+        "row": 25,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "click3": {
+        "row": 26,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "combo1u": {
+        "row": 27,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "star1u": {
+        "row": 28,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "star2u": {
+        "row": 29,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "perfect1": {
+        "row": 30,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "gold1": {
+        "row": 31,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "gold2": {
+        "row": 32,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
       }
     }
   },
   "frame_layout": {
     "sheetWidth": 512,
-    "sheetHeight": 9216,
+    "sheetHeight": 16896,
     "cellWidth": 512,
     "cellHeight": 512,
     "rows": {
@@ -287,6 +377,126 @@
         {
           "x": 0,
           "y": 8704,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "instinct": [
+        {
+          "x": 0,
+          "y": 9216,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "glove4": [
+        {
+          "x": 0,
+          "y": 9728,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "glove5": [
+        {
+          "x": 0,
+          "y": 10240,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "hand4": [
+        {
+          "x": 0,
+          "y": 10752,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "hand5": [
+        {
+          "x": 0,
+          "y": 11264,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "snack4": [
+        {
+          "x": 0,
+          "y": 11776,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "snack5": [
+        {
+          "x": 0,
+          "y": 12288,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "snack6": [
+        {
+          "x": 0,
+          "y": 12800,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "click3": [
+        {
+          "x": 0,
+          "y": 13312,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "combo1u": [
+        {
+          "x": 0,
+          "y": 13824,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "star1u": [
+        {
+          "x": 0,
+          "y": 14336,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "star2u": [
+        {
+          "x": 0,
+          "y": 14848,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "perfect1": [
+        {
+          "x": 0,
+          "y": 15360,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "gold1": [
+        {
+          "x": 0,
+          "y": 15872,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "gold2": [
+        {
+          "x": 0,
+          "y": 16384,
           "w": 512,
           "h": 512
         }

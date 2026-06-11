@@ -1151,7 +1151,7 @@ const PRODUCER_SPRITE_LAYOUT = {
 };
 
 const ITEM_SPRITE_ATLAS = 'assets/generated/sprites/slime-items-ai/sprite-sheet-alpha.png';
-const ITEM_SPRITE_SHEET = { w: 512, h: 9216 };
+const ITEM_SPRITE_SHEET = { w: 512, h: 16896 };
 const ITEM_SPRITE_LAYOUT = {
   glove1:    [{ x: 0, y: 0,    w: 512, h: 512 }],
   glove2:    [{ x: 0, y: 512,  w: 512, h: 512 }],
@@ -1172,10 +1172,25 @@ const ITEM_SPRITE_LAYOUT = {
   softtime:  [{ x: 0, y: 7680, w: 512, h: 512 }],
   combo:     [{ x: 0, y: 8192, w: 512, h: 512 }],
   evoseed:   [{ x: 0, y: 8704, w: 512, h: 512 }],
+  instinct:  [{ x: 0, y: 9216, w: 512, h: 512 }],
+  glove4:    [{ x: 0, y: 9728, w: 512, h: 512 }],
+  glove5:    [{ x: 0, y: 10240, w: 512, h: 512 }],
+  hand4:     [{ x: 0, y: 10752, w: 512, h: 512 }],
+  hand5:     [{ x: 0, y: 11264, w: 512, h: 512 }],
+  snack4:    [{ x: 0, y: 11776, w: 512, h: 512 }],
+  snack5:    [{ x: 0, y: 12288, w: 512, h: 512 }],
+  snack6:    [{ x: 0, y: 12800, w: 512, h: 512 }],
+  click3:    [{ x: 0, y: 13312, w: 512, h: 512 }],
+  combo1u:   [{ x: 0, y: 13824, w: 512, h: 512 }],
+  star1u:    [{ x: 0, y: 14336, w: 512, h: 512 }],
+  star2u:    [{ x: 0, y: 14848, w: 512, h: 512 }],
+  perfect1:  [{ x: 0, y: 15360, w: 512, h: 512 }],
+  gold1:     [{ x: 0, y: 15872, w: 512, h: 512 }],
+  gold2:     [{ x: 0, y: 16384, w: 512, h: 512 }],
 };
 
 const ACHIEVEMENT_SPRITE_ATLAS = 'assets/generated/sprites/slime-achievements-ai/sprite-sheet-alpha.png';
-const ACHIEVEMENT_SPRITE_SHEET = { w: 256, h: 5376 };
+const ACHIEVEMENT_SPRITE_SHEET = { w: 256, h: 9472 };
 const ACHIEVEMENT_SPRITE_LAYOUT = {
   click1:    [{ x: 0, y: 0,    w: 256, h: 256 }],
   click100:  [{ x: 0, y: 256,  w: 256, h: 256 }],
@@ -1198,6 +1213,22 @@ const ACHIEVEMENT_SPRITE_LAYOUT = {
   allUp:     [{ x: 0, y: 4608, w: 256, h: 256 }],
   rebirth1:  [{ x: 0, y: 4864, w: 256, h: 256 }],
   rebirth3:  [{ x: 0, y: 5120, w: 256, h: 256 }],
+  click50k:  [{ x: 0, y: 5376, w: 256, h: 256 }],
+  click200k: [{ x: 0, y: 5632, w: 256, h: 256 }],
+  life1e12:  [{ x: 0, y: 5888, w: 256, h: 256 }],
+  life1e15:  [{ x: 0, y: 6144, w: 256, h: 256 }],
+  level25:   [{ x: 0, y: 6400, w: 256, h: 256 }],
+  level30:   [{ x: 0, y: 6656, w: 256, h: 256 }],
+  level40:   [{ x: 0, y: 6912, w: 256, h: 256 }],
+  reset5:    [{ x: 0, y: 7168, w: 256, h: 256 }],
+  reset10:   [{ x: 0, y: 7424, w: 256, h: 256 }],
+  allCh:     [{ x: 0, y: 7680, w: 256, h: 256 }],
+  legendB:   [{ x: 0, y: 7936, w: 256, h: 256 }],
+  bless20:   [{ x: 0, y: 8192, w: 256, h: 256 }],
+  wish25:    [{ x: 0, y: 8448, w: 256, h: 256 }],
+  wish100:   [{ x: 0, y: 8704, w: 256, h: 256 }],
+  cloud10:   [{ x: 0, y: 8960, w: 256, h: 256 }],
+  friend300: [{ x: 0, y: 9216, w: 256, h: 256 }],
 };
 
 const DECOR_SPRITE_ATLAS = 'assets/generated/sprites/slime-decor-ai/sprite-sheet-alpha.png';
@@ -1922,8 +1953,13 @@ const SPRITE_ATLASES = {
   },
   guests: {
     src: 'assets/generated/sprites/slime-guests-ai/sprite-sheet-alpha.png',
-    sheet: null,
-    layout: {},
+    sheet: { w: 1792, h: 3584 },
+    layout: {
+      'raincloud':       [{ x: 0, y: 0,    w: 896, h: 896 }, { x: 896, y: 0, w: 896, h: 896 }],
+      'raincloud-happy': [{ x: 0, y: 896,  w: 896, h: 896 }],
+      'starlet':         [{ x: 0, y: 1792, w: 896, h: 896 }, { x: 896, y: 1792, w: 896, h: 896 }],
+      'starlet-happy':   [{ x: 0, y: 2688, w: 896, h: 896 }],
+    },
   },
 };
 
@@ -4301,7 +4337,17 @@ function cloudSuccess() {
   sndStar();
   toast(`🌤️ 비가 그쳤어요! <b>+${fmt(bonus)}</b> 코인과 별가루 2개!`);
   showQuip('먹구름도 사실은 말랑했어.');
-  hideCloud();
+  // 비 갠 표정 잠깐 보여주고 떠난다
+  cloudState = 'leaving';
+  cloudEl.classList.remove('challenge');
+  $('cloud-hint').textContent = '고마워! ☀️';
+  $('cloud-visual').innerHTML =
+    spriteHtml('guests', 'raincloud-happy', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' });
+  setTimeout(() => {
+    $('cloud-visual').innerHTML =
+      spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' });
+    hideCloud();
+  }, 1000);
   checkEvolution();
   renderHud();
   save();
@@ -4339,8 +4385,13 @@ function spawnStarlet() {
   starletEl.style.top = starletY + 'px';
   starletEl.classList.add('waiting');
   starletEl.classList.remove('happy');
-  starletEl.querySelector('img') ? starletEl.querySelector('img').src = STARLET_URLS.sad
-    : starletEl.insertAdjacentHTML('beforeend', `<img src="${STARLET_URLS.sad}" alt="">`);
+  let vis = starletEl.querySelector('#starlet-visual');
+  if (!vis) {
+    starletEl.insertAdjacentHTML('beforeend', '<span id="starlet-visual"></span>');
+    vis = starletEl.querySelector('#starlet-visual');
+  }
+  vis.innerHTML = spriteHtml('guests', 'starlet',
+    `<img src="${STARLET_URLS.sad}" alt="">`, { size: 56, className: 'guest-sprite' });
   $('starlet-hint').textContent = '👆 눌러서 집에 데려다주자!';
   starletEl.style.display = 'block';
   S.telemetry.starletsSeen = (S.telemetry.starletsSeen || 0) + 1;
@@ -4379,7 +4430,8 @@ starletEl.addEventListener('pointerdown', e => {
 
 function starletArrive() {
   starletState = 'leaving';
-  starletEl.querySelector('img').src = STARLET_URLS.happy;
+  starletEl.querySelector('#starlet-visual').innerHTML = spriteHtml('guests', 'starlet-happy',
+    `<img src="${STARLET_URLS.happy}" alt="">`, { size: 56, className: 'guest-sprite' });
   $('starlet-hint').textContent = '고마워! 또 올게!';
   starletEl.classList.remove('waiting');
   starletEl.classList.add('happy');
@@ -4927,9 +4979,9 @@ for (let i = 0; i < 40; i++) {
   document.body.appendChild(s);
 }
 
-// 먹구름 비주얼: guests 아틀라스 생성 전엔 캔버스 픽셀 폴백
+// 먹구름 비주얼: guests 아틀라스 (없으면 캔버스 픽셀 폴백)
 cloudEl.insertAdjacentHTML('beforeend',
-  spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' }));
+  `<span id="cloud-visual">${spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' })}</span>`);
 
 load();
 computeBlessCache();

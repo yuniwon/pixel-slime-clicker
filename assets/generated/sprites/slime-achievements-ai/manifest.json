@@ -156,12 +156,108 @@
         "frames": 1,
         "fps": 1,
         "loop": false
+      },
+      "click50k": {
+        "row": 21,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "click200k": {
+        "row": 22,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "life1e12": {
+        "row": 23,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "life1e15": {
+        "row": 24,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "level25": {
+        "row": 25,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "level30": {
+        "row": 26,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "level40": {
+        "row": 27,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "reset5": {
+        "row": 28,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "reset10": {
+        "row": 29,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "allCh": {
+        "row": 30,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "legendB": {
+        "row": 31,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "bless20": {
+        "row": 32,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "wish25": {
+        "row": 33,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "wish100": {
+        "row": 34,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "cloud10": {
+        "row": 35,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "friend300": {
+        "row": 36,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
       }
     }
   },
   "frame_layout": {
     "sheetWidth": 256,
-    "sheetHeight": 5376,
+    "sheetHeight": 9472,
     "cellWidth": 256,
     "cellHeight": 256,
     "rows": {
@@ -329,6 +425,134 @@
         {
           "x": 0,
           "y": 5120,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "click50k": [
+        {
+          "x": 0,
+          "y": 5376,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "click200k": [
+        {
+          "x": 0,
+          "y": 5632,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "life1e12": [
+        {
+          "x": 0,
+          "y": 5888,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "life1e15": [
+        {
+          "x": 0,
+          "y": 6144,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "level25": [
+        {
+          "x": 0,
+          "y": 6400,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "level30": [
+        {
+          "x": 0,
+          "y": 6656,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "level40": [
+        {
+          "x": 0,
+          "y": 6912,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "reset5": [
+        {
+          "x": 0,
+          "y": 7168,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "reset10": [
+        {
+          "x": 0,
+          "y": 7424,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "allCh": [
+        {
+          "x": 0,
+          "y": 7680,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "legendB": [
+        {
+          "x": 0,
+          "y": 7936,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "bless20": [
+        {
+          "x": 0,
+          "y": 8192,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "wish25": [
+        {
+          "x": 0,
+          "y": 8448,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "wish100": [
+        {
+          "x": 0,
+          "y": 8704,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "cloud10": [
+        {
+          "x": 0,
+          "y": 8960,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "friend300": [
+        {
+          "x": 0,
+          "y": 9216,
           "w": 256,
           "h": 256
         }
