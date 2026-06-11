@@ -264,12 +264,14 @@
     image-rendering: auto;
     vertical-align: middle;
   }
-  .sprite-icon.friend-sprite { filter: drop-shadow(2px 2px 0 #00000055); }
-  .sprite-icon.shop-sprite { filter: drop-shadow(2px 2px 0 #00000044); }
+  /* 생성 에셋이 전반적으로 채도가 낮아 가볍게 보정한다 */
+  .sprite-icon.friend-sprite { filter: saturate(1.3) drop-shadow(2px 2px 0 #00000055); }
+  .sprite-icon.shop-sprite { filter: saturate(1.3) drop-shadow(2px 2px 0 #00000044); }
   .sprite-icon.locked-sprite {
     filter: grayscale(1) brightness(.48) drop-shadow(2px 2px 0 #00000044);
     opacity: .72;
   }
+  .fr-frames { filter: saturate(1.3); }
   @keyframes friendbob {
     from { transform: translateY(0); }
     to { transform: translateY(-10px); }
@@ -1018,7 +1020,7 @@ const ITEM_SPRITE_LAYOUT = {
   snack3:    [{ x: 0, y: 4096, w: 512, h: 512 }],
   click1:    [{ x: 0, y: 4608, w: 512, h: 512 }],
   click2:    [{ x: 0, y: 5120, w: 512, h: 512 }],
-  // prestige: 핑크 회색화 — 보라 묘사로 재생성 후 복구 예정 (이모지 폴백)
+  prestige:  [{ x: 0, y: 5632, w: 512, h: 512 }],  // 회색 생성 → violet 틴트로 복원
 
   sticky:    [{ x: 0, y: 6144, w: 512, h: 512 }],
   promise:   [{ x: 0, y: 6656, w: 512, h: 512 }],
@@ -1556,7 +1558,7 @@ const SPRITE_ATLASES = {
       napecon:     [{ x: 0, y: 4224, w: 384, h: 384 }],
       dustsense:   [{ x: 0, y: 4608, w: 384, h: 384 }],
       slowcrown:   [{ x: 0, y: 4992, w: 384, h: 384 }],
-      // soulwhisper: 핑크 회색화 — 라벤더 묘사로 재생성 후 복구 예정
+      soulwhisper: [{ x: 0, y: 5376, w: 384, h: 384 }],  // 회색 생성 → violet 틴트로 복원
       warmstart:   [{ x: 0, y: 5760, w: 384, h: 384 }],
     },
   },
@@ -1577,14 +1579,16 @@ const SPRITE_ATLASES = {
     src: 'assets/generated/sprites/slime-cosmetics-ai/sprite-sheet-alpha.png',
     sheet: { w: 384, h: 4224 },
     layout: {
-      // 핑크 계열(aura-pink, bubble-pink, pt-heart)은 마젠타 크로마 충돌로
-      // 회색화되어 임시 제외 — 이모지 폴백. green 크로마 재생성 후 복구 예정
+      // 핑크 계열은 회색으로 생성되어 SPRITE_TINTS의 colorize로 색을 복원한다
+      'aura-pink':   [{ x: 0, y: 0,    w: 384, h: 384 }],
       'aura-mint':   [{ x: 0, y: 384,  w: 384, h: 384 }],
       'aura-gold':   [{ x: 0, y: 768,  w: 384, h: 384 }],
       'bg-dawn':     [{ x: 0, y: 1152, w: 384, h: 384 }],
       'bg-abyss':    [{ x: 0, y: 1536, w: 384, h: 384 }],
       'bg-aurora':   [{ x: 0, y: 1920, w: 384, h: 384 }],
+      'bubble-pink': [{ x: 0, y: 2304, w: 384, h: 384 }],
       'bubble-gold': [{ x: 0, y: 2688, w: 384, h: 384 }],
+      'pt-heart':    [{ x: 0, y: 3072, w: 384, h: 384 }],
       'pt-star':     [{ x: 0, y: 3456, w: 384, h: 384 }],
       'pt-note':     [{ x: 0, y: 3840, w: 384, h: 384 }],
     },
@@ -1594,6 +1598,22 @@ const SPRITE_ATLASES = {
     sheet: null,
     layout: {},
   },
+};
+
+/* 색 복원 틴트: 생성 파이프라인이 회색으로 죽인 에셋을 CSS colorize로 살린다.
+   회색 픽셀은 명암 정보가 온전해서 sepia→hue-rotate 틴트가 깨끗하게 먹는다.
+   새로 회색 에셋을 발견하면 여기에 한 줄 추가하면 끝. */
+const TINT_FILTERS = {
+  pink:   'sepia(1) saturate(5) hue-rotate(287deg) brightness(1.08)',
+  violet: 'sepia(1) saturate(3.5) hue-rotate(220deg) brightness(1.02)',
+};
+
+const SPRITE_TINTS = {
+  'cosmetics:aura-pink':   'pink',
+  'cosmetics:bubble-pink': 'pink',
+  'cosmetics:pt-heart':    'pink',
+  'blessings:soulwhisper': 'violet',
+  'items:prestige':        'violet',
 };
 
 /* 범용 스프라이트 렌더러.
@@ -1613,8 +1633,10 @@ function spriteHtml(atlasKey, id, fallback, opts = {}) {
     `background-image:url('${atlas.src}')`,
     `background-size:${atlas.sheet.w * scale}px ${atlas.sheet.h * scale}px`,
     `background-position:-${r.x * scale}px -${r.y * scale}px`,
-  ].join(';');
-  return `<span class="sprite-icon ${className}" aria-hidden="true" style="${style}"></span>`;
+  ];
+  const tint = SPRITE_TINTS[`${atlasKey}:${id}`];
+  if (tint) style.push(`filter:${TINT_FILTERS[tint]} drop-shadow(2px 2px 0 #00000044)`);
+  return `<span class="sprite-icon ${className}" aria-hidden="true" style="${style.join(';')}"></span>`;
 }
 
 /* 기존 호출부 호환 래퍼 */

@@ -56,6 +56,11 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
   - 둘 다 포함 → 시트를 색군별로 분리하거나, 한쪽 에셋의 묘사 색을 우회
     (예: 핑크 영혼 → 라벤더 보라)
   - 생성 후 반드시 대표 셀의 평균색을 확인할 것 (회색 rgb(140±20,140±20,140±20) = 실패)
+  - **재생성 없이 코드로 복원 가능**: 회색 에셋은 명암이 살아있으므로
+    `SPRITE_TINTS`(index.html)에 `'아틀라스:id': 'pink'|'violet'` 한 줄 추가하면
+    CSS colorize(sepia→hue-rotate)로 색이 복원된다. 새 색이 필요하면 `TINT_FILTERS`에
+    필터 추가 (핑크 hue 287°, 보라 220° — 캔버스 평균색 실측으로 튜닝된 값)
+  - 전반적 채도 저하는 `.sprite-icon` 전역 `saturate(1.3)`으로 보정 중
 - **style 문자열**: 기존 요청서의 것을 그대로 복사 (게임 전체 톤 통일). 변경 금지
 - **state 이름 = 코드의 id**: 코드 데이터(`BLESSINGS[].id` 등)와 글자 단위로 일치해야 자동 연결됨
 - 새 항목 추가 시: 코딩팀이 데이터에 id+이모지 추가 → 같은 커밋에서 sprite-request.json의 `states`에 동일 키로 action 설명 추가
