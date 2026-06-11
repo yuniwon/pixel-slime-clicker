@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-goldstar-ai",
+    "description": "golden event star and mini shooting star for a cozy clicker game - chunky five-pointed golden star with a happy glint, the rare clickable event object that crosses the sky",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 256,
+    "height": 256,
+    "safe_margin_x": 28,
+    "safe_margin_y": 28,
+    "size": 256,
+    "safe_margin": 28
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "star": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "big golden five-pointed star with a glossy highlight and tiny sparkles, frame 2 with the sparkles shifted and the highlight brighter for a twinkle loop"
+    },
+    "ministar": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "small golden shooting star with a short comet tail to the left, frame 2 with the tail flickering for a twinkle loop"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

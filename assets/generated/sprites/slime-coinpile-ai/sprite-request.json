@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-coinpile-ai",
+    "description": "growing piles of golden coins shown on the stage floor as a landscape of accumulated wealth in a cozy clicker game - three escalating sizes, drawn to sit on the ground (bottom-anchored in the cell)",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 256,
+    "height": 256,
+    "safe_margin_x": 28,
+    "safe_margin_y": 28,
+    "size": 256,
+    "safe_margin": 28
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "pile1": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "small humble pile of a few golden coins with one coin leaning against it, bottom-anchored"
+    },
+    "pile2": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "medium mound of golden coins with a couple of coin stacks and one gem peeking out, bottom-anchored"
+    },
+    "pile3": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "tall overflowing treasure pile of golden coins with stacked towers, gems, and a tiny crown on top, bottom-anchored"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

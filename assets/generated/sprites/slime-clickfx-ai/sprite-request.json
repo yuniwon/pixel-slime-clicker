@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-clickfx-ai",
+    "description": "click burst effect for a cozy clicker game - a soft padded glove giving a friendly squish pop, used as a 3-frame one-shot animation at the click point. Each frame ONLY the glove and impact sparkles on transparent background",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 192,
+    "height": 192,
+    "safe_margin_x": 20,
+    "safe_margin_y": 20,
+    "size": 192,
+    "safe_margin": 20
+  },
+  "chroma_key": {
+    "name": "green",
+    "hex": "#00FF00",
+    "rgb": [
+      0,
+      255,
+      0
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "pop": {
+      "frames": 3,
+      "fps": 12,
+      "loop": false,
+      "action": "frame 1: soft pink padded glove pressing in with small squash lines; frame 2: glove lifting with a burst of tiny star sparkles around the impact point; frame 3: glove gone, only fading sparkles and a small puff ring"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

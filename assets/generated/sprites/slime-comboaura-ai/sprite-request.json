@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-comboaura-ai",
+    "description": "combo heat aura rings that sit BEHIND the slime body (slime-main-ai, 768 cell) - each state is ONLY a circular aura/glow ring on a fully transparent background, centered in the cell, designed to be layered under the slime. No slime body in these cells. The four states are escalating heat tiers of a cozy clicker combo system",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 384,
+    "height": 384,
+    "safe_margin_x": 20,
+    "safe_margin_y": 20,
+    "size": 384,
+    "safe_margin": 20
+  },
+  "chroma_key": {
+    "name": "green",
+    "hex": "#00FF00",
+    "rgb": [
+      0,
+      255,
+      0
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "tier0": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "faint soft lavender-purple circular aura ring, barely visible, frame 2 slightly larger for a gentle breathing loop"
+    },
+    "tier1": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "warm pink circular aura ring with a few tiny rising heat sparkles, frame 2 with sparkles shifted upward for a loop"
+    },
+    "tier2": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "hot pink-orange double aura ring with small flame licks at the bottom edge, frame 2 with the flames flickering"
+    },
+    "tier3": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "blazing golden aura ring with bold flame tongues all around and star sparkles, frame 2 with flames and sparkles shifted for an intense loop"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}
