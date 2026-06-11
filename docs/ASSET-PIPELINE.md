@@ -18,12 +18,15 @@ const SPRITE_ATLASES = {
   items:        { src, sheet, layout: ITEM_SPRITE_LAYOUT },              // 연결됨
   achievements: { src, sheet, layout: ACHIEVEMENT_SPRITE_LAYOUT },       // 연결됨
   decor:        { src, sheet, layout: DECOR_SPRITE_LAYOUT },             // 연결됨
-  blessings:    { src, sheet: null, layout: {} },                        // 생성 대기
-  wishes:       { src, sheet: null, layout: {} },                        // 생성 대기
-  cosmetics:    { src, sheet: null, layout: {} },                        // 생성 대기
+  blessings:    { src, sheet, layout: {...16종} },                       // 연결됨
+  wishes:       { src, sheet, layout: {...7종} },                        // 연결됨
+  cosmetics:    { src, sheet, layout: {...11종} },                       // 연결됨 (핑크 3종 틴트 복원)
+  guests:       { src, sheet, layout: {...4종} },                        // 연결됨
+  crystal:      { src, sheet: null, layout: {} },                        // 생성 대기 (이모지 폴백)
 };
 
 spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
+// 슬라임 본체는 별도: SLIME_ATLAS (slime-main-ai) — 캔버스 CSS 배경 + 성향 오버레이 캔버스
 ```
 
 - `sheet: null` 또는 layout에 id 없음 → `fallbackEmoji` 반환 (안전)
