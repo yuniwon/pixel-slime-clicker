@@ -3212,6 +3212,29 @@ $('game-area').addEventListener('pointerdown', e => {
   doClick(e.clientX, e.clientY);
 });
 
+/* iOS 더블탭 줌 마지막 구멍 막기.
+   touch-action: manipulation은 첫 탭에서 요소가 사라지는 경우(구름·미니별 연타)와
+   모달 위 빠른 연타에서 새는 케이스가 있다 — 350ms 내 두 번째 touchend의
+   기본 동작(줌)을 직접 차단하고, 죽는 네이티브 click은 합성 click으로 살려서
+   상점 연타 구매·축복 카드 탭이 끊기지 않게 한다 */
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  // 텍스트 입력은 포커스·붙여넣기 동작을 건드리지 않는다
+  if (e.target.closest('input, textarea, select')) { lastTouchEnd = now; return; }
+  if (now - lastTouchEnd < 350 && e.cancelable) {
+    e.preventDefault();
+    const t = e.changedTouches[0];
+    if (t) {
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      if (el) el.dispatchEvent(new MouseEvent('click', {
+        bubbles: true, cancelable: true, clientX: t.clientX, clientY: t.clientY,
+      }));
+    }
+  }
+  lastTouchEnd = now;
+}, { passive: false });
+
 $('crystal-bed').addEventListener('click', crystalClick);
 $('close-crystal-btn').addEventListener('click', () => $('crystal-overlay').classList.remove('open'));
 $('crystal-overlay').addEventListener('click', e => {
