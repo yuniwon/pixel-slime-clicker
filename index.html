@@ -1583,6 +1583,15 @@ const SLIME_ATLAS = {
 };
 let slimeAtlasOk = false;
 
+/* 성향 액세서리 아틀라스 (slime-traits-ai): 본체와 같은 2×5 그리드 —
+   CSS 다중 배경으로 본체 위에 겹친다. 미로드 시 오라 글로우 폴백 */
+const TRAIT_ATLAS = {
+  src: 'assets/generated/sprites/slime-traits-ai/sprite-sheet-alpha.png',
+  rows: { muscle: 0, ranch: 1, star: 2, dream: 3, samsara: 4 },
+  twoFrame: { star: true, samsara: true },
+};
+let traitAtlasOk = false;
+
 const MAX_LEVEL = 60;
 
 /* 환생 특성: cost = (현재 레벨 + 1) 젤리 영혼 */
@@ -2896,35 +2905,47 @@ function traitPreviewHtml(tr, seen) {
 }
 
 /* 본체 스프라이트: 캔버스의 CSS 배경으로 아틀라스 셀을 깐다.
-   캔버스 픽셀은 성향 오버레이 전용이 된다 (DOM 변경 없음) */
-let slimeSpriteStage = -1;
+   성향 액세서리는 다중 배경 상위 레이어 (캔버스 픽셀은 비움, DOM 변경 없음) */
+let slimeSpriteSig = '';
 let slimeFrame = 0;
 
 function applySlimeSprite(force) {
   if (!slimeAtlasOk || !STAGES[stageIdx].spriteId) return false;
-  if (!force && slimeSpriteStage === stageIdx) return true;
-  slimeSpriteStage = stageIdx;
-  slimeCv.style.backgroundImage = `url('${SLIME_ATLAS.src}')`;
-  slimeCv.style.backgroundSize = '200% 500%';     // 셀 = 시트의 1/2 × 1/5
+  const traitKey = (traitAtlasOk && currentTrait && TRAIT_ATLAS.rows[currentTrait.key] != null) ? currentTrait.key : '';
+  const ring = traitAtlasOk && hasSamsaraAura();
+  const sig = `${stageIdx}|${slimeFrame}|${traitKey}|${ring}`;
+  if (!force && sig === slimeSpriteSig) return true;
+  slimeSpriteSig = sig;
+  const imgs = [], poss = [];
+  const addTrait = key => {  // 위에 그려질 레이어부터 — CSS 다중 배경은 첫 항목이 최상단
+    const fx = TRAIT_ATLAS.twoFrame[key] ? slimeFrame * 100 : 0;
+    imgs.push(`url('${TRAIT_ATLAS.src}')`);
+    poss.push(`${fx}% ${TRAIT_ATLAS.rows[key] * 25}%`);
+  };
+  if (traitKey && traitKey !== 'samsara') addTrait(traitKey);
+  if (ring) addTrait('samsara');
+  imgs.push(`url('${SLIME_ATLAS.src}')`);
+  poss.push(`${slimeFrame * 100}% ${stageIdx * 25}%`);
+  slimeCv.style.backgroundImage = imgs.join(', ');
+  slimeCv.style.backgroundSize = imgs.map(() => '200% 500%').join(', ');  // 셀 = 시트의 1/2 × 1/5
   slimeCv.style.backgroundRepeat = 'no-repeat';
-  slimeCv.style.backgroundPosition = `${slimeFrame * 100}% ${stageIdx * 25}%`;
+  slimeCv.style.backgroundPosition = poss.join(', ');
   return true;
 }
 
 function drawSlime(t) {
-  // ── 스프라이트 모드: 본체는 배경, 캔버스엔 성향 흔적만 ──
+  // ── 스프라이트 모드: 본체+액세서리는 배경 레이어, 캔버스 픽셀은 비움 ──
   if (applySlimeSprite()) {
-    const f = Math.floor(t / 700) % 2;  // 2프레임 idle
+    const f = Math.floor(t / 700) % 2;  // 2프레임 idle (액세서리 반짝임 동기)
     if (f !== slimeFrame) {
       slimeFrame = f;
-      slimeCv.style.backgroundPosition = `${f * 100}% ${stageIdx * 25}%`;
+      applySlimeSprite(true);
     }
-    // 16×17용 성향 픽셀은 고해상 스프라이트와 형태가 안 맞아 블록 잔상이 됨 —
-    // 스프라이트 모드에선 성향을 tick의 filter 오라 글로우로 표현 (전용 액세서리 아틀라스 대기)
     slimeCtx.clearRect(0, 0, 16, 17);
     return;
   }
   // ── 폴백: 기존 캔버스 픽셀 렌더 ──
+  slimeSpriteSig = '';
   slimeCv.style.backgroundImage = '';
   const stage = STAGES[stageIdx];
   let pal = stage.pal;
@@ -5735,9 +5756,9 @@ function econTickBody() {
     let slimeGlow = '';
     if (cosAura) slimeGlow = `drop-shadow(0 0 14px ${cosAura})`;
     else if (currentTrait && hasSyn('unicorn', 100)) slimeGlow = `drop-shadow(0 0 14px ${currentTrait.pupil})`;
-    else if (slimeAtlasOk && currentTrait) slimeGlow = `drop-shadow(0 0 10px ${currentTrait.pupil}cc)`;
-    // 윤회의 고리: 스프라이트 모드에선 픽셀 잔상 대신 이중 보라 헤일로
-    if (slimeAtlasOk && hasSamsaraAura()) {
+    else if (slimeAtlasOk && !traitAtlasOk && currentTrait) slimeGlow = `drop-shadow(0 0 10px ${currentTrait.pupil}cc)`;
+    // 윤회의 고리: 액세서리 아틀라스가 있으면 진짜 고리 스프라이트가 표시 — 글로우는 폴백
+    if (slimeAtlasOk && !traitAtlasOk && hasSamsaraAura()) {
       slimeGlow += ' drop-shadow(0 0 8px #b48aff) drop-shadow(0 0 22px #b48aff66)';
     }
     slimeCv.style.filter = slimeGlow;
@@ -5831,9 +5852,16 @@ function pinkifyGray(d) {
   }
 }
 
+// 성향 액세서리 아틀라스 프리로드 — 성공 시 글로우 대신 진짜 액세서리
 (() => {
   const im = new Image();
-  const ready = () => { slimeAtlasOk = true; slimeSpriteStage = -1; silhouetteStage = -1; };
+  im.onload = () => { traitAtlasOk = true; slimeSpriteSig = ''; };
+  im.src = TRAIT_ATLAS.src;
+})();
+
+(() => {
+  const im = new Image();
+  const ready = () => { slimeAtlasOk = true; slimeSpriteSig = ''; silhouetteStage = -1; };
   im.onload = () => {
     try {
       const c = document.createElement('canvas');
