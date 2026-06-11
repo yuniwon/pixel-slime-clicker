@@ -382,6 +382,19 @@
     50% { transform: rotate(2deg); }
   }
   #raincloud img { width: 100%; height: 100%; image-rendering: pixelated; }
+  #cloud-hint {
+    position: absolute;
+    top: -36px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: var(--gold);
+    background: #000000aa;
+    border: 2px solid var(--border);
+    padding: 3px 8px;
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+  }
   #cloud-bar-outer {
     position: absolute;
     top: -16px; left: 4px; right: 4px;
@@ -766,7 +779,13 @@
     width: min(380px, 92vw);
     padding: 18px;
     text-align: center;
+    animation: modal-in .3s ease-out;
   }
+  @keyframes modal-in {
+    from { transform: scale(.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  #blessing-modal.guarding .blessing-card { opacity: .55; pointer-events: none; }
   #blessing-modal h3 { color: var(--gold); font-size: 15px; margin-bottom: 4px; letter-spacing: 1px; }
   #blessing-modal .blessing-sub { font-size: 11px; color: var(--text-dim); margin-bottom: 14px; }
   .blessing-card {
@@ -889,6 +908,17 @@
     #coin-display { font-size: 24px; }
     .friend { font-size: 20px; }
     #speech-bubble { font-size: 11px; max-width: 180px; }
+    /* 토스트: 모바일에선 상단 고정 + 화면 폭 안으로 */
+    #toast {
+      bottom: auto;
+      top: 60px;
+      font-size: 12px;
+      padding: 10px 14px;
+      width: max-content;
+      max-width: calc(100vw - 24px);
+      transform: translateX(-50%) translateY(-90px);
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
   }
 </style>
 </head>
@@ -952,6 +982,7 @@
 
 <canvas id="golden-star" width="16" height="16" aria-label="황금별"></canvas>
 <div id="raincloud" role="button" aria-label="먹구름 손님">
+  <div id="cloud-hint"></div>
   <div id="cloud-bar-outer"><div id="cloud-bar"></div></div>
 </div>
 <div id="evo-flash"></div>
@@ -1235,42 +1266,42 @@ const SYNERGIES = {
 /* 슬라임의 소원: 접속 중 항상 3개 활성, 완료하면 별가루 획득.
    별가루는 경제에 영향 없는 표현(코스메틱) 보상 전용 재화 */
 const WISH_TYPES = [
-  { type: 'click',    icon: '👆', reward: 2,
-    make: wc => ({ target: Math.min(40 + wc * 10, 400) }),
+  { type: 'click',    icon: '👆', reward: 1,
+    make: wc => ({ target: Math.min(60 + wc * 15, 600) }),
     text: w => `슬라임 ${w.target}번 클릭하기` },
-  { type: 'combo',    icon: '⚡', reward: 3,
-    make: wc => ({ target: Math.min(20 + Math.floor(wc / 2) * 5, 45) }),
+  { type: 'combo',    icon: '⚡', reward: 2,
+    make: wc => ({ target: Math.min(22 + Math.floor(wc / 2) * 5, 48) }),
     text: w => `콤보 ${w.target} 달성하기` },
-  { type: 'star',     icon: '⭐', reward: 5,
+  { type: 'star',     icon: '⭐', reward: 3,
     make: () => ({ target: 1 }),
     text: () => '황금별 1개 잡기' },
-  { type: 'ministar', icon: '🌠', reward: 4,
-    make: () => ({ target: 3 }),
-    text: () => '미니 별똥별 3개 잡기' },
-  { type: 'hire',     icon: '🐾', reward: 3,
-    make: wc => ({ target: Math.min(5 + wc, 30) }),
+  { type: 'ministar', icon: '🌠', reward: 2,
+    make: () => ({ target: 4 }),
+    text: () => '미니 별똥별 4개 잡기' },
+  { type: 'hire',     icon: '🐾', reward: 2,
+    make: wc => ({ target: Math.min(6 + wc * 2, 40) }),
     text: w => `친구 ${w.target}마리 고용하기` },
-  { type: 'earn',     icon: '💰', reward: 3,
-    make: () => ({ target: Math.max(100, Math.round(totalCps() * 90 + clickPower() * 50)) }),
+  { type: 'earn',     icon: '💰', reward: 2,
+    make: () => ({ target: Math.max(150, Math.round(totalCps() * 150 + clickPower() * 80)) }),
     text: w => `코인 ${fmt(w.target)} 모으기` },
-  { type: 'upgrade',  icon: '🧤', reward: 4,
+  { type: 'upgrade',  icon: '🧤', reward: 2,
     make: () => ({ target: 1 }),
     text: () => '강화 1개 구매하기' },
 ];
 
 /* 별가루 코스메틱: 전부 표현 전용, 보너스 없음 */
 const COSMETICS = [
-  { id: 'aura-pink',   slot: 'aura',     icon: '💗', name: '핑크 오라',    desc: '슬라임이 분홍빛으로 빛나요',   cost: 5, value: '#ff8ac4' },
-  { id: 'aura-mint',   slot: 'aura',     icon: '💚', name: '민트 오라',    desc: '슬라임이 민트빛으로 빛나요',   cost: 5, value: '#7dffc4' },
-  { id: 'aura-gold',   slot: 'aura',     icon: '💛', name: '골드 오라',    desc: '슬라임이 금빛으로 빛나요',     cost: 5, value: '#ffd75e' },
-  { id: 'bg-dawn',     slot: 'bg',       icon: '🌅', name: '새벽 하늘',    desc: '방이 새벽빛으로 물들어요',     cost: 8, value: 'bg-dawn' },
-  { id: 'bg-abyss',    slot: 'bg',       icon: '🌊', name: '깊은 바다',    desc: '방이 심해처럼 고요해져요',     cost: 8, value: 'bg-abyss' },
-  { id: 'bg-aurora',   slot: 'bg',       icon: '🌌', name: '오로라',       desc: '하늘에 오로라가 흐릅니다',     cost: 8, value: 'bg-aurora' },
-  { id: 'bubble-pink', slot: 'bubble',   icon: '🎀', name: '핑크 말풍선',  desc: '슬라임의 말풍선이 달콤해져요', cost: 5, value: 'bubble-pink' },
-  { id: 'bubble-gold', slot: 'bubble',   icon: '⭐', name: '골드 말풍선',  desc: '슬라임의 말풍선이 반짝여요',   cost: 5, value: 'bubble-gold' },
-  { id: 'pt-heart',    slot: 'particle', icon: '💖', name: '하트 파티클',  desc: '클릭하면 하트가 터져요',       cost: 6, value: '💖' },
-  { id: 'pt-star',     slot: 'particle', icon: '✨', name: '별 파티클',    desc: '클릭하면 별이 흩날려요',       cost: 6, value: '✨' },
-  { id: 'pt-note',     slot: 'particle', icon: '🎵', name: '음표 파티클',  desc: '클릭하면 음표가 통통 튀어요',  cost: 6, value: '🎵' },
+  { id: 'aura-pink',   slot: 'aura',     icon: '💗', name: '핑크 오라',    desc: '슬라임이 분홍빛으로 빛나요',   cost: 10, value: '#ff8ac4' },
+  { id: 'aura-mint',   slot: 'aura',     icon: '💚', name: '민트 오라',    desc: '슬라임이 민트빛으로 빛나요',   cost: 10, value: '#7dffc4' },
+  { id: 'aura-gold',   slot: 'aura',     icon: '💛', name: '골드 오라',    desc: '슬라임이 금빛으로 빛나요',     cost: 10, value: '#ffd75e' },
+  { id: 'bg-dawn',     slot: 'bg',       icon: '🌅', name: '새벽 하늘',    desc: '방이 새벽빛으로 물들어요',     cost: 15, value: 'bg-dawn' },
+  { id: 'bg-abyss',    slot: 'bg',       icon: '🌊', name: '깊은 바다',    desc: '방이 심해처럼 고요해져요',     cost: 15, value: 'bg-abyss' },
+  { id: 'bg-aurora',   slot: 'bg',       icon: '🌌', name: '오로라',       desc: '하늘에 오로라가 흐릅니다',     cost: 15, value: 'bg-aurora' },
+  { id: 'bubble-pink', slot: 'bubble',   icon: '🎀', name: '핑크 말풍선',  desc: '슬라임의 말풍선이 달콤해져요', cost: 10, value: 'bubble-pink' },
+  { id: 'bubble-gold', slot: 'bubble',   icon: '⭐', name: '골드 말풍선',  desc: '슬라임의 말풍선이 반짝여요',   cost: 10, value: 'bubble-gold' },
+  { id: 'pt-heart',    slot: 'particle', icon: '💖', name: '하트 파티클',  desc: '클릭하면 하트가 터져요',       cost: 12, value: '💖' },
+  { id: 'pt-star',     slot: 'particle', icon: '✨', name: '별 파티클',    desc: '클릭하면 별이 흩날려요',       cost: 12, value: '✨' },
+  { id: 'pt-note',     slot: 'particle', icon: '🎵', name: '음표 파티클',  desc: '클릭하면 음표가 통통 튀어요',  cost: 12, value: '🎵' },
 ];
 
 const COSMETIC_SLOT_NAMES = { aura: '오라', bg: '배경', bubble: '말풍선', particle: '파티클' };
@@ -2637,13 +2668,20 @@ function renderBlessingCards() {
   return true;
 }
 
+let blessGuardUntil = 0;
+
 function openBlessingModal() {
   rerollCost = REROLL_BASE;
   if (!renderBlessingCards()) return;
   $('blessing-overlay').classList.add('open');
+  // 연타 중 오터치 방지: 잠깐 입력 잠금 + 흐리게 표시
+  blessGuardUntil = performance.now() + 700;
+  $('blessing-modal').classList.add('guarding');
+  setTimeout(() => $('blessing-modal').classList.remove('guarding'), 700);
 }
 
 function rerollBlessings() {
+  if (performance.now() < blessGuardUntil) return;
   if (S.stardust < rerollCost) return;
   S.stardust -= rerollCost;
   rerollCost += 2;
@@ -2653,6 +2691,7 @@ function rerollBlessings() {
 }
 
 function pickBlessing(b) {
+  if (performance.now() < blessGuardUntil) return;
   S.runBlessings.push(b.id);
   S.codex.blessings[b.id] = true;
   computeBlessCache();
@@ -2664,6 +2703,7 @@ function pickBlessing(b) {
 }
 
 function skipBlessing() {
+  if (performance.now() < blessGuardUntil) return;
   S.stardust += 1;  // 패스에도 작은 보상 — 모든 선택이 유의미하게
   toast('💫 이번엔 괜찮아 — 별가루 +1');
   closeBlessingModal();
@@ -2866,7 +2906,7 @@ const FRIEND_BEHAVIOR = {
   unicorn: { max: 2, anim: 'shine',
     pos: () => S.decor.lamp ? { right: '13%', bottom: '31%' } : { right: '20%', bottom: '36%' } },
   dragon:  { max: 2, anim: 'guard',
-    pos: () => S.decor.fountain ? { right: '15%', bottom: '52%' } : { left: '16%', bottom: '50%' } },
+    pos: () => S.decor.fountain ? { right: '15%', bottom: '40%' } : { left: '14%', bottom: '34%' } },
   whale:   { max: 1, anim: 'cross',
     pos: () => ({ left: '50%', top: S.decor.window ? '13%' : '20%' }) },
   planet:  { max: 1, anim: 'orbit',
@@ -2904,14 +2944,35 @@ function friendSpriteAnimHtml(id, size) {
   return `<span class="sprite-icon fr-frames" aria-hidden="true" style="${style}"></span>`;
 }
 
+function isMobileLayout() {
+  return window.matchMedia('(max-width: 760px)').matches;
+}
+
+/* 모바일: 종별 1마리, 바닥 한 줄 정렬로 난잡함 방지 */
+const MOBILE_GROUND_ORDER = ['chick', 'dog', 'cat', 'rabbit', 'unicorn', 'dragon'];
+
 function rebuildFriends() {
   friendsLayer.innerHTML = '';
+  const mobile = isMobileLayout();
+  let groundIdx = 0;
+
   PRODUCERS.forEach(p => {
     const bhv = FRIEND_BEHAVIOR[p.id];
     const owned = S.producers[p.id];
     if (!bhv || !owned) return;
-    const n = Math.min(bhv.max, friendCount(owned));
-    const pos = bhv.pos();
+    const n = mobile ? 1 : Math.min(bhv.max, friendCount(owned));
+
+    let pos = bhv.pos();
+    if (mobile) {
+      if (p.id === 'whale') pos = { left: '50%', top: '16%' };
+      else if (p.id === 'planet') pos = { right: '6%', top: '20%' };
+      else {
+        const slot = MOBILE_GROUND_ORDER.indexOf(p.id);
+        pos = { left: (7 + (slot < 0 ? groundIdx : slot) * 15) + '%', bottom: '7%' };
+        groundIdx++;
+      }
+    }
+
     for (let k = 0; k < n; k++) {
       const el = document.createElement('div');
       el.className = 'friend';
@@ -2925,13 +2986,20 @@ function rebuildFriends() {
       const mover = document.createElement('span');
       mover.className = 'fr-move bv-' + bhv.anim;
       mover.style.animationDelay = (Math.random() * 2.5).toFixed(2) + 's';
-      const size = (p.id === 'whale' || p.id === 'planet') ? 64 : 48;
+      const size = mobile ? 36 : (p.id === 'whale' || p.id === 'planet') ? 64 : 48;
       mover.innerHTML = friendSpriteAnimHtml(p.id, size);
       el.appendChild(mover);
       friendsLayer.appendChild(el);
     }
   });
 }
+
+/* 화면 회전/크기 변경 시 친구 재배치 */
+let resizeDebounce = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeDebounce);
+  resizeDebounce = setTimeout(rebuildFriends, 350);
+});
 
 /* 분위기 파티클: 드래곤 불꽃, 유니콘 반짝이 */
 function spawnSparkAt(x, y, color) {
@@ -3518,6 +3586,10 @@ function starSpawnRect() {
 function spawnStar() {
   starVisible = starLinger();
   starEl.style.display = 'block';
+  // 첫 황금별 안내
+  if (S.stats.lifetime.starsClicked === 0) {
+    toast('⭐ <b>황금별</b>이 떴어요! 사라지기 전에 눌러보세요 — 좋은 일이 생겨요');
+  }
   const pos = starSpawnRect();
   starEl.style.left = pos.x + 'px';
   starEl.style.top = pos.y + 'px';
@@ -3625,7 +3697,8 @@ function spawnCloud() {
   cloudEl.classList.add('drift');
   cloudEl.classList.remove('challenge');
   cloudEl.style.display = 'block';
-  toast('☁️ <b>먹구름 손님</b>이 찾아왔어요! 두드리면 비를 털어줄 수 있어요');
+  $('cloud-hint').textContent = '👆 눌러서 비를 털어줘!';
+  toast('☁️ <b>먹구름 손님</b>이 찾아왔어요!');
   beep(294, 0.12, 'triangle', 0.07);
 }
 
@@ -3645,13 +3718,15 @@ cloudEl.addEventListener('pointerdown', e => {
     cloudTime = 10;
     cloudEl.classList.remove('drift');
     cloudEl.classList.add('challenge');
-    toast(`☁️ 10초 안에 <b>${cloudNeed}번</b> 두드려서 비를 털어내자!`);
+    $('cloud-hint').textContent = `⚡ 연타! ${cloudNeed}번 두드리기!`;
+    toast(`☁️ 10초 안에 <b>${cloudNeed}번</b> 연타해서 비를 털어내자!`);
     beep(330, 0.1);
   } else if (cloudState === 'challenge') {
     cloudClicks++;
     spawnRaindrops(e.clientX, e.clientY);
     beep(392 + cloudClicks * 8, 0.05);
     $('cloud-bar').style.width = Math.min(100, cloudClicks / cloudNeed * 100) + '%';
+    $('cloud-hint').textContent = `⚡ ${Math.max(0, cloudNeed - cloudClicks)}번 남았어!`;
     if (cloudClicks >= cloudNeed) cloudSuccess();
   }
 });
@@ -3674,11 +3749,11 @@ function spawnRaindrops(x, y) {
 function cloudSuccess() {
   const bonus = Math.max(totalCps() * 180, clickPower() * 250, 200);
   earnCoins(bonus, 'event');
-  S.stardust += 3;
+  S.stardust += 2;
   S.stats.lifetime.cloudsSoothed = (S.stats.lifetime.cloudsSoothed || 0) + 1;
   confettiBurst();
   sndStar();
-  toast(`🌤️ 비가 그쳤어요! <b>+${fmt(bonus)}</b> 코인과 별가루 3개!`);
+  toast(`🌤️ 비가 그쳤어요! <b>+${fmt(bonus)}</b> 코인과 별가루 2개!`);
   showQuip('먹구름도 사실은 말랑했어.');
   hideCloud();
   checkEvolution();
