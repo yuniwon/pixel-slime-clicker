@@ -1634,23 +1634,18 @@ const TRAIT_PLACE = {
   ranch:   { s: 0.70, cy: 0.18 },  // 밀짚모자: 정수리
   star:    { s: 1.00, cy: 0.50 },  // 별가루: 몸 전체 주변 (원래 풀셀 디자인)
   dream:   { s: 0.70, cy: 0.18 },  // 잠모자: 정수리
-  samsara: { s: 0.64, cy: 0.06 },  // 고리: 머리 위 부유
+  samsara: { s: 0.64, cy: 0.12 },  // 고리: 머리 위 부유 (캔버스 안에 완전히 들어오는 최소 높이)
 };
 
+/* 셀을 (키,프레임)별 단일 이미지로 썰어서 쓴다 — 시트째 축소하면 이웃 프레임이
+   캔버스 안으로 비쳐 들어오는 블리딩이 생긴다 (실측: 좌우 유령 고리) */
 function traitBgLayer(key, frame) {
   const { s, cy } = TRAIT_PLACE[key];
-  const row = TRAIT_ATLAS.rows[key];
-  const col = TRAIT_ATLAS.twoFrame[key] ? frame : 0;
-  const tx = (1 - s) / 2;       // 가로 중앙 (아트가 셀 중앙 정렬)
-  const ty = cy - s / 2;        // 셀 중심이 cy에 오도록
-  // background-position % 역산: offset = (1 - bgSize) × p
-  const px = (tx - col * s) / (1 - 2 * s) * 100;
-  const py = (ty - row * s) / (1 - 5 * s) * 100;
-  return {
-    img: `url('${TRAIT_ATLAS.src}')`,
-    size: `${(s * 200).toFixed(1)}% ${(s * 500).toFixed(1)}%`,
-    pos: `${px.toFixed(2)}% ${py.toFixed(2)}%`,
-  };
+  const urls = TRAIT_ATLAS.cells[key];
+  const img = `url('${urls[frame % urls.length]}')`;
+  if (s >= 1) return { img, size: '100% 100%', pos: '50% 50%' };
+  const py = (cy - s / 2) / (1 - s) * 100;  // 단일 이미지: offset = (1-s)H × p
+  return { img, size: `${(s * 100).toFixed(1)}% ${(s * 100).toFixed(1)}%`, pos: `50% ${py.toFixed(2)}%` };
 }
 
 const MAX_LEVEL = 60;
@@ -2984,8 +2979,8 @@ function applySlimeSprite(force) {
     const L = traitBgLayer(key, slimeFrame);
     imgs.push(L.img); sizes.push(L.size); poss.push(L.pos);
   };
+  if (ring) addTrait('samsara');  // 고리가 최상단 — 모자 위에 떠야 가려지지 않는다
   if (traitKey && traitKey !== 'samsara') addTrait(traitKey);
-  if (ring) addTrait('samsara');
   imgs.push(`url('${SLIME_ATLAS.src}')`);
   sizes.push('200% 500%');  // 본체 셀 = 시트의 1/2 × 1/5
   poss.push(`${slimeFrame * 100}% ${stageIdx * 25}%`);
@@ -3589,8 +3584,11 @@ function checkStory() {
     if (st.cond()) {
       S.story[st.id] = true;
       newUnlock = true;
-      toast(`📜 별의 기록에 <b>${st.title}</b>이(가) 추가되었어요!`);
-      beep(784, 0.12, 'triangle', 0.08);
+      // 게임 시작 직후의 첫 스토리는 조용히 해금 — 첫 화면에 의미 모를 알림 금지 (UX 점진 공개)
+      if (S.playTime > 15) {
+        toast(`📜 별의 기록에 <b>${st.title}</b>이(가) 추가되었어요!`);
+        beep(784, 0.12, 'triangle', 0.08);
+      }
     }
   }
   if (newUnlock) {
@@ -6026,10 +6024,36 @@ function pinkifyGray(d) {
   }
 }
 
-// 성향 액세서리 아틀라스 프리로드 — 성공 시 글로우 대신 진짜 액세서리
+// 성향 액세서리 아틀라스 프리로드 — 성공 시 글로우 대신 진짜 액세서리.
+// 셀을 개별 blob으로 분리해 이웃 프레임 블리딩을 원천 차단
 (() => {
   const im = new Image();
-  im.onload = () => { traitAtlasOk = true; slimeSpriteSig = ''; };
+  im.onload = async () => {
+    try {
+      const cells = {};
+      const jobs = [];
+      for (const key in TRAIT_ATLAS.rows) {
+        const row = TRAIT_ATLAS.rows[key];
+        const frames = TRAIT_ATLAS.twoFrame[key] ? 2 : 1;
+        cells[key] = [];
+        for (let f = 0; f < frames; f++) {
+          const c = document.createElement('canvas');
+          c.width = 768; c.height = 768;
+          c.getContext('2d').drawImage(im, f * 768, row * 768, 768, 768, 0, 0, 768, 768);
+          jobs.push(new Promise(res => c.toBlob(b => {
+            cells[key][f] = b ? URL.createObjectURL(b) : '';
+            res();
+          })));
+        }
+      }
+      await Promise.all(jobs);
+      if (Object.values(cells).every(arr => arr.every(u => u))) {
+        TRAIT_ATLAS.cells = cells;
+        traitAtlasOk = true;
+        slimeSpriteSig = '';
+      }
+    } catch (e) { /* 분리 실패 시 오라 글로우 폴백 유지 */ }
+  };
   im.src = TRAIT_ATLAS.src;
 })();
 
