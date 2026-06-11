@@ -74,6 +74,18 @@
       "fps": 2,
       "loop": true,
       "action": "two-frame coin planet gentle spin"
+    },
+    "spirit": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "tiny star fairy spirit creature, glowing pale-gold body with two small wings, two-frame gentle hover with sparkle"
+    },
+    "turtle": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "small cosmic turtle with a tiny hourglass on its shell, sleepy eyes, two-frame slow breathing"
     }
   },
   "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",

@@ -1048,7 +1048,7 @@
 
 /* ════════════════════════ 데이터 ════════════════════════ */
 
-const SAVE_VERSION = 9;
+const SAVE_VERSION = 10;
 const PRESTIGE_UNLOCK = 1e9;
 
 const PRODUCERS = [
@@ -1060,6 +1060,8 @@ const PRODUCERS = [
   { id: 'dragon',  icon: '🐲', name: '아기 드래곤', desc: '보물 더미 위에서 잠을 자요',       baseCost: 1.4e6,    cps: 1400 },
   { id: 'whale',   icon: '🐋', name: '우주 고래',   desc: '은하수를 헤엄치며 코인을 뿜어요',  baseCost: 1.8e7,    cps: 7800 },
   { id: 'planet',  icon: '🪐', name: '코인 행성',   desc: '행성 전체가 코인으로 되어 있어요', baseCost: 2.8e8,    cps: 44000 },
+  { id: 'spirit',  icon: '🧚', name: '별의 정령',   desc: '잠든 별을 깨워 코인으로 바꿔요',   baseCost: 6e9,      cps: 260000 },
+  { id: 'turtle',  icon: '🐢', name: '시간 거북',   desc: '느리지만 시간을 등에 업었어요',     baseCost: 1e11,     cps: 1.6e6 },
 ];
 
 const PRODUCER_SPRITE_ATLAS = 'assets/generated/sprites/slime-friends-ai/sprite-sheet-alpha.png';
@@ -1245,6 +1247,9 @@ const STORY = [
   { id: 'seed', title: '끝은 씨앗',
     cond: () => S.prestige.totalResets >= 1,
     text: '모든 것이 사라지는 순간, 슬라임은 알았다. 끝은 끝이 아니라 씨앗이라는 것을. 슬라임은 더 깊은 층에서 다시 눈을 떴다.' },
+  { id: 'cosmic', title: '우주 씨앗',
+    cond: () => !!S.cosmicSeed,
+    text: '다섯 번의 생을 거치고, 모든 모습과 모든 성향을 겪은 슬라임의 방에 작은 우주 씨앗이 내려앉았다. 끝이 아니다 — 우주 어딘가에서, 또 다른 별이 떨어질 준비를 하는 소리가 들린다. 당신은 이 작은 우주를 한 번, 완성했다.' },
   { id: 'trait-muscle', title: '눌림을 견디는 법',
     cond: () => S.codex.traits.muscle,
     text: '수없이 눌린 슬라임은 튕겨 오르는 법을 배웠다. 작은 머리띠는 오늘도 말랑한 용기의 표시다.' },
@@ -1311,6 +1316,18 @@ const SYNERGIES = {
     { at: 5,   desc: '환생 영혼 획득 +5%' },
     { at: 10,  desc: '장식 보너스 +10%' },
     { at: 25,  desc: '친구 생산 추가 +10%' },
+  ],
+  spirit: [
+    { at: 10,  desc: '황금별 간격 -5%' },
+    { at: 25,  desc: '별 코인 보상 +20%' },
+    { at: 50,  desc: '행운 +10' },
+    { at: 100, desc: '미니 별똥별 +2개' },
+  ],
+  turtle: [
+    { at: 10,  desc: '오프라인 한도 +3시간' },
+    { at: 25,  desc: '콤보 지속 +0.3초' },
+    { at: 50,  desc: '레벨 요구치 -5%' },
+    { at: 100, desc: '모든 수입 +10%' },
   ],
 };
 
@@ -1538,6 +1555,9 @@ const NEWS = [
   { cond: () => !!S.cosmetics.equipped.bg, text: '하늘 색이 바뀌었지만 아무도 놀라지 않음. 흔한 일.' },
   { cond: () => S.wishes.completed >= 5, text: '소원 성취 전문 슬라임, 비결은 "그냥 꾸준히".' },
   { cond: () => (S.stats.lifetime.cloudsSoothed || 0) > 0, text: '먹구름 손님, 간식 들고 재방문 예고.' },
+  { cond: () => S.producers.spirit > 0, text: '별의 정령, 잠든 별 깨우다 본인이 깜빡 졸아.' },
+  { cond: () => S.producers.turtle > 0, text: '시간 거북 인터뷰: "서두르면 시간에 실례야."' },
+  { cond: () => !!S.cosmicSeed, text: '우주 씨앗 발아 관측 — 학계 "말랑하다" 술렁.' },
   { cond: () => chActive() === 'silence', text: '침묵의 손 수행자 목격담: "손은 멈췄지만 마음은 말랑."' },
   { cond: () => Object.keys(S.codex.challenges).length > 0, text: '이상한 생을 살아본 슬라임, 회고록 집필 중.' },
 ];
@@ -1693,6 +1713,18 @@ function defaultState() {
     cosmetics: { owned: {}, equipped: {} },
     runBlessings: [],   // 이번 생의 축복 (환생 시 초기화)
     challenge: { active: null, startedAt: 0 },  // 도전 런 (이번 생 한정)
+    cosmicSeed: false,  // 중간 엔딩: 우주 씨앗
+    telemetry: {        // 재미 측정용 로컬 텔레메트리 (외부 전송 없음)
+      sessions: 0,
+      sessionLengths: [],
+      starsSeen: 0,
+      starsClicked: 0,
+      cloudsSeen: 0,
+      cloudsEngaged: 0,
+      rerolls: 0,
+      skips: 0,
+      challengesStarted: 0,
+    },
     playTime: 0,        // 함께한 시간(초) — 앨범용
     createdAt: Date.now(),
     soundOn: true,
@@ -1992,12 +2024,14 @@ function clickSynMul() {
 function frenzyDuration() { return 20 + (hasSyn('dragon', 10) ? 2 : 0) + BC.frenzyDur; }
 function partyDuration() { return 30 + (hasSyn('whale', 25) ? 5 : 0) + BC.partyDur; }
 function offlineCapHours() {
-  return 8 + (hasSyn('cat', 25) ? 1 : 0) + (hasSyn('whale', 10) ? 2 : 0) + BC.offlineCap + 2 * perkLv('deeproot');
+  return 8 + (hasSyn('cat', 25) ? 1 : 0) + (hasSyn('whale', 10) ? 2 : 0) + BC.offlineCap
+    + 2 * perkLv('deeproot') + (hasSyn('turtle', 10) ? 3 : 0);
 }
 
 /* 별 코인 보상 통합 배율 (축복 + 강화 + 별의 혈통 특성) */
 function starRewardMul() {
-  return BC.starBonus * upProd('starBon') * (1 + 0.2 * perkLv('starborn'));
+  return BC.starBonus * upProd('starBon') * (1 + 0.2 * perkLv('starborn'))
+    * (hasSyn('spirit', 25) ? 1.2 : 1);
 }
 function offlineSynMul() { return (hasSyn('cat', 10) ? 1.1 : 1) * (hasSyn('whale', 100) ? 1.15 : 1); }
 function dreamThreshold() { return hasSyn('cat', 50) ? 0.18 : 0.25; }
@@ -2018,10 +2052,13 @@ function globalMul() {
   const codexBonus = hasSyn('unicorn', 50) ? 1 + 0.005 * codexEntryCount() : 1;
   const levelMul = 1 + (slimeLevel - 1) * 0.02;  // 레벨당 +2% (이번 생)
   const soulfire = 1 + 0.1 * perkLv('soulfire');
-  return (1 + achCount() * 0.01) * soulMul() * codexBonus * levelMul * BC.globalMulX * upProd('globMul') * soulfire;
+  return (1 + achCount() * 0.01) * soulMul() * codexBonus * levelMul * BC.globalMulX * upProd('globMul') * soulfire
+    * (hasSyn('turtle', 100) ? 1.1 : 1);
 }
 
-function comboWindow() { return 0.9 + 0.15 * perkLv('combo') + BC.comboWindow + upSum('comboWin'); }
+function comboWindow() {
+  return 0.9 + 0.15 * perkLv('combo') + BC.comboWindow + upSum('comboWin') + (hasSyn('turtle', 25) ? 0.3 : 0);
+}
 
 function offlineRate() {
   if (BC.offlineFull) return 1;
@@ -2046,7 +2083,7 @@ buildLevelTable();
 /* 레벨 L에 도달하기 위한 누적 코인 */
 function levelNeed(L) {
   if (L <= 1) return 0;
-  const reduct = (1 - 0.05 * perkLv('evoseed')) * BC.evoNeed;
+  const reduct = (1 - 0.05 * perkLv('evoseed')) * BC.evoNeed * (hasSyn('turtle', 50) ? 0.95 : 1);
   return levelTable[Math.min(L, MAX_LEVEL)] * reduct;
 }
 
@@ -2734,7 +2771,7 @@ function computeBlessCache() {
 computeBlessCache();  // 초기 상태로 즉시 1회 (load 전 BC 참조 안전)
 
 function luckTotal() {
-  const raw = BC.luck + perkLv('instinct') * 5;
+  const raw = BC.luck + perkLv('instinct') * 5 + (hasSyn('spirit', 50) ? 10 : 0);
   // 소프트캡: 30 초과분은 40%만 — 전설 독점 방지
   return raw <= 30 ? raw : 30 + (raw - 30) * 0.4;
 }
@@ -2849,6 +2886,7 @@ function rerollBlessings() {
   if (S.stardust < rerollCost) return;
   S.stardust -= rerollCost;
   rerollCost += 2;
+  S.telemetry.rerolls++;
   beep(523, 0.07);
   renderBlessingCards();
   save();
@@ -2868,6 +2906,7 @@ function pickBlessing(b) {
 
 function skipBlessing() {
   if (performance.now() < blessGuardUntil) return;
+  S.telemetry.skips++;
   if (S.prestige.totalResets >= 1) {
     S.stardust += 1;  // 패스에도 작은 보상 — 모든 선택이 유의미하게
     toast('💫 이번엔 괜찮아 — 별가루 +1');
@@ -2920,11 +2959,75 @@ function clickCosmetic(c) {
   save();
 }
 
+/* ════════════════════════ 우주 씨앗 (중간 엔딩) ════════════════════════
+   다섯 번의 생 + 갓 슬라임 + 모든 성향 — "이 작은 우주를 한 번 완성했다" */
+
+function cosmicSeedReady() {
+  return !S.cosmicSeed
+    && S.prestige.totalResets >= 5
+    && S.codex.stages[4]
+    && Object.keys(S.codex.traits).length >= 5;
+}
+
+function grantCosmicSeed() {
+  S.cosmicSeed = true;
+  const flash = $('evo-flash');
+  flash.classList.remove('go', 'rebirth');
+  void flash.offsetWidth;
+  flash.classList.add('go', 'rebirth');
+  confettiBurst();
+  setTimeout(confettiBurst, 600);
+  sndRebirth();
+  toast('🌌 <b>우주 씨앗</b>이 방에 내려앉았어요<br><small>당신은 이 작은 우주를 한 번 완성했습니다. 별의 기록에 마지막 장이 열렸어요.</small>');
+  showQuip('우리가… 해냈구나. 고마워.');
+  renderDecor();
+  save();
+}
+
+function cosmicSeedHtml() {
+  // 12x12 픽셀 씨앗: 보랏빛 발아체
+  const map = [
+    '.....gg.....',
+    '....gllg....',
+    '.....gg.....',
+    '....pppp....',
+    '..ppllllpp..',
+    '.plllsslllp.',
+    '.plsslssslp.',
+    '.plllsslllp.',
+    '..ppllllpp..',
+    '....pppp....',
+    '...oooooo...',
+    '..oooooooo..',
+  ];
+  const col = { g: '#7dff8a', l: '#d8c2ff', p: '#8d5ce8', s: '#fff8d6', o: '#3a2a5e' };
+  const cv = document.createElement('canvas');
+  cv.width = 12; cv.height = 12;
+  const ctx = cv.getContext('2d');
+  map.forEach((row, y) => [...row].forEach((ch, x) => {
+    if (ch === '.') return;
+    ctx.fillStyle = col[ch];
+    ctx.fillRect(x, y, 1, 1);
+  }));
+  return `<img src="${cv.toDataURL()}" alt="우주 씨앗" style="width:44px;height:44px;image-rendering:pixelated;">`;
+}
+
 /* ════════════════════════ 슬라임 방 (장식) ════════════════════════ */
 
 function renderDecor() {
   const layer = $('decor-layer');
   layer.innerHTML = '';
+  // 우주 씨앗: 엔딩 도달의 영구 증표 — 방 한가운데 위에서 빛난다
+  if (S.cosmicSeed) {
+    const seed = document.createElement('div');
+    seed.className = 'decor';
+    seed.style.left = '50%';
+    seed.style.top = '7%';
+    seed.style.transform = 'translateX(-50%)';
+    seed.style.filter = 'drop-shadow(0 0 12px #b48affcc)';
+    seed.innerHTML = cosmicSeedHtml();
+    layer.appendChild(seed);
+  }
   for (const d of DECOR) {
     if (!S.decor[d.id]) continue;
     const el = document.createElement('div');
@@ -2991,6 +3094,7 @@ function doPrestige(challengeId = null) {
   S.stats.run = defaultState().stats.run;  // 이번 생 통계만 초기화
   S.runBlessings = [];                      // 축복도 이번 생 한정
   S.challenge = { active: challengeId, startedAt: challengeId ? Date.now() : 0 };
+  if (challengeId) S.telemetry.challengesStarted++;
   if (challengeId === 'silence') S.producers.chick = 3;  // 침묵의 손: 동행 병아리
   pendingBlessings = 0;
   $('blessing-overlay').classList.remove('open');
@@ -3077,6 +3181,10 @@ const FRIEND_BEHAVIOR = {
     pos: () => ({ left: '50%', top: S.decor.window ? '13%' : '20%' }) },
   planet:  { max: 1, anim: 'orbit',
     pos: () => ({ right: '9%', top: '24%' }) },
+  spirit:  { max: 2, anim: 'shine',
+    pos: () => S.decor.lamp ? { right: '24%', bottom: '38%' } : { left: '24%', bottom: '40%' } },
+  turtle:  { max: 1, anim: 'snooze',
+    pos: () => ({ left: '8%', bottom: '8%' }) },
 };
 
 function friendCount(owned) {
@@ -3115,7 +3223,7 @@ function isMobileLayout() {
 }
 
 /* 모바일: 종별 1마리, 바닥 한 줄 정렬로 난잡함 방지 */
-const MOBILE_GROUND_ORDER = ['chick', 'dog', 'cat', 'rabbit', 'unicorn', 'dragon'];
+const MOBILE_GROUND_ORDER = ['chick', 'dog', 'cat', 'rabbit', 'unicorn', 'dragon', 'spirit', 'turtle'];
 
 function rebuildFriends() {
   friendsLayer.innerHTML = '';
@@ -3134,7 +3242,7 @@ function rebuildFriends() {
       else if (p.id === 'planet') pos = { right: '6%', top: '20%' };
       else {
         const slot = MOBILE_GROUND_ORDER.indexOf(p.id);
-        pos = { left: (7 + (slot < 0 ? groundIdx : slot) * 15) + '%', bottom: '7%' };
+        pos = { left: (5 + (slot < 0 ? groundIdx : slot) * 11) + '%', bottom: '7%' };
         groundIdx++;
       }
     }
@@ -3514,6 +3622,7 @@ function buildRoomTab() {
     ['거쳐온 생', (S.prestige.totalResets + 1) + '번째'],
     ['달래준 먹구름', (S.stats.lifetime.cloudsSoothed || 0) + '번'],
     ['완수한 도전', Object.keys(S.codex.challenges).length + '/' + CHALLENGES.length],
+    ['우주 씨앗', S.cosmicSeed ? '🌌 싹틈 — 우주를 한 번 완성함' : '아직 잠들어 있음'],
     ['가장 아낀 친구', bestFriend ? `${bestFriend.name} (${bestFriend.max}마리)` : '아직 없어요'],
   ];
   const album = document.createElement('div');
@@ -3771,7 +3880,8 @@ let starVisible = 0;
 function starInterval() {
   return (40 + Math.random() * 60) * (1 - 0.08 * perkLv('starlight')) * (hasSyn('dog', 25) ? 0.95 : 1)
     * BC.starInt
-    * (1 - upSum('starInt'));
+    * (1 - upSum('starInt'))
+    * (hasSyn('spirit', 10) ? 0.95 : 1);
 }
 
 function starSpawnRect() {
@@ -3787,6 +3897,7 @@ function starSpawnRect() {
 function spawnStar() {
   starVisible = starLinger();
   starEl.style.display = 'block';
+  S.telemetry.starsSeen++;
   // 첫 황금별 안내
   if (S.stats.lifetime.starsClicked === 0) {
     toast('⭐ <b>황금별</b>이 떴어요! 사라지기 전에 눌러보세요 — 좋은 일이 생겨요');
@@ -3862,6 +3973,7 @@ starEl.addEventListener('pointerdown', e => {
   sndStar();
   S.stats.run.starsClicked++;
   S.stats.lifetime.starsClicked++;
+  S.telemetry.starsClicked++;
   wishEvent('star', 1);
   pickStarEvent().run(e);
   // 로켓 토끼 100: 별 이벤트 후 20% 확률로 미니 별똥별 추가
@@ -3901,6 +4013,7 @@ function spawnCloud() {
   cloudEl.classList.remove('challenge');
   cloudEl.style.display = 'block';
   $('cloud-hint').textContent = '👆 눌러서 비를 털어줘!';
+  S.telemetry.cloudsSeen++;
   toast('☁️ <b>먹구름 손님</b>이 찾아왔어요!');
   beep(294, 0.12, 'triangle', 0.07);
 }
@@ -3921,6 +4034,7 @@ cloudEl.addEventListener('pointerdown', e => {
     cloudTime = 10;
     cloudEl.classList.remove('drift');
     cloudEl.classList.add('challenge');
+    S.telemetry.cloudsEngaged++;
     $('cloud-hint').textContent = `⚡ 연타! ${cloudNeed}번 두드리기!`;
     toast(`☁️ 10초 안에 <b>${cloudNeed}번</b> 연타해서 비를 털어내자!`);
     beep(330, 0.1);
@@ -3974,7 +4088,7 @@ function cloudFail() {
 }
 
 function spawnMiniStars() {
-  const count = 5 + (hasSyn('rabbit', 10) ? 1 : 0) + BC.miniCount;
+  const count = 5 + (hasSyn('rabbit', 10) ? 1 : 0) + BC.miniCount + (hasSyn('spirit', 100) ? 2 : 0);
   for (let i = 0; i < count; i++) {
     const img = document.createElement('img');
     img.src = starDataURL;
@@ -4148,6 +4262,11 @@ function migrateSave(data) {
   // v8 이하: 도전 런
   out.challenge = Object.assign({ active: null, startedAt: 0 }, data.challenge || {});
   out.codex.challenges = (data.codex && data.codex.challenges) || {};
+
+  // v9 이하: 우주 씨앗 + 텔레메트리
+  out.cosmicSeed = !!data.cosmicSeed;
+  out.telemetry = Object.assign(defaultState().telemetry, data.telemetry || {});
+  if (!Array.isArray(out.telemetry.sessionLengths)) out.telemetry.sessionLengths = [];
   out.achievements = data.achievements || {};
   out.producers = Object.assign({}, defaultState().producers, data.producers || {});
   out.upgrades = data.upgrades || {};
@@ -4409,6 +4528,7 @@ function econTickBody() {
     }
     recordCodex();
     checkStory();
+    if (cosmicSeedReady()) grantCosmicSeed();
     // 온보딩: 첫 친구를 아직 안 샀고 살 수 있을 때 한 번만 안내
     if (!hintFriendShown && S.totalEarned < 200 && S.coins >= 15
         && PRODUCERS.every(p => !S.producers[p.id])) {
@@ -4473,6 +4593,35 @@ cloudEl.insertAdjacentHTML('beforeend',
 
 load();
 computeBlessCache();
+// 세션 기록 (재미 텔레메트리)
+S.telemetry.sessions++;
+const sessionStartPlay = S.playTime;
+window.addEventListener('pagehide', () => {
+  const len = Math.round(S.playTime - sessionStartPlay);
+  if (len > 5) {
+    S.telemetry.sessionLengths.push(len);
+    if (S.telemetry.sessionLengths.length > 20) S.telemetry.sessionLengths.shift();
+  }
+});
+
+/* 재미 텔레메트리 요약 (개발용): 콘솔에서 telemetryDump() */
+window.telemetryDump = function telemetryDump() {
+  const t = S.telemetry;
+  const avg = t.sessionLengths.length
+    ? Math.round(t.sessionLengths.reduce((a, b) => a + b, 0) / t.sessionLengths.length) : 0;
+  return {
+    세션수: t.sessions,
+    평균세션: fmtTime(avg),
+    최근세션들: t.sessionLengths.map(fmtTime),
+    황금별_응답률: t.starsSeen ? Math.min(100, t.starsClicked / t.starsSeen * 100).toFixed(0) + '%' : '-',
+    먹구름_참여율: t.cloudsSeen ? (t.cloudsEngaged / t.cloudsSeen * 100).toFixed(0) + '%' : '-',
+    리롤: t.rerolls, 스킵: t.skips,
+    도전시작: t.challengesStarted,
+    소원완료: S.wishes.completed,
+    플레이타임: fmtTime(S.playTime),
+  };
+};
+
 slimeLevel = currentLevelFor(S.totalEarned);
 stageIdx = stageForLevel(slimeLevel);
 currentTrait = detectTrait();
