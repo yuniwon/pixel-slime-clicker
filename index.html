@@ -519,6 +519,114 @@
   .syn-line { font-size: 10px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
   .syn-line.on { color: var(--green); }
 
+  /* ── 소원 / 별가루 ── */
+  #stardust-display {
+    text-align: center;
+    font-size: 13px;
+    color: var(--gold);
+    padding: 6px 0 10px;
+  }
+  .wish-item { cursor: default; }
+  .wish-item.done { border-color: var(--green); }
+  .wish-bar-outer {
+    height: 8px;
+    background: #00000066;
+    border: 2px solid var(--border);
+    margin-top: 6px;
+  }
+  .wish-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--pink), var(--gold));
+    transition: width .25s ease;
+  }
+  .wish-reward { font-size: 11px; color: var(--gold); margin-top: 4px; }
+  .cosmetic-item.equipped { border-color: var(--gold); }
+  .cosmetic-item.equipped .shop-name::after { content: ' (장착 중)'; color: var(--green); font-size: 11px; }
+
+  /* ── 배경 테마 ── */
+  body.bg-dawn {
+    background:
+      radial-gradient(ellipse at 50% 120%, #7a3b5e 0%, transparent 60%),
+      linear-gradient(180deg, #2b1a3e 0%, #5e2c50 70%, #8a4a4a 100%);
+  }
+  body.bg-abyss {
+    background:
+      radial-gradient(ellipse at 50% 120%, #173f5e 0%, transparent 60%),
+      linear-gradient(180deg, #081826 0%, #0e2c44 100%);
+  }
+  body.bg-aurora {
+    background:
+      radial-gradient(ellipse at 30% 0%, #1d5e4a55 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 10%, #5e2c7a55 0%, transparent 50%),
+      linear-gradient(180deg, #0e1f33 0%, #1d3a4e 100%);
+  }
+
+  /* ── 말풍선 테마 ── */
+  #speech-bubble.bubble-pink { background: #ffd9ec; border-color: #a8336e; color: #5e1740; }
+  #speech-bubble.bubble-pink::after { border-top-color: #a8336e; }
+  #speech-bubble.bubble-gold { background: #ffeec4; border-color: #8a6d1f; color: #5c4312; }
+  #speech-bubble.bubble-gold::after { border-top-color: #8a6d1f; }
+
+  /* ── 퍼펙트 말랑 ── */
+  .float-num.perfect {
+    font-size: 32px;
+    color: #ff5ea8;
+    text-shadow: 2px 2px 0 #ffffff88, 4px 4px 0 #00000066;
+  }
+  .emoji-spark {
+    position: fixed;
+    font-size: 15px;
+    pointer-events: none;
+    z-index: 49;
+  }
+
+  /* ── 설정 모달 ── */
+  #settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: #000000aa;
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  #settings-overlay.open { display: flex; }
+  #settings-modal {
+    background: var(--panel);
+    border: 4px solid var(--border);
+    box-shadow: 6px 6px 0 #00000066;
+    width: min(420px, 92vw);
+    max-height: 86vh;
+    overflow-y: auto;
+    padding: 18px;
+  }
+  #settings-modal h3 { color: var(--gold); font-size: 15px; margin-bottom: 12px; letter-spacing: 1px; }
+  #settings-modal h4 { color: var(--text-dim); font-size: 12px; margin: 14px 0 6px; }
+  #settings-modal textarea {
+    width: 100%;
+    height: 64px;
+    background: #00000055;
+    border: 2px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 10px;
+    padding: 6px;
+    resize: none;
+  }
+  .settings-row { display: flex; gap: 8px; margin-top: 6px; }
+  .settings-btn {
+    flex: 1;
+    background: var(--panel-light);
+    border: 2px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 8px 0;
+    cursor: pointer;
+  }
+  .settings-btn:hover { border-color: var(--gold); }
+  .settings-btn.danger { border-color: #8a2b2b; color: #ff9a9a; }
+
   /* ── 토스트 ── */
   #toast {
     position: fixed;
@@ -594,7 +702,7 @@
     <span id="discount-badge">⭐ 다음 구매 50% 할인!</span>
     <div>
       <button class="icon-btn" id="sound-btn" aria-label="소리 켜기/끄기">🔊</button>
-      <button class="icon-btn" id="reset-btn" aria-label="게임 초기화 (길게 누르기)" title="길게 눌러 초기화">초기화</button>
+      <button class="icon-btn" id="settings-btn" aria-label="설정 열기">⚙️</button>
     </div>
   </div>
   <div id="shop-tabs">
@@ -603,6 +711,7 @@
     <div class="tab" data-tab="achievements" role="button">업적</div>
     <div class="tab" data-tab="prestige" role="button">환생</div>
     <div class="tab" data-tab="room" role="button">방</div>
+    <div class="tab" data-tab="wishes" role="button">소원</div>
   </div>
   <div id="buy-modes" class="on">
     <button class="mode-btn active" data-mode="1">x1</button>
@@ -622,12 +731,35 @@
 <div id="evo-flash"></div>
 <div id="toast"></div>
 
+<div id="settings-overlay">
+  <div id="settings-modal">
+    <h3>⚙️ 설정</h3>
+    <h4>세이브 내보내기</h4>
+    <textarea id="export-area" readonly aria-label="세이브 코드"></textarea>
+    <div class="settings-row">
+      <button class="settings-btn" id="copy-save-btn">코드 복사</button>
+    </div>
+    <h4>세이브 가져오기</h4>
+    <textarea id="import-area" placeholder="세이브 코드를 붙여넣으세요" aria-label="세이브 코드 입력"></textarea>
+    <div class="settings-row">
+      <button class="settings-btn" id="import-save-btn">가져오기 (현재 진행을 덮어써요)</button>
+    </div>
+    <h4>위험 구역</h4>
+    <div class="settings-row">
+      <button class="settings-btn danger" id="reset-btn" title="길게 눌러 초기화">처음부터 다시 시작 (길게 누르기)</button>
+    </div>
+    <div class="settings-row">
+      <button class="settings-btn" id="close-settings-btn">닫기</button>
+    </div>
+  </div>
+</div>
+
 <script>
 'use strict';
 
 /* ════════════════════════ 데이터 ════════════════════════ */
 
-const SAVE_VERSION = 5;
+const SAVE_VERSION = 6;
 const PRESTIGE_UNLOCK = 1e9;
 
 const PRODUCERS = [
@@ -856,6 +988,49 @@ const SYNERGIES = {
   ],
 };
 
+/* 슬라임의 소원: 접속 중 항상 3개 활성, 완료하면 별가루 획득.
+   별가루는 경제에 영향 없는 표현(코스메틱) 보상 전용 재화 */
+const WISH_TYPES = [
+  { type: 'click',    icon: '👆', reward: 2,
+    make: wc => ({ target: Math.min(40 + wc * 10, 400) }),
+    text: w => `슬라임 ${w.target}번 클릭하기` },
+  { type: 'combo',    icon: '⚡', reward: 3,
+    make: wc => ({ target: Math.min(20 + Math.floor(wc / 2) * 5, 45) }),
+    text: w => `콤보 ${w.target} 달성하기` },
+  { type: 'star',     icon: '⭐', reward: 5,
+    make: () => ({ target: 1 }),
+    text: () => '황금별 1개 잡기' },
+  { type: 'ministar', icon: '🌠', reward: 4,
+    make: () => ({ target: 3 }),
+    text: () => '미니 별똥별 3개 잡기' },
+  { type: 'hire',     icon: '🐾', reward: 3,
+    make: wc => ({ target: Math.min(5 + wc, 30) }),
+    text: w => `친구 ${w.target}마리 고용하기` },
+  { type: 'earn',     icon: '💰', reward: 3,
+    make: () => ({ target: Math.max(100, Math.round(totalCps() * 90 + clickPower() * 50)) }),
+    text: w => `코인 ${fmt(w.target)} 모으기` },
+  { type: 'upgrade',  icon: '🧤', reward: 4,
+    make: () => ({ target: 1 }),
+    text: () => '강화 1개 구매하기' },
+];
+
+/* 별가루 코스메틱: 전부 표현 전용, 보너스 없음 */
+const COSMETICS = [
+  { id: 'aura-pink',   slot: 'aura',     icon: '💗', name: '핑크 오라',    desc: '슬라임이 분홍빛으로 빛나요',   cost: 5, value: '#ff8ac4' },
+  { id: 'aura-mint',   slot: 'aura',     icon: '💚', name: '민트 오라',    desc: '슬라임이 민트빛으로 빛나요',   cost: 5, value: '#7dffc4' },
+  { id: 'aura-gold',   slot: 'aura',     icon: '💛', name: '골드 오라',    desc: '슬라임이 금빛으로 빛나요',     cost: 5, value: '#ffd75e' },
+  { id: 'bg-dawn',     slot: 'bg',       icon: '🌅', name: '새벽 하늘',    desc: '방이 새벽빛으로 물들어요',     cost: 8, value: 'bg-dawn' },
+  { id: 'bg-abyss',    slot: 'bg',       icon: '🌊', name: '깊은 바다',    desc: '방이 심해처럼 고요해져요',     cost: 8, value: 'bg-abyss' },
+  { id: 'bg-aurora',   slot: 'bg',       icon: '🌌', name: '오로라',       desc: '하늘에 오로라가 흐릅니다',     cost: 8, value: 'bg-aurora' },
+  { id: 'bubble-pink', slot: 'bubble',   icon: '🎀', name: '핑크 말풍선',  desc: '슬라임의 말풍선이 달콤해져요', cost: 5, value: 'bubble-pink' },
+  { id: 'bubble-gold', slot: 'bubble',   icon: '⭐', name: '골드 말풍선',  desc: '슬라임의 말풍선이 반짝여요',   cost: 5, value: 'bubble-gold' },
+  { id: 'pt-heart',    slot: 'particle', icon: '💖', name: '하트 파티클',  desc: '클릭하면 하트가 터져요',       cost: 6, value: '💖' },
+  { id: 'pt-star',     slot: 'particle', icon: '✨', name: '별 파티클',    desc: '클릭하면 별이 흩날려요',       cost: 6, value: '✨' },
+  { id: 'pt-note',     slot: 'particle', icon: '🎵', name: '음표 파티클',  desc: '클릭하면 음표가 통통 튀어요',  cost: 6, value: '🎵' },
+];
+
+const COSMETIC_SLOT_NAMES = { aura: '오라', bg: '배경', bubble: '말풍선', particle: '파티클' };
+
 const ACHIEVEMENTS = [
   { id: 'click1',    icon: '👆', name: '첫 말랑',         desc: '슬라임을 처음 클릭하기' },
   { id: 'click100',  icon: '👏', name: '말랑 입문자',     desc: '총 100번 클릭하기' },
@@ -1031,6 +1206,9 @@ function defaultState() {
     decor: {},
     story: {},
     codex: { stages: {}, traits: {}, friends: {} },
+    stardust: 0,
+    wishes: { active: [], completed: 0 },
+    cosmetics: { owned: {}, equipped: {} },
     soundOn: true,
     lastSave: Date.now(),
   };
@@ -1055,6 +1233,7 @@ let blinking = 0;
 let currentTrait = null;    // 0.5초마다 갱신
 let quipTimer = 30;
 let silentTick = false;     // finalSave 중 토스트/말풍선 억제
+let hintFriendShown = false; // 온보딩: 첫 친구 고용 힌트 (세션당 1회)
 
 /* ════════════════════════ 유틸 ════════════════════════ */
 
@@ -1161,6 +1340,7 @@ function earnCoins(gain, kind) {
   else if (kind === 'idle') S.stats.run.idleEarned += gain;
   else if (kind === 'offline') S.stats.run.offlineEarned += gain;
   if (frenzyTimer > 0) frenzyEarned += gain;
+  wishEvent('earn', gain);
 }
 
 function earnShare(key) {
@@ -1337,6 +1517,7 @@ function sndBuy()   { beep(523, 0.08); setTimeout(() => beep(784, 0.1), 70); }
 function sndEvo()   { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.15, 'triangle', 0.1), i * 110)); }
 function sndStar()  { [880, 1175, 1568].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.1), i * 80)); }
 function sndAch()   { [659, 880, 1319].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.09), i * 90)); }
+function sndPerfect() { [784, 1047, 1568, 2093].forEach((f, i) => setTimeout(() => beep(f, 0.1, 'triangle', 0.1), i * 55)); }
 function sndRebirth() { [1047, 784, 523, 392, 523, 784, 1047, 1568].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'triangle', 0.1), i * 130)); }
 
 /* ════════════════════════ 슬라임 렌더링 ════════════════════════ */
@@ -1545,7 +1726,10 @@ function randomQuip() {
 const slimeWrap = $('slime-wrap');
 
 function doClick(x, y) {
-  const gain = clickPower() * comboMul() * frenzyMul();
+  // 퍼펙트 말랑: 3% 확률로 x5 — 손맛용 잭팟
+  const perfect = Math.random() < 0.03;
+  let gain = clickPower() * comboMul() * frenzyMul();
+  if (perfect) gain *= 5;
   earnCoins(gain, 'click');
   S.totalClicks++;
   S.stats.run.clicks++;
@@ -1559,9 +1743,18 @@ function doClick(x, y) {
   void slimeCv.offsetWidth;
   slimeCv.classList.add('squish');
 
-  spawnFloat(x, y, '+' + fmt(gain), frenzyTimer > 0);
-  spawnSparks(x, y);
-  sndClick();
+  if (perfect) {
+    spawnFloat(x, y - 10, '퍼펙트 말랑! +' + fmt(gain), false, true);
+    spawnSparks(x, y);
+    spawnSparks(x, y);
+    sndPerfect();
+  } else {
+    spawnFloat(x, y, '+' + fmt(gain), frenzyTimer > 0);
+    spawnSparks(x, y);
+    sndClick();
+  }
+  wishEvent('click', 1);
+  wishEvent('combo', combo);
   checkEvolution();
   renderHud();
 }
@@ -1577,9 +1770,9 @@ window.addEventListener('keydown', e => {
   doClick(r.left + r.width / 2 + (Math.random() * 60 - 30), r.top + r.height * 0.55);
 });
 
-function spawnFloat(x, y, text, big) {
+function spawnFloat(x, y, text, big, perfect) {
   const el = document.createElement('div');
-  el.className = 'float-num' + (big ? ' big' : '');
+  el.className = 'float-num' + (big ? ' big' : '') + (perfect ? ' perfect' : '');
   el.textContent = text;
   el.style.left = (x - 20 + (Math.random() * 40 - 20)) + 'px';
   el.style.top = (y - 30) + 'px';
@@ -1589,10 +1782,16 @@ function spawnFloat(x, y, text, big) {
 
 const SPARK_COLORS = ['#ffd75e', '#ff8ac4', '#7dff8a', '#56b8f2', '#ffffff'];
 function spawnSparks(x, y) {
+  const emoji = S.cosmetics.equipped.particle;  // 장착한 파티클 스킨
   for (let i = 0; i < 5; i++) {
     const el = document.createElement('div');
-    el.className = 'spark';
-    el.style.background = SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)];
+    if (emoji) {
+      el.className = 'emoji-spark';
+      el.textContent = emoji;
+    } else {
+      el.className = 'spark';
+      el.style.background = SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)];
+    }
     el.style.left = x + 'px';
     el.style.top = y + 'px';
     const ang = Math.random() * Math.PI * 2;
@@ -1729,6 +1928,92 @@ function checkStory() {
     save();
     if (currentTab === 'room') buildShop();
   }
+}
+
+/* ════════════════════════ 슬라임의 소원 / 별가루 ════════════════════════ */
+
+function drawWish() {
+  const activeTypes = S.wishes.active.map(w => w.type);
+  const pool = WISH_TYPES.filter(t => {
+    if (activeTypes.includes(t.type)) return false;
+    if (t.type === 'upgrade' && UPGRADES.every(u => S.upgrades[u.id])) return false;
+    return true;
+  });
+  if (!pool.length) return;
+  const tpl = pool[Math.floor(Math.random() * pool.length)];
+  const made = tpl.make(S.wishes.completed);
+  S.wishes.active.push({
+    type: tpl.type,
+    icon: tpl.icon,
+    target: made.target,
+    progress: 0,
+    reward: tpl.reward,
+  });
+}
+
+function initWishes() {
+  // 손상된 항목 정리 후 3개 채우기
+  S.wishes.active = S.wishes.active.filter(w =>
+    w && WISH_TYPES.some(t => t.type === w.type) && w.target > 0);
+  while (S.wishes.active.length < 3) drawWish();
+}
+
+function wishText(w) {
+  const tpl = WISH_TYPES.find(t => t.type === w.type);
+  return tpl ? tpl.text(w) : '';
+}
+
+function wishEvent(type, amount) {
+  let completedAny = false;
+  for (let i = S.wishes.active.length - 1; i >= 0; i--) {
+    const w = S.wishes.active[i];
+    if (w.type !== type) continue;
+    if (type === 'combo') w.progress = Math.max(w.progress, amount);
+    else w.progress += amount;
+    if (w.progress >= w.target) {
+      S.wishes.active.splice(i, 1);
+      S.stardust += w.reward;
+      S.wishes.completed++;
+      completedAny = true;
+      toast(`💫 소원 성취! <b>${wishText(w)}</b><br><small>별가루 +${w.reward}</small>`);
+      sndAch();
+    }
+  }
+  if (completedAny) {
+    initWishes();
+    save();
+    if (currentTab === 'wishes') buildShop();
+  }
+}
+
+/* ── 코스메틱 ── */
+
+function applyCosmetics() {
+  document.body.classList.remove('bg-dawn', 'bg-abyss', 'bg-aurora');
+  if (S.cosmetics.equipped.bg) document.body.classList.add(S.cosmetics.equipped.bg);
+  const bub = $('speech-bubble');
+  bub.classList.remove('bubble-pink', 'bubble-gold');
+  if (S.cosmetics.equipped.bubble) bub.classList.add(S.cosmetics.equipped.bubble);
+}
+
+function clickCosmetic(c) {
+  if (!S.cosmetics.owned[c.id]) {
+    if (S.stardust < c.cost) return;
+    S.stardust -= c.cost;
+    S.cosmetics.owned[c.id] = true;
+    S.cosmetics.equipped[c.slot] = c.value;
+    toast(`${c.icon} <b>${c.name}</b> 구매하고 바로 장착했어요!`);
+    sndBuy();
+  } else if (S.cosmetics.equipped[c.slot] === c.value) {
+    delete S.cosmetics.equipped[c.slot];
+    toast(`${c.icon} ${c.name} 해제`);
+  } else {
+    S.cosmetics.equipped[c.slot] = c.value;
+    toast(`${c.icon} <b>${c.name}</b> 장착!`);
+  }
+  applyCosmetics();
+  buildShop();
+  save();
 }
 
 /* ════════════════════════ 슬라임 방 (장식) ════════════════════════ */
@@ -1936,10 +2221,65 @@ function buildShop() {
     }
   } else if (currentTab === 'prestige') {
     buildPrestigeTab();
-  } else {
+  } else if (currentTab === 'room') {
     buildRoomTab();
+  } else {
+    buildWishesTab();
   }
   refreshShop();
+}
+
+function buildWishesTab() {
+  const dust = document.createElement('div');
+  dust.id = 'stardust-display';
+  dust.innerHTML = `💫 별가루 <b>${S.stardust}</b>개 · 이룬 소원 ${S.wishes.completed}개`;
+  shopList.appendChild(dust);
+
+  const title1 = document.createElement('div');
+  title1.className = 'room-section-title';
+  title1.textContent = '💫 슬라임의 소원 — 이루면 별가루를 줘요';
+  shopList.appendChild(title1);
+
+  S.wishes.active.forEach((w, i) => {
+    const el = document.createElement('div');
+    el.className = 'shop-item wish-item';
+    el.dataset.idx = i;
+    el.innerHTML = `
+      <div class="shop-icon">${w.icon}</div>
+      <div class="shop-info">
+        <div class="shop-name">${wishText(w)}</div>
+        <div class="wish-bar-outer"><div class="wish-bar"></div></div>
+        <div class="wish-reward">진행 <span class="wish-progress"></span> · 보상 별가루 +${w.reward}</div>
+      </div>`;
+    shopList.appendChild(el);
+  });
+
+  // 코스메틱: 슬롯별 섹션
+  for (const slot of ['aura', 'bg', 'bubble', 'particle']) {
+    const title = document.createElement('div');
+    title.className = 'room-section-title';
+    title.textContent = `✨ ${COSMETIC_SLOT_NAMES[slot]} 꾸미기`;
+    shopList.appendChild(title);
+
+    for (const c of COSMETICS.filter(x => x.slot === slot)) {
+      const owned = !!S.cosmetics.owned[c.id];
+      const equipped = S.cosmetics.equipped[c.slot] === c.value;
+      const el = document.createElement('div');
+      el.className = 'shop-item cosmetic-item'
+        + (equipped ? ' equipped' : '')
+        + (!owned && S.stardust < c.cost ? ' locked' : '');
+      el.dataset.id = c.id;
+      el.innerHTML = `
+        <div class="shop-icon">${c.icon}</div>
+        <div class="shop-info">
+          <div class="shop-name">${c.name}</div>
+          <div class="shop-desc">${c.desc}</div>
+          <div class="shop-cost">${owned ? (equipped ? '클릭해서 해제' : '클릭해서 장착') : `별가루 ${c.cost}개`}</div>
+        </div>`;
+      el.addEventListener('click', () => clickCosmetic(c));
+      shopList.appendChild(el);
+    }
+  }
 }
 
 function buildRoomTab() {
@@ -2151,6 +2491,22 @@ function refreshShop() {
       if (!d || S.decor[d.id]) continue;
       el.classList.toggle('locked', S.coins < d.cost);
     }
+  } else if (currentTab === 'wishes') {
+    const dust = $('stardust-display');
+    if (dust) dust.innerHTML = `💫 별가루 <b>${S.stardust}</b>개 · 이룬 소원 ${S.wishes.completed}개`;
+    for (const el of shopList.querySelectorAll('.wish-item')) {
+      const w = S.wishes.active[el.dataset.idx];
+      if (!w) continue;
+      const pct = Math.min(100, w.progress / w.target * 100);
+      el.querySelector('.wish-bar').style.width = pct + '%';
+      el.querySelector('.wish-progress').textContent =
+        `${fmt(Math.min(w.progress, w.target))} / ${fmt(w.target)}`;
+    }
+    for (const el of shopList.querySelectorAll('.cosmetic-item')) {
+      const c = COSMETICS.find(x => x.id === el.dataset.id);
+      if (!c || S.cosmetics.owned[c.id]) continue;
+      el.classList.toggle('locked', S.stardust < c.cost);
+    }
   }
 }
 
@@ -2168,6 +2524,7 @@ function buyProducer(p) {
   S.producers[p.id] += info.count;
   consumeDiscount();
   sndBuy();
+  wishEvent('hire', info.count);
   rebuildFriends();
   refreshShop();
   renderHud();
@@ -2181,6 +2538,7 @@ function buyUpgrade(u) {
   S.upgrades[u.id] = true;
   consumeDiscount();
   sndBuy();
+  wishEvent('upgrade', 1);
   toast(`${u.icon} <b>${u.name}</b> 구매 완료!`);
   buildShop();
   renderHud();
@@ -2289,6 +2647,7 @@ starEl.addEventListener('pointerdown', e => {
   sndStar();
   S.stats.run.starsClicked++;
   S.stats.lifetime.starsClicked++;
+  wishEvent('star', 1);
   pickStarEvent().run(e);
   // 로켓 토끼 100: 별 이벤트 후 20% 확률로 미니 별똥별 추가
   if (hasSyn('rabbit', 100) && Math.random() < 0.2) {
@@ -2319,6 +2678,7 @@ function spawnMiniStars() {
       if (hasSyn('rabbit', 25)) bonus *= 1.3;
       if (hasSyn('dog', 50)) bonus *= 1.2;
       earnCoins(bonus, 'event');
+      wishEvent('ministar', 1);
       spawnFloat(ev.clientX, ev.clientY, '+' + fmt(bonus), true);
       beep(1175, 0.1, 'triangle', 0.09);
       img.remove();
@@ -2437,6 +2797,15 @@ function migrateSave(data) {
       out.codex.friends[k] = { discovered: true, maxOwned: (data.producers && data.producers[k]) || 0 };
     }
   }
+
+  // v5 이하: 별가루/소원/코스메틱 기본값
+  out.stardust = data.stardust || 0;
+  out.wishes = Object.assign({ active: [], completed: 0 }, data.wishes || {});
+  if (!Array.isArray(out.wishes.active)) out.wishes.active = [];
+  out.cosmetics = {
+    owned: (data.cosmetics && data.cosmetics.owned) || {},
+    equipped: (data.cosmetics && data.cosmetics.equipped) || {},
+  };
   out.achievements = data.achievements || {};
   out.producers = Object.assign({}, defaultState().producers, data.producers || {});
   out.upgrades = data.upgrades || {};
@@ -2495,6 +2864,46 @@ $('sound-btn').addEventListener('click', () => {
   $('sound-btn').textContent = S.soundOn ? '🔊' : '🔇';
   if (S.soundOn) beep(660, 0.08);
   save();
+});
+
+/* ── 설정 모달: 세이브 내보내기/가져오기 ── */
+
+function exportSaveCode() {
+  save();
+  const json = localStorage.getItem(SAVE_KEY) || '';
+  return btoa(unescape(encodeURIComponent(json)));
+}
+
+function importSaveCode(code) {
+  try {
+    const json = decodeURIComponent(escape(atob(code.trim())));
+    const data = JSON.parse(json);
+    if (typeof data !== 'object' || data === null || data.coins === undefined) throw new Error('bad save');
+    localStorage.setItem(SAVE_KEY, json);
+    location.reload();
+  } catch (e) {
+    toast('가져오기 실패: 세이브 코드가 올바르지 않아요');
+  }
+}
+
+$('settings-btn').addEventListener('click', () => {
+  $('export-area').value = exportSaveCode();
+  $('import-area').value = '';
+  $('settings-overlay').classList.add('open');
+});
+$('close-settings-btn').addEventListener('click', () => $('settings-overlay').classList.remove('open'));
+$('settings-overlay').addEventListener('click', e => {
+  if (e.target === $('settings-overlay')) $('settings-overlay').classList.remove('open');
+});
+$('copy-save-btn').addEventListener('click', () => {
+  $('export-area').select();
+  try { navigator.clipboard.writeText($('export-area').value); } catch (e) { document.execCommand('copy'); }
+  toast('세이브 코드를 복사했어요!');
+});
+$('import-save-btn').addEventListener('click', () => {
+  const code = $('import-area').value;
+  if (!code.trim()) return;
+  if (confirm('현재 진행을 덮어쓰고 이 세이브를 불러올까요?')) importSaveCode(code);
 });
 
 /* 닫기/숨김 직전 마지막 경과분까지 정산 후 저장 (토스트 없이) */
@@ -2616,12 +3025,21 @@ function econTickBody() {
         }
       }
     }
-    // 유니콘 100: 성향 오라
-    slimeCv.style.filter = (currentTrait && hasSyn('unicorn', 100))
-      ? `drop-shadow(0 0 14px ${currentTrait.pupil})`
-      : '';
+    // 오라: 코스메틱 장착 > 유니콘 100 성향 오라
+    const cosAura = S.cosmetics.equipped.aura;
+    slimeCv.style.filter = cosAura
+      ? `drop-shadow(0 0 14px ${cosAura})`
+      : (currentTrait && hasSyn('unicorn', 100))
+        ? `drop-shadow(0 0 14px ${currentTrait.pupil})`
+        : '';
     recordCodex();
     checkStory();
+    // 온보딩: 첫 친구를 아직 안 샀고 살 수 있을 때 한 번만 안내
+    if (!hintFriendShown && S.totalEarned < 200 && S.coins >= 15
+        && PRODUCERS.every(p => !S.producers[p.id])) {
+      hintFriendShown = true;
+      toast('🐤 상점에서 <b>병아리</b> 친구를 고용해보세요! 자동으로 코인을 모아줘요');
+    }
   }
 
   saveAcc += dt;
@@ -2680,11 +3098,15 @@ currentTrait = detectTrait();
 recordCodex();
 renderStageName();
 $('sound-btn').textContent = S.soundOn ? '🔊' : '🔇';
+initWishes();
+applyCosmetics();
 buildShop();
 rebuildFriends();
 renderDecor();
 renderHud();
 checkStory();
+// 온보딩: 완전 새 게임이면 첫 클릭 안내
+if (S.totalClicks === 0) setTimeout(() => showQuip('나를 말랑말랑 눌러봐!'), 1200);
 requestAnimationFrame(loop);
 </script>
 </body>
