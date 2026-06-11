@@ -76,6 +76,7 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | slime-cosmetics-ai | 11 (꾸미기) | ⚠️ 부분 연결 (핑크 3종 폴백) → green 크로마로 재생성 대기 |
 | slime-items-ai | 18 (강화/특성) | ⚠️ prestige 회색화 → 보라 묘사로 재생성 대기 |
 | slime-guests-ai | 4 (먹구름·별똥이 + happy 표정) | ✅ 생성·연결 완료 |
+| slime-main-ai | 5단계 ×2프레임 (본체) | ⚠️ 연결됨, strawberry 행 회색화 → 프리로드 시 `pinkifyGray()` 캔버스 베이크로 복원 중. green 크로마 재생성 시 코드 변경 없이 자동 정상화 |
 
 ## 디자인 시스템 발 신규 요청 (claude.ai/design LiveGameScreen 핸드오프)
 
@@ -91,10 +92,14 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | ★ | 지면 텍스처 (진화 단계별 5종) | 글로우 그라디언트 | 412×80 타일 |
 | ★ | 트로피 선반 프레임 | 반투명 스트립 | 412×40 타일 |
 
-## 캔버스 직접 렌더 (스프라이트 교체 대상 아님)
+## 캔버스 직접 렌더
 
-- **슬라임 본체** — 성향 오버레이(`drawTraitOverlay`)가 픽셀 단위로 합성되므로 캔버스 유지가 설계 의도.
-  본체 교체는 `slime-main-ai` 아틀라스와 함께 별도 설계 필요 (보류 중)
+- **슬라임 본체** — ✅ `slime-main-ai` 아틀라스 연결됨 (하이브리드 방식):
+  본체는 `#slime-canvas`의 CSS background로 아틀라스 셀을 깔고(`applySlimeSprite`, 200%×500% + %-position),
+  캔버스 픽셀은 **성향 오버레이 전용**(`drawTraitOverlay` — 머리띠/모자/별가루/윤회 고리).
+  실루엣 게이지도 같은 시트를 mask로 사용. 아틀라스 로드 실패 시 기존 16×17 픽셀 렌더로 자동 폴백.
+  딸기 행은 마젠타 크로마 회색화(실측 3건째) → 프리로드에서 `pinkifyGray()`로 명암 보존 colorize 후
+  blob URL로 교체. 시트를 green 크로마로 재생성하면 보정 코드는 no-op처럼 동작(유채색 픽셀은 건드리지 않음).
 - **코인 아이콘, 황금별** — 8×8/16×16 수제 픽셀. 교체 원하면 동일 패턴으로 요청서 작성
 
 ## 친구 행동 애니메이션 프레임 확장

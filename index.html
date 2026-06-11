@@ -1415,17 +1415,26 @@ function upProd(type) {
 /* 외형 진화는 레벨 마일스톤. 레벨 요구치는 기하 곡선(레벨당 2배)이라
    수입의 지수 성장과 맞물려 게임 내내 레벨업 리듬이 일정하다 */
 const STAGES = [
-  { name: '아기 초록 슬라임', atLevel: 1, glow: '#3d2566',
+  { name: '아기 초록 슬라임', atLevel: 1, glow: '#3d2566', spriteId: 'baby_green',
     pal: { b: '#5ad95a', l: '#aef2a4', d: '#37a837', o: '#1b4a26' } },
-  { name: '바다 슬라임', atLevel: 5, glow: '#1d3f66',
+  { name: '바다 슬라임', atLevel: 5, glow: '#1d3f66', spriteId: 'sea',
     pal: { b: '#56b8f2', l: '#aee2ff', d: '#3380c2', o: '#16365c' } },
-  { name: '딸기 슬라임', atLevel: 10, glow: '#5e2547',
+  { name: '딸기 슬라임', atLevel: 10, glow: '#5e2547', spriteId: 'strawberry',
     pal: { b: '#f78fc0', l: '#ffc8e2', d: '#c2538e', o: '#591238' } },
-  { name: '황금 킹 슬라임', atLevel: 15, glow: '#5e4a17',
+  { name: '황금 킹 슬라임', atLevel: 15, glow: '#5e4a17', spriteId: 'gold_king',
     pal: { b: '#f7c948', l: '#ffeaa8', d: '#c79232', o: '#5c4312' }, crown: true },
-  { name: '전설의 갓 슬라임', atLevel: 20, glow: '#3d4a70',
+  { name: '전설의 갓 슬라임', atLevel: 20, glow: '#3d4a70', spriteId: 'god',
     pal: null, crown: true, rainbow: true },
 ];
+
+/* 슬라임 본체 아틀라스 (slime-main-ai): 단계당 2프레임 idle.
+   로드 실패 시 기존 캔버스 픽셀 렌더로 자동 폴백 */
+const SLIME_ATLAS = {
+  src: 'assets/generated/sprites/slime-main-ai/sprite-sheet-alpha.png',
+  sheet: { w: 1536, h: 3840 },
+  cell: 768,
+};
+let slimeAtlasOk = false;
 
 const MAX_LEVEL = 60;
 
@@ -2635,7 +2644,37 @@ function traitPreviewHtml(tr, seen) {
   return `<img class="trait-preview" src="${traitPreviewDataUrl(tr.key)}" alt="${tr.name} 미리보기">`;
 }
 
+/* 본체 스프라이트: 캔버스의 CSS 배경으로 아틀라스 셀을 깐다.
+   캔버스 픽셀은 성향 오버레이 전용이 된다 (DOM 변경 없음) */
+let slimeSpriteStage = -1;
+let slimeFrame = 0;
+
+function applySlimeSprite(force) {
+  if (!slimeAtlasOk || !STAGES[stageIdx].spriteId) return false;
+  if (!force && slimeSpriteStage === stageIdx) return true;
+  slimeSpriteStage = stageIdx;
+  slimeCv.style.backgroundImage = `url('${SLIME_ATLAS.src}')`;
+  slimeCv.style.backgroundSize = '200% 500%';     // 셀 = 시트의 1/2 × 1/5
+  slimeCv.style.backgroundRepeat = 'no-repeat';
+  slimeCv.style.backgroundPosition = `${slimeFrame * 100}% ${stageIdx * 25}%`;
+  return true;
+}
+
 function drawSlime(t) {
+  // ── 스프라이트 모드: 본체는 배경, 캔버스엔 성향 흔적만 ──
+  if (applySlimeSprite()) {
+    const f = Math.floor(t / 700) % 2;  // 2프레임 idle
+    if (f !== slimeFrame) {
+      slimeFrame = f;
+      slimeCv.style.backgroundPosition = `${f * 100}% ${stageIdx * 25}%`;
+    }
+    slimeCtx.clearRect(0, 0, 16, 17);
+    if (currentTrait) drawTraitOverlay(slimeCtx, currentTrait.key, t);
+    if (hasSamsaraAura()) drawTraitOverlay(slimeCtx, 'samsara', t);
+    return;
+  }
+  // ── 폴백: 기존 캔버스 픽셀 렌더 ──
+  slimeCv.style.backgroundImage = '';
   const stage = STAGES[stageIdx];
   let pal = stage.pal;
   if (stage.rainbow) {
@@ -3011,11 +3050,26 @@ let silhouetteStage = -1;
 function refreshSilhouette() {
   if (silhouetteStage === stageIdx) return;
   silhouetteStage = stageIdx;
-  drawSlime(0);  // 캔버스에 현 스테이지가 그려져 있도록 보장
-  const url = slimeCv.toDataURL();  // 현 스테이지 슬라임의 알파 = 실루엣
   const el = $('evo-silhouette');
+  if (slimeAtlasOk && STAGES[stageIdx].spriteId) {
+    // 아틀라스 셀을 마스크로 직접 사용
+    el.style.webkitMaskImage = `url('${SLIME_ATLAS.src}')`;
+    el.style.maskImage = `url('${SLIME_ATLAS.src}')`;
+    el.style.webkitMaskSize = '200% 500%';
+    el.style.maskSize = '200% 500%';
+    el.style.webkitMaskPosition = `0% ${stageIdx * 25}%`;
+    el.style.maskPosition = `0% ${stageIdx * 25}%`;
+    return;
+  }
+  // 폴백: 캔버스 렌더의 알파를 실루엣으로
+  drawSlime(0);
+  const url = slimeCv.toDataURL();
   el.style.webkitMaskImage = `url(${url})`;
   el.style.maskImage = `url(${url})`;
+  el.style.webkitMaskSize = 'contain';
+  el.style.maskSize = 'contain';
+  el.style.webkitMaskPosition = 'center';
+  el.style.maskPosition = 'center';
 }
 
 function renderEvoProgress() {
@@ -5193,6 +5247,45 @@ for (let i = 0; i < 40; i++) {
 // 먹구름 비주얼: guests 아틀라스 (없으면 캔버스 픽셀 폴백)
 cloudEl.insertAdjacentHTML('beforeend',
   `<span id="cloud-visual">${spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' })}</span>`);
+
+// 슬라임 본체 아틀라스 프리로드 — 성공 시 스프라이트 모드로 전환
+// 딸기 행은 마젠타 크로마 핑크 충돌로 회색 생성됨(ASSET-PIPELINE 규약) → 명암 보존 colorize로 복원
+function pinkifyGray(d) {
+  // 핑크 램프 (기존 딸기 팔레트): 외곽 #591238 → 어두움 #c2538e → 본색 #f78fc0 → 하이라이트 #ffc8e2
+  const stops = [
+    [0.00, 0x30, 0x08, 0x1d], [0.16, 0x59, 0x12, 0x38], [0.45, 0xc2, 0x53, 0x8e],
+    [0.69, 0xf7, 0x8f, 0xc0], [0.85, 0xff, 0xc8, 0xe2], [1.00, 0xff, 0xf0, 0xf8],
+  ];
+  for (let p = 0; p < d.length; p += 4) {
+    if (d[p + 3] === 0) continue;
+    const mx = Math.max(d[p], d[p + 1], d[p + 2]), mn = Math.min(d[p], d[p + 1], d[p + 2]);
+    if (mx && (mx - mn) / mx > 0.45) continue;  // 이미 유채색인 디테일(볼터치 등)은 보존
+    const l = (0.299 * d[p] + 0.587 * d[p + 1] + 0.114 * d[p + 2]) / 255;
+    let i = 1; while (i < stops.length - 1 && stops[i][0] < l) i++;
+    const [l0, r0, g0, b0] = stops[i - 1], [l1, r1, g1, b1] = stops[i];
+    const t = Math.min(1, Math.max(0, (l - l0) / (l1 - l0)));
+    d[p] = r0 + (r1 - r0) * t; d[p + 1] = g0 + (g1 - g0) * t; d[p + 2] = b0 + (b1 - b0) * t;
+  }
+}
+
+(() => {
+  const im = new Image();
+  const ready = () => { slimeAtlasOk = true; slimeSpriteStage = -1; silhouetteStage = -1; };
+  im.onload = () => {
+    try {
+      const c = document.createElement('canvas');
+      c.width = SLIME_ATLAS.sheet.w; c.height = SLIME_ATLAS.sheet.h;
+      const x = c.getContext('2d');
+      x.drawImage(im, 0, 0);
+      const row = STAGES.findIndex(s => s.spriteId === 'strawberry');
+      const id = x.getImageData(0, row * SLIME_ATLAS.cell, SLIME_ATLAS.sheet.w, SLIME_ATLAS.cell);
+      pinkifyGray(id.data);
+      x.putImageData(id, 0, row * SLIME_ATLAS.cell);
+      c.toBlob(b => { if (b) SLIME_ATLAS.src = URL.createObjectURL(b); ready(); });
+    } catch (e) { ready(); }  // 보정 실패 시 원본 시트 그대로 사용
+  };
+  im.src = SLIME_ATLAS.src;
+})();
 
 load();
 computeBlessCache();
