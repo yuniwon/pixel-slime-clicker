@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-wishes-ai",
+    "description": "cute wish goal icons for a cozy slime clicker game, each icon represents a small daily-style goal type",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 384,
+    "height": 384,
+    "safe_margin_x": 42,
+    "safe_margin_y": 42,
+    "size": 384,
+    "safe_margin": 42
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [255, 0, 255],
+    "selection": "manual"
+  },
+  "states": {
+    "click": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "rounded pointing finger tapping a squishy jelly button icon, click goal"
+    },
+    "combo": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "lightning bolt made of three jelly segments icon, combo goal"
+    },
+    "star": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "single gold star with a tiny happy face icon, golden star goal"
+    },
+    "ministar": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "three small shooting stars with short trails icon, mini star goal"
+    },
+    "hire": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "cozy pet basket icon with two paw prints on the front, friend hiring goal"
+    },
+    "earn": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "small stack of three gold coins with one sparkle icon, coin earning goal"
+    },
+    "upgrade": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "soft mitten glove icon with a plus badge on the cuff, upgrade purchase goal"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

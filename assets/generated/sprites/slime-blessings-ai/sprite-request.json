@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-blessings-ai",
+    "description": "cute evolution blessing icons for a cozy slime clicker game, each icon is a small magical boon charm",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 384,
+    "height": 384,
+    "safe_margin_x": 42,
+    "safe_margin_y": 42,
+    "size": 384,
+    "safe_margin": 42
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [255, 0, 255],
+    "selection": "manual"
+  },
+  "states": {
+    "elastic": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "bouncy pastel jelly yo-yo charm icon, springy string coil, combo head-start blessing"
+    },
+    "luckytip": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "four-leaf clover sealed inside a translucent jelly drop icon, lucky perfect-click blessing"
+    },
+    "sparkfinger": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "tiny star-tipped wand icon with two sparkles, click power blessing"
+    },
+    "comboKeep": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "small festival drum icon with rhythmic echo ring marks, combo duration blessing"
+    },
+    "firststep": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "cute paw footprint stepping stone icon with tiny grass, friend discount blessing"
+    },
+    "quietrich": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "sleeping coin pouch icon with closed happy eyes, passive production blessing"
+    },
+    "cheapup": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "jelly price tag icon with a playful scissors cut mark, upgrade discount blessing"
+    },
+    "starhunch": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "small brass telescope icon pointed at one gold star, star frequency blessing"
+    },
+    "starlonger": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "candle lantern icon holding a small gold star inside, star linger blessing"
+    },
+    "partylong": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "confetti party horn icon with two curled streamers, buff duration blessing"
+    },
+    "minirain": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "cluster of three tiny shooting stars icon with short trails, mini star blessing"
+    },
+    "napecon": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "crescent moon pillow icon with one sleep bubble, offline reward blessing"
+    },
+    "dustsense": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "open rounded palm icon catching falling stardust specks, wish reward blessing"
+    },
+    "slowcrown": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "small gold crown resting on a snail shell icon, slow but steady evolution blessing"
+    },
+    "soulwhisper": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "translucent pink jelly soul wisp icon with one sparkle, bonus soul blessing"
+    },
+    "warmstart": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "tiny campfire icon with a heart-shaped flame, all-round warm start blessing"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

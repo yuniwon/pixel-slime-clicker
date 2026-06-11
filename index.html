@@ -1442,69 +1442,90 @@ let newsHideTimer = null;
 
 const $ = id => document.getElementById(id);
 
-function producerSpriteHtml(id, fallback, className = 'shop-sprite', frame = 0) {
-  const frames = PRODUCER_SPRITE_LAYOUT[id];
-  if (!frames) return fallback;
-  const r = frames[frame % frames.length];
-  const size = className.includes('friend-sprite') ? 56 : 64;
+/* ════════════════════════ 스프라이트 레지스트리 ════════════════════════
+   모든 아이콘은 spriteHtml()을 거친다. layout에 id가 없으면 이모지 폴백.
+   새 아틀라스 연결법: 코덱스(sprite-gen)가 만든 manifest.json의
+   frame_layout 사각형을 layout에 복사하고 sheet 크기를 채우면 끝.
+   자세한 협업 규약: docs/ASSET-PIPELINE.md */
+
+const SPRITE_ATLASES = {
+  friends: {
+    src: PRODUCER_SPRITE_ATLAS,
+    sheet: PRODUCER_SPRITE_SHEET,
+    layout: PRODUCER_SPRITE_LAYOUT,
+  },
+  items: {
+    src: ITEM_SPRITE_ATLAS,
+    sheet: ITEM_SPRITE_SHEET,
+    layout: ITEM_SPRITE_LAYOUT,
+  },
+  achievements: {
+    src: ACHIEVEMENT_SPRITE_ATLAS,
+    sheet: ACHIEVEMENT_SPRITE_SHEET,
+    layout: ACHIEVEMENT_SPRITE_LAYOUT,
+  },
+  decor: {
+    src: DECOR_SPRITE_ATLAS,
+    sheet: DECOR_SPRITE_SHEET,
+    layout: DECOR_SPRITE_LAYOUT,
+  },
+  // ── 생성 대기 (sprite-request.json 작성됨, 코덱스 생성 후 sheet/layout 채우기) ──
+  blessings: {
+    src: 'assets/generated/sprites/slime-blessings-ai/sprite-sheet-alpha.png',
+    sheet: null,
+    layout: {},
+  },
+  wishes: {
+    src: 'assets/generated/sprites/slime-wishes-ai/sprite-sheet-alpha.png',
+    sheet: null,
+    layout: {},
+  },
+  cosmetics: {
+    src: 'assets/generated/sprites/slime-cosmetics-ai/sprite-sheet-alpha.png',
+    sheet: null,
+    layout: {},
+  },
+};
+
+/* 범용 스프라이트 렌더러.
+   opts: { size, className, frame } — layout 미존재 시 fallback(이모지) 반환 */
+function spriteHtml(atlasKey, id, fallback, opts = {}) {
+  const atlas = SPRITE_ATLASES[atlasKey];
+  if (!atlas || !atlas.sheet) return fallback;
+  const frames = atlas.layout[id];
+  if (!frames || !frames.length) return fallback;
+  const r = frames[(opts.frame || 0) % frames.length];
+  const size = opts.size || 60;
+  const className = opts.className || 'shop-sprite';
   const scale = size / r.w;
   const style = [
     `width:${size}px`,
     `height:${size}px`,
-    `background-image:url('${PRODUCER_SPRITE_ATLAS}')`,
-    `background-size:${PRODUCER_SPRITE_SHEET.w * scale}px ${PRODUCER_SPRITE_SHEET.h * scale}px`,
+    `background-image:url('${atlas.src}')`,
+    `background-size:${atlas.sheet.w * scale}px ${atlas.sheet.h * scale}px`,
     `background-position:-${r.x * scale}px -${r.y * scale}px`,
   ].join(';');
   return `<span class="sprite-icon ${className}" aria-hidden="true" style="${style}"></span>`;
+}
+
+/* 기존 호출부 호환 래퍼 */
+function producerSpriteHtml(id, fallback, className = 'shop-sprite', frame = 0) {
+  const size = className.includes('friend-sprite') ? 56 : 64;
+  return spriteHtml('friends', id, fallback, { size, className, frame });
 }
 
 function itemSpriteHtml(id, fallback, className = 'shop-sprite') {
-  const frames = ITEM_SPRITE_LAYOUT[id];
-  if (!frames) return fallback;
-  const r = frames[0];
-  const size = 60;
-  const scale = size / r.w;
-  const style = [
-    `width:${size}px`,
-    `height:${size}px`,
-    `background-image:url('${ITEM_SPRITE_ATLAS}')`,
-    `background-size:${ITEM_SPRITE_SHEET.w * scale}px ${ITEM_SPRITE_SHEET.h * scale}px`,
-    `background-position:-${r.x * scale}px -${r.y * scale}px`,
-  ].join(';');
-  return `<span class="sprite-icon ${className}" aria-hidden="true" style="${style}"></span>`;
+  return spriteHtml('items', id, fallback, { size: 60, className });
 }
 
 function achievementSpriteHtml(id, fallback, done) {
-  const frames = ACHIEVEMENT_SPRITE_LAYOUT[id];
-  if (!frames) return done ? fallback : '❓';
-  const r = frames[0];
-  const size = 54;
-  const scale = size / r.w;
   const className = done ? 'shop-sprite' : 'shop-sprite locked-sprite';
-  const style = [
-    `width:${size}px`,
-    `height:${size}px`,
-    `background-image:url('${ACHIEVEMENT_SPRITE_ATLAS}')`,
-    `background-size:${ACHIEVEMENT_SPRITE_SHEET.w * scale}px ${ACHIEVEMENT_SPRITE_SHEET.h * scale}px`,
-    `background-position:-${r.x * scale}px -${r.y * scale}px`,
-  ].join(';');
-  return `<span class="sprite-icon ${className}" aria-hidden="true" style="${style}"></span>`;
+  return spriteHtml('achievements', id, done ? fallback : '❓', { size: 54, className });
 }
 
 function decorSpriteHtml(id, fallback, className = 'shop-sprite') {
-  const frames = DECOR_SPRITE_LAYOUT[id];
-  if (!frames) return fallback;
-  const r = frames[0];
   const size = className.includes('room-decor-sprite') ? 78 : 60;
-  const scale = size / r.w;
-  const style = [
-    `width:${size}px`,
-    `height:${size}px`,
-    `background-image:url('${DECOR_SPRITE_ATLAS}')`,
-    `background-size:${DECOR_SPRITE_SHEET.w * scale}px ${DECOR_SPRITE_SHEET.h * scale}px`,
-    `background-position:-${r.x * scale}px -${r.y * scale}px`,
-  ].join(';');
-  return `<span class="sprite-icon ${className}" aria-hidden="true" style="${style}"></span>`;
+  return spriteHtml('decor', id, fallback, { size, className });
 }
 
 function setProducerShopIcon(el, p, reveal) {
@@ -2267,7 +2288,7 @@ function openBlessingModal() {
     const card = document.createElement('button');
     card.className = 'blessing-card';
     card.innerHTML = `
-      <span class="b-icon">${b.icon}</span>
+      <span class="b-icon">${spriteHtml('blessings', b.id, b.icon, { size: 34 })}</span>
       <span><span class="b-name">${b.name}</span><div class="b-desc">${b.desc}</div></span>`;
     card.addEventListener('click', () => pickBlessing(b));
     wrap.appendChild(card);
@@ -2637,7 +2658,7 @@ function buildWishesTab() {
     el.className = 'shop-item wish-item';
     el.dataset.idx = i;
     el.innerHTML = `
-      <div class="shop-icon">${w.icon}</div>
+      <div class="shop-icon">${spriteHtml('wishes', w.type, w.icon, { size: 54 })}</div>
       <div class="shop-info">
         <div class="shop-name">${wishText(w)}</div>
         <div class="wish-bar-outer"><div class="wish-bar"></div></div>
@@ -2662,7 +2683,7 @@ function buildWishesTab() {
         + (!owned && S.stardust < c.cost ? ' locked' : '');
       el.dataset.id = c.id;
       el.innerHTML = `
-        <div class="shop-icon">${c.icon}</div>
+        <div class="shop-icon">${spriteHtml('cosmetics', c.id, c.icon, { size: 54 })}</div>
         <div class="shop-info">
           <div class="shop-name">${c.name}</div>
           <div class="shop-desc">${c.desc}</div>
@@ -2751,7 +2772,7 @@ function buildRoomTab() {
     const active = hasBless(b.id);
     const cell = document.createElement('div');
     cell.className = 'codex-cell' + (seen ? ' seen' : '');
-    cell.innerHTML = `<div style="font-size:20px">${seen ? b.icon : '❓'}</div>` +
+    cell.innerHTML = `<div style="font-size:20px">${seen ? spriteHtml('blessings', b.id, b.icon, { size: 28 }) : '❓'}</div>` +
       (seen ? `${b.name}${active ? '<br><span style="color:var(--green)">진행 중</span>' : ''}` : '???');
     blessGrid.appendChild(cell);
   });
