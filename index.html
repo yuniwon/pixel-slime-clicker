@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>픽셀 슬라임 클리커</title>
 <meta name="theme-color" content="#1a1033">
 <link rel="manifest" href="manifest.json">
@@ -10,7 +10,9 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+  /* touch-action: manipulation — iOS 더블탭 줌 차단 (user-scalable은 iOS가 무시함).
+     팬·스크롤은 그대로 허용된다 */
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
   :root {
     --bg1: #1a1033;
@@ -26,7 +28,7 @@
     --soul: #b48aff;
   }
 
-  html, body { height: 100%; overflow: hidden; }
+  html, body { height: 100%; height: 100dvh; overflow: hidden; }
 
   body {
     font-family: 'Galmuri11', 'DungGeunMo', 'Courier New', monospace;
@@ -955,27 +957,57 @@
 
   @media (max-width: 760px) {
     body { flex-direction: column; }
-    #game-area { flex: none; padding-top: 12px; }
-    #slime-canvas { width: 192px; height: 204px; }
-    #slime-shadow { width: 130px; }
-    #shop { width: 100%; flex: 1; border-left: none; border-top: 4px solid var(--border); min-height: 0; }
-    #title { font-size: 18px; }
-    #coin-display { font-size: 24px; }
+    /* 게임 영역은 화면의 44%로 고정 — 상점이 절반 이상을 확보한다 */
+    #game-area {
+      flex: 0 0 44dvh;
+      height: 44dvh;
+      padding-top: 30px;  /* 말랑뉴스 스트립 전용 공간 — 제목과 겹침 방지 */
+      justify-content: flex-start;
+    }
+    #title { font-size: 15px; margin-top: 2px; }
+    #stage-name { font-size: 11px; margin-bottom: 5px; }
+    #evo-progress-outer { width: 200px; height: 10px; }
+    #evo-progress-label { font-size: 10px; }
+    #coin-display { font-size: 20px; }
+    #coin-icon { width: 20px; height: 20px; }
+    #cps-display { font-size: 11px; margin-top: 2px; }
+    #slime-wrap { margin: 8px 0 4px; }
+    #slime-canvas { width: 132px; height: 140px; }
+    #slime-shadow { width: 90px; height: 16px; margin-top: -12px; }
+    #combo-box { height: 34px; margin-top: 4px; }
+    #combo-label { font-size: 12px; }
+    #combo-bar-outer { width: 140px; height: 8px; }
+    #challenge-badge { font-size: 10px; padding: 2px 8px; margin-bottom: 4px; }
     .friend { font-size: 20px; }
-    #speech-bubble { font-size: 11px; max-width: 180px; }
-    /* 토스트: 모바일에선 상단 고정 + 화면 폭 안으로 */
+    #speech-bubble { font-size: 10px; max-width: 160px; padding: 6px 10px; }
+    /* 상점: 나머지 전부 + iOS 홈바 안전영역 */
+    #shop {
+      width: 100%;
+      flex: 1 1 auto;
+      border-left: none;
+      border-top: 4px solid var(--border);
+      min-height: 0;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    #shop-header { padding: 8px 12px 6px; }
+    #shop-header h2 { font-size: 13px; }
+    .icon-btn { font-size: 12px; padding: 3px 8px; }
+    .tab { padding: 8px 0; font-size: 11px; }
+    #shop-list { -webkit-overflow-scrolling: touch; }
+    #stats-bar { padding: 6px 12px; font-size: 10px; line-height: 1.5; }
+    /* 토스트: 모바일에선 뉴스 스트립 아래 */
     #toast {
       bottom: auto;
-      top: 8px;
+      top: 34px;
       font-size: 12px;
       padding: 10px 14px;
       width: max-content;
       max-width: calc(100vw - 24px);
-      transform: translateX(-50%) translateY(-120%);
+      transform: translateX(-50%) translateY(-140%);
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
-    /* 광란/파티 배너: 모바일에선 하단으로 — 상단 정보와 겹침 방지 */
-    #buff-banner { top: auto; bottom: 30px; font-size: 12px; padding: 6px 12px; }
+    /* 광란/파티 배너: 모바일에선 게임영역 하단 — 상단 정보와 겹침 방지 */
+    #buff-banner { top: auto; bottom: 8px; font-size: 11px; padding: 5px 10px; }
   }
 </style>
 </head>
