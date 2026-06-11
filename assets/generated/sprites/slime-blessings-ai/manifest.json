@@ -1,0 +1,268 @@
+{
+  "characterId": "slime-blessings-ai",
+  "engine": "component-row",
+  "game_input": "sprite-sheet-alpha.png",
+  "degraded_static_fallback": false,
+  "curation_applied": false,
+  "sprite_sheet_alpha": "sprite-sheet-alpha.png",
+  "sprite_sheet_alpha_report": "sprite-sheet-alpha.report.json",
+  "base_image": null,
+  "cell": {
+    "shape": "square",
+    "width": 384,
+    "height": 384,
+    "safe_margin_x": 42,
+    "safe_margin_y": 42,
+    "size": 384,
+    "safe_margin": 42
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "fallback"
+  },
+  "animation": {
+    "cellWidth": 384,
+    "cellHeight": 384,
+    "columns": 1,
+    "rows": {
+      "elastic": {
+        "row": 0,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "luckytip": {
+        "row": 1,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "sparkfinger": {
+        "row": 2,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "comboKeep": {
+        "row": 3,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "firststep": {
+        "row": 4,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "quietrich": {
+        "row": 5,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "cheapup": {
+        "row": 6,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "starhunch": {
+        "row": 7,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "starlonger": {
+        "row": 8,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "partylong": {
+        "row": 9,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "minirain": {
+        "row": 10,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "napecon": {
+        "row": 11,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "dustsense": {
+        "row": 12,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "slowcrown": {
+        "row": 13,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "soulwhisper": {
+        "row": 14,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "warmstart": {
+        "row": 15,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      }
+    }
+  },
+  "frame_layout": {
+    "sheetWidth": 384,
+    "sheetHeight": 6144,
+    "cellWidth": 384,
+    "cellHeight": 384,
+    "rows": {
+      "elastic": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "luckytip": [
+        {
+          "x": 0,
+          "y": 384,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "sparkfinger": [
+        {
+          "x": 0,
+          "y": 768,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "comboKeep": [
+        {
+          "x": 0,
+          "y": 1152,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "firststep": [
+        {
+          "x": 0,
+          "y": 1536,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "quietrich": [
+        {
+          "x": 0,
+          "y": 1920,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "cheapup": [
+        {
+          "x": 0,
+          "y": 2304,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "starhunch": [
+        {
+          "x": 0,
+          "y": 2688,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "starlonger": [
+        {
+          "x": 0,
+          "y": 3072,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "partylong": [
+        {
+          "x": 0,
+          "y": 3456,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "minirain": [
+        {
+          "x": 0,
+          "y": 3840,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "napecon": [
+        {
+          "x": 0,
+          "y": 4224,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "dustsense": [
+        {
+          "x": 0,
+          "y": 4608,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "slowcrown": [
+        {
+          "x": 0,
+          "y": 4992,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "soulwhisper": [
+        {
+          "x": 0,
+          "y": 5376,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "warmstart": [
+        {
+          "x": 0,
+          "y": 5760,
+          "w": 384,
+          "h": 384
+        }
+      ]
+    }
+  }
+}

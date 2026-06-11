@@ -1,0 +1,198 @@
+{
+  "characterId": "slime-cosmetics-ai",
+  "engine": "component-row",
+  "game_input": "sprite-sheet-alpha.png",
+  "degraded_static_fallback": false,
+  "curation_applied": false,
+  "sprite_sheet_alpha": "sprite-sheet-alpha.png",
+  "sprite_sheet_alpha_report": "sprite-sheet-alpha.report.json",
+  "base_image": null,
+  "cell": {
+    "shape": "square",
+    "width": 384,
+    "height": 384,
+    "safe_margin_x": 42,
+    "safe_margin_y": 42,
+    "size": 384,
+    "safe_margin": 42
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "fallback"
+  },
+  "animation": {
+    "cellWidth": 384,
+    "cellHeight": 384,
+    "columns": 1,
+    "rows": {
+      "aura-pink": {
+        "row": 0,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "aura-mint": {
+        "row": 1,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "aura-gold": {
+        "row": 2,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "bg-dawn": {
+        "row": 3,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "bg-abyss": {
+        "row": 4,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "bg-aurora": {
+        "row": 5,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "bubble-pink": {
+        "row": 6,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "bubble-gold": {
+        "row": 7,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "pt-heart": {
+        "row": 8,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "pt-star": {
+        "row": 9,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "pt-note": {
+        "row": 10,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      }
+    }
+  },
+  "frame_layout": {
+    "sheetWidth": 384,
+    "sheetHeight": 4224,
+    "cellWidth": 384,
+    "cellHeight": 384,
+    "rows": {
+      "aura-pink": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "aura-mint": [
+        {
+          "x": 0,
+          "y": 384,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "aura-gold": [
+        {
+          "x": 0,
+          "y": 768,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "bg-dawn": [
+        {
+          "x": 0,
+          "y": 1152,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "bg-abyss": [
+        {
+          "x": 0,
+          "y": 1536,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "bg-aurora": [
+        {
+          "x": 0,
+          "y": 1920,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "bubble-pink": [
+        {
+          "x": 0,
+          "y": 2304,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "bubble-gold": [
+        {
+          "x": 0,
+          "y": 2688,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "pt-heart": [
+        {
+          "x": 0,
+          "y": 3072,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "pt-star": [
+        {
+          "x": 0,
+          "y": 3456,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "pt-note": [
+        {
+          "x": 0,
+          "y": 3840,
+          "w": 384,
+          "h": 384
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,317 @@
+{
+  "ok": true,
+  "engine": "component-row",
+  "curation_applied": false,
+  "errors": [],
+  "atlas": "sprite-sheet-alpha.png",
+  "manifest": "manifest.json",
+  "cell": {
+    "shape": "square",
+    "width": 384,
+    "height": 384,
+    "safe_margin_x": 42,
+    "safe_margin_y": 42,
+    "size": 384,
+    "safe_margin": 42
+  },
+  "states": [
+    "elastic",
+    "luckytip",
+    "sparkfinger",
+    "comboKeep",
+    "firststep",
+    "quietrich",
+    "cheapup",
+    "starhunch",
+    "starlonger",
+    "partylong",
+    "minirain",
+    "napecon",
+    "dustsense",
+    "slowcrown",
+    "soulwhisper",
+    "warmstart"
+  ],
+  "cells": [
+    {
+      "state": "elastic",
+      "frame": 0,
+      "nontransparent_pixels": 42994,
+      "x": 0,
+      "y": 0,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "luckytip",
+      "frame": 0,
+      "nontransparent_pixels": 61417,
+      "x": 0,
+      "y": 384,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "sparkfinger",
+      "frame": 0,
+      "nontransparent_pixels": 30096,
+      "x": 0,
+      "y": 768,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "comboKeep",
+      "frame": 0,
+      "nontransparent_pixels": 51998,
+      "x": 0,
+      "y": 1152,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "firststep",
+      "frame": 0,
+      "nontransparent_pixels": 63636,
+      "x": 0,
+      "y": 1536,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "quietrich",
+      "frame": 0,
+      "nontransparent_pixels": 59148,
+      "x": 0,
+      "y": 1920,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "cheapup",
+      "frame": 0,
+      "nontransparent_pixels": 42515,
+      "x": 0,
+      "y": 2304,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "starhunch",
+      "frame": 0,
+      "nontransparent_pixels": 31353,
+      "x": 0,
+      "y": 2688,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "starlonger",
+      "frame": 0,
+      "nontransparent_pixels": 39742,
+      "x": 0,
+      "y": 3072,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "partylong",
+      "frame": 0,
+      "nontransparent_pixels": 30636,
+      "x": 0,
+      "y": 3456,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "minirain",
+      "frame": 0,
+      "nontransparent_pixels": 44637,
+      "x": 0,
+      "y": 3840,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "napecon",
+      "frame": 0,
+      "nontransparent_pixels": 64603,
+      "x": 0,
+      "y": 4224,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "dustsense",
+      "frame": 0,
+      "nontransparent_pixels": 24761,
+      "x": 0,
+      "y": 4608,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "slowcrown",
+      "frame": 0,
+      "nontransparent_pixels": 58888,
+      "x": 0,
+      "y": 4992,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "soulwhisper",
+      "frame": 0,
+      "nontransparent_pixels": 38740,
+      "x": 0,
+      "y": 5376,
+      "w": 384,
+      "h": 384
+    },
+    {
+      "state": "warmstart",
+      "frame": 0,
+      "nontransparent_pixels": 48846,
+      "x": 0,
+      "y": 5760,
+      "w": 384,
+      "h": 384
+    }
+  ],
+  "frame_layout": {
+    "sheetWidth": 384,
+    "sheetHeight": 6144,
+    "cellWidth": 384,
+    "cellHeight": 384,
+    "rows": {
+      "elastic": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "luckytip": [
+        {
+          "x": 0,
+          "y": 384,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "sparkfinger": [
+        {
+          "x": 0,
+          "y": 768,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "comboKeep": [
+        {
+          "x": 0,
+          "y": 1152,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "firststep": [
+        {
+          "x": 0,
+          "y": 1536,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "quietrich": [
+        {
+          "x": 0,
+          "y": 1920,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "cheapup": [
+        {
+          "x": 0,
+          "y": 2304,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "starhunch": [
+        {
+          "x": 0,
+          "y": 2688,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "starlonger": [
+        {
+          "x": 0,
+          "y": 3072,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "partylong": [
+        {
+          "x": 0,
+          "y": 3456,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "minirain": [
+        {
+          "x": 0,
+          "y": 3840,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "napecon": [
+        {
+          "x": 0,
+          "y": 4224,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "dustsense": [
+        {
+          "x": 0,
+          "y": 4608,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "slowcrown": [
+        {
+          "x": 0,
+          "y": 4992,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "soulwhisper": [
+        {
+          "x": 0,
+          "y": 5376,
+          "w": 384,
+          "h": 384
+        }
+      ],
+      "warmstart": [
+        {
+          "x": 0,
+          "y": 5760,
+          "w": 384,
+          "h": 384
+        }
+      ]
+    }
+  }
+}

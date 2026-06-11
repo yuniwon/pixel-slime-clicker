@@ -56,12 +56,12 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 
 ## 현재 생성 대기 큐
 
-| 아틀라스 | states | 요청서 | 코드 연결 지점 |
-|---|---|---|---|
-| slime-blessings-ai | 16 (진화 축복) | ✅ 작성됨 | `SPRITE_ATLASES.blessings` |
-| slime-wishes-ai | 7 (소원 타입) | ✅ 작성됨 | `SPRITE_ATLASES.wishes` |
-| slime-cosmetics-ai | 11 (꾸미기) | ✅ 작성됨 | `SPRITE_ATLASES.cosmetics` |
-| slime-guests-ai | 2 (먹구름 손님: raincloud 2프레임 + raincloud-happy) | ✅ 작성됨 | `SPRITE_ATLASES.guests` |
+| 아틀라스 | states | 상태 |
+|---|---|---|
+| slime-blessings-ai | 16 (진화 축복) | ✅ 생성·연결 완료 |
+| slime-wishes-ai | 7 (소원 타입) | ✅ 생성·연결 완료 |
+| slime-cosmetics-ai | 11 (꾸미기) | ✅ 생성·연결 완료 |
+| slime-guests-ai | 2 (먹구름 손님: raincloud 2프레임 + raincloud-happy) | ⏳ 요청서 작성됨, 생성 대기 |
 
 ## 캔버스 직접 렌더 (스프라이트 교체 대상 아님)
 
