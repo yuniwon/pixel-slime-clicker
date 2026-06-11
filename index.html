@@ -755,18 +755,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 3px 10px;
+    gap: 14px;
+    padding: 7px 14px;
     background: #00000033;
     border-top: 2px solid #ffffff0d;
     cursor: pointer;
   }
   #trophy-shelf .shelf-label {
-    font-size: 9px;
+    font-size: 14px;
     color: var(--text-dim);
     white-space: nowrap;
   }
-  #trophy-shelf .trophy { width: 22px; height: 22px; display: inline-block; }
+  #trophy-shelf .trophy { width: 38px; height: 38px; display: inline-block; }
   #trophy-shelf .trophy.dim { filter: grayscale(1) brightness(.35); }
   #trophy-shelf .trophy.fresh { animation: trophy-pop .5s ease-out; }
   @keyframes trophy-pop {
@@ -862,11 +862,11 @@
     left: 0;
     right: 0;
     text-align: center;
-    font-size: 11px;
+    font-size: 17px;
     color: var(--text-dim);
     background: #00000044;
     border-bottom: 2px solid #ffffff0d;
-    padding: 5px 12px;
+    padding: 9px 16px;
     text-shadow: 1px 1px 0 #00000088;
     opacity: 0;
     transition: opacity 1.2s ease;
@@ -1126,7 +1126,9 @@
     #toast.show { transform: translateX(-50%) translateY(0); }
     /* 광란/파티 배너: 모바일에선 게임영역 하단, 선반 위 */
     #buff-banner { top: auto; bottom: 34px; font-size: 11px; padding: 5px 10px; }
+    #news-ticker { font-size: 11px; padding: 5px 12px; }
     #trophy-shelf { padding: 2px 8px; gap: 6px; }
+    #trophy-shelf .shelf-label { font-size: 9px; }
     #trophy-shelf .trophy { width: 18px; height: 18px; }
     #combo-box { margin-top: 2px; }
   }
@@ -2668,9 +2670,9 @@ function drawSlime(t) {
       slimeFrame = f;
       slimeCv.style.backgroundPosition = `${f * 100}% ${stageIdx * 25}%`;
     }
+    // 16×17용 성향 픽셀은 고해상 스프라이트와 형태가 안 맞아 블록 잔상이 됨 —
+    // 스프라이트 모드에선 성향을 tick의 filter 오라 글로우로 표현 (전용 액세서리 아틀라스 대기)
     slimeCtx.clearRect(0, 0, 16, 17);
-    if (currentTrait) drawTraitOverlay(slimeCtx, currentTrait.key, t);
-    if (hasSamsaraAura()) drawTraitOverlay(slimeCtx, 'samsara', t);
     return;
   }
   // ── 폴백: 기존 캔버스 픽셀 렌더 ──
@@ -5173,11 +5175,15 @@ function econTickBody() {
     }
     // 오라: 코스메틱 장착 > 유니콘 100 성향 오라
     const cosAura = S.cosmetics.equipped.aura;
-    slimeCv.style.filter = cosAura
-      ? `drop-shadow(0 0 14px ${cosAura})`
-      : (currentTrait && hasSyn('unicorn', 100))
-        ? `drop-shadow(0 0 14px ${currentTrait.pupil})`
-        : '';
+    let slimeGlow = '';
+    if (cosAura) slimeGlow = `drop-shadow(0 0 14px ${cosAura})`;
+    else if (currentTrait && hasSyn('unicorn', 100)) slimeGlow = `drop-shadow(0 0 14px ${currentTrait.pupil})`;
+    else if (slimeAtlasOk && currentTrait) slimeGlow = `drop-shadow(0 0 10px ${currentTrait.pupil}cc)`;
+    // 윤회의 고리: 스프라이트 모드에선 픽셀 잔상 대신 이중 보라 헤일로
+    if (slimeAtlasOk && hasSamsaraAura()) {
+      slimeGlow += ' drop-shadow(0 0 8px #b48aff) drop-shadow(0 0 22px #b48aff66)';
+    }
+    slimeCv.style.filter = slimeGlow;
     // 도전 런: 환생선 도달 = 완수, 서두르는 생은 시간 초과 시 무손실 해제
     if (chActive()) {
       if (soulsGain() >= 1) {

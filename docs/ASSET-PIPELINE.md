@@ -77,6 +77,7 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | slime-items-ai | 18 (강화/특성) | ⚠️ prestige 회색화 → 보라 묘사로 재생성 대기 |
 | slime-guests-ai | 4 (먹구름·별똥이 + happy 표정) | ✅ 생성·연결 완료 |
 | slime-main-ai | 5단계 ×2프레임 (본체) | ⚠️ 연결됨, strawberry 행 회색화 → 프리로드 시 `pinkifyGray()` 캔버스 베이크로 복원 중. green 크로마 재생성 시 코드 변경 없이 자동 정상화 |
+| slime-traits-ai | 5 (성향 액세서리 오버레이: muscle/ranch/star/dream/samsara) | 📝 요청서 작성됨 — 본체 스프라이트 위에 겹칠 투명 액세서리. 생성 전까지 성향은 filter 오라 글로우로 표현 (16×17 픽셀 오버레이는 스프라이트와 형태 불일치로 비활성) |
 
 ## 디자인 시스템 발 신규 요청 (claude.ai/design LiveGameScreen 핸드오프)
 

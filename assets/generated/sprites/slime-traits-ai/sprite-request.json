@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-traits-ai",
+    "description": "transparent accessory overlays that sit on top of the main slime sprite (slime-main-ai, 768x768 round blob filling most of the cell). Each state is ONLY the accessory on a fully transparent/chroma background, positioned so it aligns when layered over the slime cell: hats anchored at top-center of the blob head area, bands across the upper-middle, sparkles scattered around the blob silhouette. No slime body in these cells.",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 768,
+    "height": 768,
+    "safe_margin_x": 84,
+    "safe_margin_y": 84,
+    "size": 768,
+    "safe_margin": 84
+  },
+  "chroma_key": {
+    "name": "green",
+    "hex": "#00FF00",
+    "rgb": [
+      0,
+      255,
+      0
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "muscle": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "red training headband tied around where the slime's forehead would be (upper third of the cell, spanning the blob width), small knot on the right side, nothing else in the cell"
+    },
+    "ranch": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "straw farmer hat with a tiny green sprout on the brim, resting at top-center of the cell where the slime's head crown area is, nothing else in the cell"
+    },
+    "star": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "small golden star sparkles floating around the edges of where the slime body would be, frame 2 with the sparkles shifted slightly for a twinkle loop, nothing else in the cell"
+    },
+    "dream": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "soft blue nightcap with a white pom-pom drooping to the right, resting at top-center of the cell where the slime's head is, plus one tiny dream cloud at the upper left, nothing else in the cell"
+    },
+    "samsara": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "glowing lavender-violet halo ring floating above the top-center of the cell, frame 2 with the ring slightly brighter and lifted for a pulse loop, nothing else in the cell"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}
