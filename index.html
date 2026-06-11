@@ -1028,7 +1028,7 @@
     </div>
     <h4>위험 구역</h4>
     <div class="settings-row">
-      <button class="settings-btn danger" id="reset-btn" title="길게 눌러 초기화">처음부터 다시 시작 (길게 누르기)</button>
+      <button class="settings-btn danger" id="reset-btn">🗑️ 처음부터 다시 시작 (전체 초기화)</button>
     </div>
     <div class="settings-row">
       <button class="settings-btn" id="close-settings-btn">닫기</button>
@@ -3975,7 +3975,10 @@ function toast(html) {
 
 /* ════════════════════════ 저장 / 불러오기 ════════════════════════ */
 
+let wiping = false;  // 초기화 진행 중 — 언로드 시 finalSave가 세이브를 되살리는 것 방지
+
 function save() {
+  if (wiping) return;
   S.lastSave = Date.now();
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {}
 }
@@ -4084,30 +4087,14 @@ function load() {
 }
 
 /* 초기화: 1.2초 길게 누르기 → 확인 */
-const resetBtn = $('reset-btn');
-let resetHold = null;
-
-resetBtn.addEventListener('pointerdown', () => {
-  resetBtn.classList.add('holding');
-  resetHold = setTimeout(() => {
-    resetBtn.classList.remove('holding');
-    resetHold = null;
-    if (confirm('정말 처음부터 다시 시작할까요? 환생 영혼을 포함해 모든 진행이 사라져요!')) {
-      localStorage.removeItem(SAVE_KEY);
-      location.reload();
-    }
-  }, 1200);
+/* 초기화: 설정 모달 안이라 이미 의도가 분명함 — 클릭 + 이중 확인 */
+$('reset-btn').addEventListener('click', () => {
+  if (!confirm('정말 처음부터 다시 시작할까요?\n환생 영혼을 포함해 모든 진행이 사라져요!')) return;
+  if (!confirm('마지막 확인이에요. 정말로 전부 지울까요?')) return;
+  wiping = true;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
 });
-function cancelReset() {
-  resetBtn.classList.remove('holding');
-  if (resetHold) {
-    clearTimeout(resetHold);
-    resetHold = null;
-    toast('초기화하려면 버튼을 <b>길게</b> 누르세요');
-  }
-}
-resetBtn.addEventListener('pointerup', cancelReset);
-resetBtn.addEventListener('pointerleave', cancelReset);
 
 $('sound-btn').addEventListener('click', () => {
   S.soundOn = !S.soundOn;
@@ -4129,6 +4116,7 @@ function importSaveCode(code) {
     const json = decodeURIComponent(escape(atob(code.trim())));
     const data = JSON.parse(json);
     if (typeof data !== 'object' || data === null || data.coins === undefined) throw new Error('bad save');
+    wiping = true;  // 언로드 finalSave가 가져온 세이브를 덮어쓰지 않게
     localStorage.setItem(SAVE_KEY, json);
     location.reload();
   } catch (e) {
