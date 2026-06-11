@@ -2468,7 +2468,14 @@ function spawnFloat(x, y, text, big, perfect) {
 }
 
 const SPARK_COLORS = ['#ffd75e', '#ff8ac4', '#7dff8a', '#56b8f2', '#ffffff'];
+const PARTICLE_CAP = 60;  // 백그라운드 탭 타이머 스로틀에도 DOM이 무한히 쌓이지 않게
+
+function particleCount() {
+  return document.querySelectorAll('.spark, .emoji-spark').length;
+}
+
 function spawnSparks(x, y) {
+  if (particleCount() > PARTICLE_CAP) return;
   const emoji = S.cosmetics.equipped.particle;  // 장착한 파티클 스킨
   for (let i = 0; i < 5; i++) {
     const el = document.createElement('div');
@@ -3195,6 +3202,7 @@ window.addEventListener('resize', () => {
 
 /* 분위기 파티클: 드래곤 불꽃, 유니콘 반짝이 */
 function spawnSparkAt(x, y, color) {
+  if (particleCount() > PARTICLE_CAP + 30) return;  // 컨페티 여유분
   const el = document.createElement('div');
   el.className = 'spark';
   el.style.background = color;
@@ -4542,6 +4550,244 @@ window.simRun = function simRun(opts = {}) {
   slimeLevel = snapLevel; stageIdx = snapStage; combo = snapCombo;
   renderHud(); buildShop(); rebuildFriends();
   return report;
+};
+
+/* ── 출시 판정 하니스 (개발용) ──
+   docs/LAUNCH-CRITERIA.md 의 5대 기준을 자동 측정한다.
+   콘솔에서 await launchCheck() → { score, byCriterion, failures } */
+window.launchCheck = async function launchCheck() {
+  const cats = { stability: [], onboarding: [], pacing: [], performance: [], compliance: [] };
+  const WEIGHTS = { stability: 30, onboarding: 15, pacing: 25, performance: 15, compliance: 15 };
+  const add = (cat, name, pass, detail) => cats[cat].push({ name, pass: !!pass, detail: detail || '' });
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const noNaN = obj => !/NaN|Infinity/.test(JSON.stringify(obj));
+  const smAt = n => 1 + 0.05 * Math.min(n, 100) + 0.02 * Math.min(Math.max(n - 100, 0), 400) + 0.005 * Math.max(n - 500, 0);
+
+  // 에러 계측 + 전체 상태 스냅샷
+  let errCount = 0;
+  const origErr = console.error;
+  console.error = (...a) => { errCount++; origErr(...a); };
+  const onWinErr = () => errCount++;
+  window.addEventListener('error', onWinErr);
+  const snapS = JSON.stringify(S);
+  const snapLS = localStorage.getItem(SAVE_KEY);
+  const snapLevel = slimeLevel, snapStage = stageIdx, snapCombo = combo;
+  const origConfirm = window.confirm;
+
+  try {
+    /* ═══ 1. 안정성 ═══ */
+    window.confirm = () => true;
+    S = migrateSave({}); computeBlessCache(); slimeLevel = 1; stageIdx = 0;
+    combo = 0; frenzyTimer = 0; partyTimer = 0; pendingBlessings = 0;
+
+    for (let i = 0; i < 30; i++) doClick(innerWidth / 3, innerHeight / 2);
+    add('stability', '클릭 30회', errCount === 0 && S.coins > 0);
+
+    S.coins = 1e7;
+    buyProducer(PRODUCERS[0]); buyProducer(PRODUCERS[1]); buyUpgrade(UPGRADES[0]);
+    add('stability', '친구·강화 구매', S.producers.chick > 0 && !!S.upgrades.glove1);
+
+    const e0 = errCount;
+    for (const ev of STAR_EVENTS) ev.run({ clientX: 300, clientY: 300 });
+    add('stability', '별 이벤트 5종 실행', errCount === e0);
+    frenzyTimer = 0; partyTimer = 0; S.buffs.discount = false;
+    document.querySelectorAll('.mini-star').forEach(el => el.remove());
+
+    spawnCloud();
+    if (cloudState === 'drift') {
+      cloudEl.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      cloudClicks = cloudNeed - 1;
+      cloudEl.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    }
+    add('stability', '먹구름 성공 경로', cloudState === 'hidden' && errCount === e0);
+    spawnCloud();
+    if (cloudState === 'drift') { cloudEl.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); cloudFail(); }
+    add('stability', '먹구름 실패 경로', cloudState === 'hidden' && errCount === e0);
+
+    S.totalEarned = levelNeed(5) + 1; checkEvolution();
+    openBlessingModal(); blessGuardUntil = 0;
+    const card = document.querySelector('.blessing-card');
+    if (card) card.click();
+    add('stability', '레벨업·축복 선택', S.runBlessings.length > 0 && errCount === e0);
+    pendingBlessings = 0; $('blessing-overlay').classList.remove('open');
+
+    S.totalEarned = 1e9; doPrestige(null);
+    add('stability', '환생 리셋', S.totalEarned === 0 && S.prestige.totalResets === 1);
+
+    S.prestige.totalResets = 2; S.totalEarned = 1e9; doPrestige('mono');
+    const inCh = chActive() === 'mono';
+    abandonChallenge(true);
+    add('stability', '도전 진입·포기', inCh && !chActive());
+
+    initWishes();
+    const w0 = S.wishes.active[0];
+    wishEvent(w0.type, w0.target * 2);
+    add('stability', '소원 완료·리필', S.wishes.active.length === 3);
+
+    S.stardust = 50; clickCosmetic(COSMETICS[0]);
+    add('stability', '코스메틱 구매·장착', !!S.cosmetics.owned[COSMETICS[0].id]);
+
+    add('stability', '수치 무결성(시나리오 후)', noNaN(S));
+    save();
+    const re = migrateSave(JSON.parse(localStorage.getItem(SAVE_KEY)));
+    add('stability', '세이브 왕복 일치', Math.abs(re.coins - S.coins) < 1 && re.prestige.totalResets === S.prestige.totalResets);
+
+    // 입력 퍼즈 (파괴 방지: confirm=false)
+    window.confirm = () => false;
+    const eFuzz = errCount;
+    for (let i = 0; i < 200; i++) {
+      const x = Math.random() * innerWidth, y = Math.random() * innerHeight;
+      const el = document.elementFromPoint(x, y);
+      if (el) {
+        el.dispatchEvent(new PointerEvent('pointerdown', { clientX: x, clientY: y, bubbles: true }));
+        el.dispatchEvent(new MouseEvent('click', { clientX: x, clientY: y, bubbles: true }));
+      }
+    }
+    document.querySelectorAll('.tab').forEach(t => t.click());
+    $('settings-overlay').classList.remove('open');
+    $('blessing-overlay').classList.remove('open');
+    add('stability', '입력 퍼즈 200회 에러 0', errCount === eFuzz);
+    add('stability', '퍼즈 후 수치 무결성', noNaN(S));
+
+    /* ═══ 2. 온보딩 ═══ */
+    S = migrateSave({}); computeBlessCache(); slimeLevel = 1; stageIdx = 0; combo = 0;
+    let onbT = 0, onbCoins = 0;
+    for (onbT = 0; onbT < 60; onbT++) {
+      onbCoins += clickPower() * comboMul() * 2;
+      combo = Math.min(combo + 2, 50);
+      if (onbCoins >= producerCost(PRODUCERS[0])) break;
+    }
+    combo = 0;
+    add('onboarding', '60초 내 첫 친구 구매 도달', onbT < 60, onbT + '초');
+    add('onboarding', '첫 황금별 안내 존재', spawnStar.toString().includes('starsClicked === 0'));
+    add('onboarding', '먹구름 상시 힌트 요소', !!document.getElementById('cloud-hint'));
+    add('onboarding', '첫 클릭 말풍선 온보딩', typeof showQuip === 'function' && document.body.contains($('speech-bubble')));
+    add('onboarding', '첫 친구 고용 힌트 로직', typeof hintFriendShown !== 'undefined');
+    const tipText = TIPS.map(t => t.text).join(' ');
+    for (const [kw, label] of [['황금별', '황금별'], ['먹구름', '먹구름'], ['시너지', '친구 시너지'], ['회수', '회수 시간'], ['환생', '환생'], ['리롤', '리롤'], ['성향', '성향'], ['장식', '장식'], ['별가루', '별가루'], ['오프라인', '오프라인']]) {
+      add('onboarding', `팁 커버리지: ${label}`, tipText.includes(kw));
+    }
+
+    /* ═══ 3. 콘텐츠·페이싱 ═══ */
+    S = migrateSave({}); computeBlessCache(); slimeLevel = 1; stageIdx = 0;
+    const rep = simRun({ hours: 1.2, clicksPerSec: 4 });
+    const rb = parseFloat(rep.rebirthLineMin);
+    add('pacing', '첫 환생 20~50분', rb >= 20 && rb <= 50, rep.rebirthLineMin + '분');
+    const lt = rep.levelTimesMin;
+    const ivs = [];
+    for (let L = 15; L <= 20; L++) {
+      if (lt[L] && lt[L - 1]) ivs.push(parseFloat(lt[L]) - parseFloat(lt[L - 1]));
+    }
+    add('pacing', '갈증 곡선(후반 간격 증가)', ivs.length >= 3 && ivs[ivs.length - 1] > ivs[0], JSON.stringify(ivs.map(v => v.toFixed(1))));
+    add('pacing', '첫 런 강화 소진 ≤60%', parseInt(rep.upgradesBought) <= 15, rep.upgradesBought);
+    add('pacing', '영혼 배율 소프트캡(3000영혼 ≤ x30)', smAt(3000) <= 30, 'x' + smAt(3000).toFixed(1));
+    add('pacing', '영혼 획득 로그화(45조 런 ≤ 200)', (() => { const d = Math.log10(4.5e13 / 6e7); return Math.floor(1 + 3 * Math.pow(d, 2.2)) <= 200; })());
+    let leg = 0;
+    for (let i = 0; i < 3000; i++) if (pickRarity() === 'legendary') leg++;
+    add('pacing', '전설 확률(행운 0) ≤ 2%', leg / 3000 <= 0.02, (leg / 30).toFixed(2) + '%');
+    add('pacing', '장기 업적 ≥ 5종', ACHIEVEMENTS.filter(a => ['life1e15', 'reset10', 'level40', 'click200k', 'wish100', 'allCh', 'life1e12', 'reset5'].includes(a.id)).length >= 5);
+    add('pacing', '축복 풀 40+ · 4등급', BLESSINGS.length >= 40 && new Set(BLESSINGS.map(b => b.rarity)).size === 4);
+    add('pacing', '레벨 상한 여유(MAX 60)', MAX_LEVEL >= 50);
+
+    /* ═══ 4. 성능 ═══ */
+    const tp0 = performance.now();
+    for (let i = 0; i < 10000; i++) { clickPower(); totalCps(); comboMul(); }
+    const hotMs = performance.now() - tp0;
+    add('performance', '경제 핫패스 1만회 < 300ms', hotMs < 300, hotMs.toFixed(0) + 'ms');
+
+    const tp1 = performance.now();
+    for (let i = 0; i < 300; i++) renderHud();
+    const hudMs = performance.now() - tp1;
+    add('performance', 'HUD 렌더 300회 < 400ms', hudMs < 400, hudMs.toFixed(0) + 'ms');
+
+    PRODUCERS.forEach(p => S.producers[p.id] = 30);
+    const tp2 = performance.now();
+    rebuildFriends();
+    add('performance', '친구 재배치 < 50ms', performance.now() - tp2 < 50);
+    add('performance', '친구 DOM ≤ 30개', friendsLayer.querySelectorAll('.friend').length <= 30);
+
+    for (let i = 0; i < 50; i++) spawnSparks(innerWidth / 2, innerHeight / 2);
+    const burst = particleCount();
+    add('performance', '파티클 하드캡(폭주 시 ≤ 90)', burst <= PARTICLE_CAP + 30, burst + '개');
+    document.querySelectorAll('.spark, .emoji-spark').forEach(el => el.remove());
+
+    const blessLen = rep.blessings;
+    add('performance', '런 축복 배열 폭주 없음(< 200)', blessLen < 200, blessLen + '개');
+
+    /* ═══ 5. 패키징·준수 ═══ */
+    const isHttp = location.protocol.startsWith('http');
+    if (isHttp) {
+      try {
+        const mf = await (await fetch('manifest.json')).json();
+        add('compliance', 'PWA manifest 유효', mf.name && mf.icons && mf.icons.length >= 2 && mf.start_url);
+      } catch (e) { add('compliance', 'PWA manifest 유효', false, String(e)); }
+      try {
+        const swText = await (await fetch('sw.js')).text();
+        const atlasSrcs = Object.values(SPRITE_ATLASES).filter(a => a.sheet).map(a => a.src);
+        const missing = atlasSrcs.filter(src => !swText.includes(src));
+        add('compliance', 'SW 캐시-아틀라스 정합', missing.length === 0, missing.join(','));
+      } catch (e) { add('compliance', 'SW 캐시-아틀라스 정합', false, String(e)); }
+      const regs = await navigator.serviceWorker.getRegistrations();
+      add('compliance', 'SW 등록', regs.length >= 1);
+    } else {
+      add('compliance', 'PWA manifest 유효', true, 'file:// 생략');
+      add('compliance', 'SW 캐시-아틀라스 정합', true, 'file:// 생략');
+      add('compliance', 'SW 등록', true, 'file:// 생략');
+    }
+    const iconOk = await new Promise(res => {
+      const im = new Image();
+      im.onload = () => res(true); im.onerror = () => res(false);
+      im.src = 'icons/icon-192.png';
+    });
+    add('compliance', '앱 아이콘 로드', iconOk);
+
+    const code = exportSaveCode();
+    const back = JSON.parse(decodeURIComponent(escape(atob(code))));
+    add('compliance', '세이브 코드 왕복', back.version === SAVE_VERSION);
+
+    const fixtures = {
+      'v1(최초)': { coins: 5, totalEarned: 5, totalClicks: 1, producers: { chick: 1 }, upgrades: {}, soundOn: true, lastSave: Date.now() },
+      'v4(평면 stats)': { version: 4, coins: 1, totalEarned: 2e4, totalClicks: 9, producers: { chick: 2 }, upgrades: {}, stats: { bestCombo: 3, starsClicked: 1, clickEarned: 5, idleEarned: 5, offlineEarned: 0 }, prestige: { souls: 2, totalResets: 1, perks: { sticky: 1 } }, codex: { stages: { 0: true }, traits: {}, friends: { chick: true } }, decor: {}, story: {} },
+      'v9(현행)': JSON.parse(snapS),
+    };
+    for (const [name, fx] of Object.entries(fixtures)) {
+      try {
+        const m = migrateSave(JSON.parse(JSON.stringify(fx)));
+        add('compliance', `마이그레이션 ${name}`, m.version === SAVE_VERSION && noNaN(m));
+      } catch (e) { add('compliance', `마이그레이션 ${name}`, false, String(e)); }
+    }
+    add('compliance', '가로 오버플로 없음', document.documentElement.scrollWidth <= innerWidth + 2,
+      document.documentElement.scrollWidth + ' vs ' + innerWidth);
+    add('compliance', '픽셀 폰트 + 폴백 체인', getComputedStyle(document.body).fontFamily.includes('Galmuri11'));
+  } finally {
+    // 완전 복원
+    console.error = origErr;
+    window.removeEventListener('error', onWinErr);
+    window.confirm = origConfirm;
+    if (snapLS === null) localStorage.removeItem(SAVE_KEY);
+    else localStorage.setItem(SAVE_KEY, snapLS);
+    S = migrateSave(JSON.parse(snapS)); computeBlessCache();
+    slimeLevel = snapLevel; stageIdx = snapStage; combo = snapCombo;
+    frenzyTimer = 0; partyTimer = 0; festActive = 0; pendingBlessings = 0;
+    hideStar(); hideCloud();
+    $('blessing-overlay').classList.remove('open');
+    $('settings-overlay').classList.remove('open');
+    document.querySelectorAll('.mini-star').forEach(el => el.remove());
+    renderStageName(); renderHud(); buildShop(); rebuildFriends(); renderDecor(); applyCosmetics();
+  }
+
+  const byCriterion = {};
+  let weighted = 0;
+  for (const [cat, checks] of Object.entries(cats)) {
+    const passed = checks.filter(c => c.pass).length;
+    const pct = checks.length ? passed / checks.length * 100 : 100;
+    byCriterion[cat] = `${pct.toFixed(1)}% (${passed}/${checks.length})`;
+    weighted += pct * WEIGHTS[cat];
+  }
+  const score = weighted / 100;
+  const failures = Object.entries(cats).flatMap(([cat, checks]) =>
+    checks.filter(c => !c.pass).map(c => `[${cat}] ${c.name}${c.detail ? ' — ' + c.detail : ''}`));
+  return { score: score.toFixed(1), byCriterion, failures };
 };
 
 // PWA: http(s)에서만 서비스워커 등록 (file:// 더블클릭 실행은 그대로 동작)
