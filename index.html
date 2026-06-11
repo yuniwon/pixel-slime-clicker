@@ -94,6 +94,18 @@
   }
   #evo-progress-label { font-size: 11px; color: var(--text-dim); margin-top: 5px; }
 
+  #challenge-badge {
+    display: none;
+    font-size: 11px;
+    color: #ffb86b;
+    background: #00000055;
+    border: 2px solid #8a5a2b;
+    padding: 3px 10px;
+    margin-bottom: 8px;
+    text-shadow: 1px 1px 0 #00000088;
+  }
+  #challenge-badge.on { display: inline-block; }
+
   #coin-display {
     font-size: 32px;
     font-weight: bold;
@@ -889,6 +901,7 @@
     <div id="evo-progress-outer"><div id="evo-progress-bar"></div></div>
     <div id="evo-progress-label"></div>
   </div>
+  <div id="challenge-badge"></div>
   <div id="coin-display"><canvas id="coin-icon" width="8" height="8"></canvas><span id="coin-num">0</span></div>
   <div id="cps-display">초당 0 코인</div>
   <div id="friends-layer"></div>
@@ -979,7 +992,7 @@
 
 /* ════════════════════════ 데이터 ════════════════════════ */
 
-const SAVE_VERSION = 8;
+const SAVE_VERSION = 9;
 const PRESTIGE_UNLOCK = 1e9;
 
 const PRODUCERS = [
@@ -1400,6 +1413,8 @@ const NEWS = [
   { cond: () => !!S.cosmetics.equipped.bg, text: '하늘 색이 바뀌었지만 아무도 놀라지 않음. 흔한 일.' },
   { cond: () => S.wishes.completed >= 5, text: '소원 성취 전문 슬라임, 비결은 "그냥 꾸준히".' },
   { cond: () => (S.stats.lifetime.cloudsSoothed || 0) > 0, text: '먹구름 손님, 간식 들고 재방문 예고.' },
+  { cond: () => chActive() === 'silence', text: '침묵의 손 수행자 목격담: "손은 멈췄지만 마음은 말랑."' },
+  { cond: () => Object.keys(S.codex.challenges).length > 0, text: '이상한 생을 살아본 슬라임, 회고록 집필 중.' },
 ];
 
 /* 진화 축복: 진화할 때마다 3택 1, 이번 생 한정.
@@ -1424,6 +1439,22 @@ const BLESSINGS = [
 ];
 
 const TRAIT_BLESSING_TAG = { muscle: 'click', ranch: 'farm', star: 'star', dream: 'dream' };
+
+/* 도전 런: 환생 2회부터 해금. 제약을 안고 환생선(영혼 1개)까지 가면 완수.
+   실패·포기해도 잃는 것 없음 — 무손실 원칙 */
+const CHALLENGES = [
+  { id: 'silence',  icon: '🤫', name: '침묵의 손',   reward: 15,
+    desc: '클릭 수입이 0이 돼요. 친구들의 힘만으로! (시작할 때 병아리 3마리가 동행해요)' },
+  { id: 'mono',     icon: '🐾', name: '외길 목장',   reward: 15,
+    desc: '처음 고용한 친구 한 종만 키울 수 있어요' },
+  { id: 'starlit',  icon: '🌠', name: '별빛 사냥꾼', reward: 15,
+    desc: '자동 생산이 5%로 줄지만, 별 코인 보상이 3배가 돼요' },
+  { id: 'sprint',   icon: '⏱️', name: '서두르는 생', reward: 20,
+    desc: '15분 안에 환생선까지 도달해보세요. 못 해도 잃는 건 없어요' },
+];
+
+const CHALLENGE_UNLOCK_RESETS = 2;
+const SPRINT_LIMIT = 15 * 60;
 
 const SLIME_MAP = [
   '................',
@@ -1474,11 +1505,12 @@ function defaultState() {
     prestige: { souls: 0, totalSoulsEarned: 0, totalResets: 0, perks: {} },
     decor: {},
     story: {},
-    codex: { stages: {}, traits: {}, friends: {}, blessings: {} },
+    codex: { stages: {}, traits: {}, friends: {}, blessings: {}, challenges: {} },
     stardust: 0,
     wishes: { active: [], completed: 0 },
     cosmetics: { owned: {}, equipped: {} },
     runBlessings: [],   // 이번 생의 축복 (환생 시 초기화)
+    challenge: { active: null, startedAt: 0 },  // 도전 런 (이번 생 한정)
     playTime: 0,        // 함께한 시간(초) — 앨범용
     createdAt: Date.now(),
     soundOn: true,
@@ -1824,6 +1856,7 @@ function clickPower() {
     if (u.type === 'clickMul') mul *= u.value;
     if (u.type === 'clickCps') cpsPart += u.value;
   }
+  if (chActive() === 'silence') return 0;  // 침묵의 손: 클릭 수입 봉인
   const sticky = 1 + 0.25 * perkLv('sticky');
   const bless = (hasBless('sparkfinger') ? 1.1 : 1) * (hasBless('warmstart') ? 1.05 : 1);
   return add * mul * globalMul() * sticky * decorClickMul() * clickSynMul() * bless + totalCps() * cpsPart;
@@ -1839,7 +1872,8 @@ function cpsMulFactor() {
     * (hasSyn('whale', 50) ? 1.1 : 1)
     * (hasSyn('planet', 25) ? 1.1 : 1)
     * (hasBless('quietrich') ? 1.08 : 1)
-    * (hasBless('warmstart') ? 1.05 : 1);
+    * (hasBless('warmstart') ? 1.05 : 1)
+    * (chActive() === 'starlit' ? 0.05 : 1);  // 별빛 사냥꾼: 생산 5%
 }
 
 function totalCps() {
@@ -2413,6 +2447,16 @@ function wishEvent(type, amount) {
 
 function hasBless(id) { return S.runBlessings.includes(id); }
 
+function chActive() { return S.challenge.active; }
+
+function challengeOf(id) { return CHALLENGES.find(c => c.id === id); }
+
+/* 외길 목장: 처음 고용한 친구 종 */
+function monoSpecies() {
+  for (const p of PRODUCERS) if (S.producers[p.id] > 0) return p.id;
+  return null;
+}
+
 let pendingBlessings = 0;
 
 function drawBlessingChoices() {
@@ -2550,11 +2594,13 @@ function playstyleName() {
 
 /* ════════════════════════ 환생 ════════════════════════ */
 
-function doPrestige() {
+function doPrestige(challengeId = null) {
   const gain = soulsGain();
   if (gain < 1) return;
   const style = playstyleName();
+  const ch = challengeId ? challengeOf(challengeId) : null;
   const ok = confirm(
+    (ch ? `[도전 런: ${ch.name}] ${ch.desc}\n\n` : '') +
     `젤리 환생을 할까요?\n\n` +
     `+ 젤리 영혼 ${gain}개 획득 (영혼 1개당 모든 수입 +5%)\n` +
     `- 코인, 친구들, 강화가 초기화돼요\n` +
@@ -2574,6 +2620,8 @@ function doPrestige() {
   S.buffs.discount = false;
   S.stats.run = defaultState().stats.run;  // 이번 생 통계만 초기화
   S.runBlessings = [];                      // 축복도 이번 생 한정
+  S.challenge = { active: challengeId, startedAt: challengeId ? Date.now() : 0 };
+  if (challengeId === 'silence') S.producers.chick = 3;  // 침묵의 손: 동행 병아리
   pendingBlessings = 0;
   $('blessing-overlay').classList.remove('open');
   combo = 0; comboTimer = 0; frenzyTimer = 0; partyTimer = 0;
@@ -2593,6 +2641,28 @@ function doPrestige() {
   rebuildFriends();
   buildShop();
   renderHud();
+  save();
+}
+
+function completeChallenge() {
+  const c = challengeOf(chActive());
+  if (!c) { S.challenge.active = null; return; }
+  S.codex.challenges[c.id] = true;
+  S.stardust += c.reward;
+  S.challenge.active = null;
+  confettiBurst();
+  sndRebirth();
+  toast(`🏆 <b>도전 완수!</b> ${c.icon} ${c.name}<br><small>별가루 +${c.reward} — 이제 편하게 플레이해도 돼요</small>`);
+  showQuip('우리, 해냈어!');
+  if (currentTab === 'prestige') buildShop();
+  renderHud();
+  save();
+}
+
+function abandonChallenge(silent) {
+  S.challenge.active = null;
+  if (!silent) toast('도전을 내려놓았어요. 잃은 건 없어요!');
+  if (currentTab === 'prestige') buildShop();
   save();
 }
 
@@ -3008,6 +3078,7 @@ function buildRoomTab() {
     ['이뤄준 소원', S.wishes.completed + '개'],
     ['거쳐온 생', (S.prestige.totalResets + 1) + '번째'],
     ['달래준 먹구름', (S.stats.lifetime.cloudsSoothed || 0) + '번'],
+    ['완수한 도전', Object.keys(S.codex.challenges).length + '/' + CHALLENGES.length],
     ['가장 아낀 친구', bestFriend ? `${bestFriend.name} (${bestFriend.max}마리)` : '아직 없어요'],
   ];
   const album = document.createElement('div');
@@ -3045,8 +3116,58 @@ function buildPrestigeTab() {
         ? `지금 환생하면 젤리 영혼 <b>+${gain}</b>개! (코인·친구·강화 초기화, 업적·영혼·특성 유지)`
         : `누적 ${fmt(PRESTIGE_UNLOCK)} 코인부터 환생할 수 있어요 (현재 ${fmt(S.totalEarned)})`}</div>
     </div>`;
-  if (unlocked && gain >= 1) btn.addEventListener('click', doPrestige);
+  if (unlocked && gain >= 1) btn.addEventListener('click', () => doPrestige(null));
   shopList.appendChild(btn);
+
+  // 도전 런 섹션
+  const chTitle = document.createElement('div');
+  chTitle.className = 'room-section-title';
+  chTitle.textContent = `🎲 이상한 이번 생 — 도전 런 (완수 ${Object.keys(S.codex.challenges).length}/${CHALLENGES.length})`;
+  shopList.appendChild(chTitle);
+
+  if (chActive()) {
+    const c = challengeOf(chActive());
+    const el = document.createElement('div');
+    el.className = 'shop-item prestige-btn';
+    el.innerHTML = `
+      <div class="shop-icon">${c.icon}</div>
+      <div class="shop-info">
+        <div class="shop-name">도전 중: ${c.name}</div>
+        <div class="shop-desc">${c.desc}<br>환생선(영혼 1개)에 도달하면 완수! 보상 별가루 +${c.reward}</div>
+        <div class="shop-cost">클릭해서 도전 내려놓기 (손해 없음)</div>
+      </div>`;
+    el.addEventListener('click', () => {
+      if (confirm('도전을 내려놓을까요? 잃는 건 없어요.')) abandonChallenge();
+    });
+    shopList.appendChild(el);
+  } else if (S.prestige.totalResets < CHALLENGE_UNLOCK_RESETS) {
+    const el = document.createElement('div');
+    el.className = 'shop-item locked';
+    el.style.cursor = 'default';
+    el.innerHTML = `
+      <div class="shop-icon">🔒</div>
+      <div class="shop-info">
+        <div class="shop-name">도전 런</div>
+        <div class="shop-desc">환생 ${CHALLENGE_UNLOCK_RESETS}회부터 열려요 (현재 ${S.prestige.totalResets}회)</div>
+      </div>`;
+    shopList.appendChild(el);
+  } else {
+    for (const c of CHALLENGES) {
+      const done = !!S.codex.challenges[c.id];
+      const can = unlocked && gain >= 1;
+      const el = document.createElement('div');
+      el.className = 'shop-item' + (can ? '' : ' locked');
+      el.innerHTML = `
+        <div class="shop-icon">${c.icon}</div>
+        <div class="shop-info">
+          <div class="shop-name">${c.name} ${done ? '<span style="color:var(--green)">✓ 완수</span>' : ''}</div>
+          <div class="shop-desc">${c.desc}</div>
+          <div class="shop-cost">${can ? `이 도전으로 환생하기 — 보상 별가루 +${c.reward}` : '환생 가능 시점부터 시작할 수 있어요'}</div>
+        </div>`;
+      if (can) el.addEventListener('click', () => doPrestige(c.id));
+      shopList.appendChild(el);
+    }
+  }
 
   // 특성 목록
   for (const perk of PERKS) {
@@ -3143,6 +3264,14 @@ function consumeDiscount() {
 }
 
 function buyProducer(p) {
+  // 외길 목장: 처음 고용한 종 외 구매 잠금
+  if (chActive() === 'mono') {
+    const sp = monoSpecies();
+    if (sp && sp !== p.id) {
+      toast('🐾 외길 목장 중! <b>' + (PRODUCERS.find(x => x.id === sp) || {}).name + '</b>만 키울 수 있어요');
+      return;
+    }
+  }
   const info = bulkInfo(p);
   if (info.count === 0 || S.coins < info.cost) return;
   S.coins -= info.cost;
@@ -3246,6 +3375,7 @@ const STAR_EVENTS = [
   { w: () => 25, run: (e) => {
       let bonus = Math.max(totalCps() * 90, clickPower() * 150, 50);
       if (hasSyn('dog', 50)) bonus *= 1.2;
+      if (chActive() === 'starlit') bonus *= 3;
       earnCoins(bonus, 'event');
       spawnFloat(e.clientX, e.clientY, '+' + fmt(bonus), true);
       toast(`⭐ 행운의 보너스! <b>+${fmt(bonus)}</b> 코인!`);
@@ -3401,6 +3531,7 @@ function spawnMiniStars() {
       let bonus = Math.max(totalCps() * 8, clickPower() * 15, 25);
       if (hasSyn('rabbit', 25)) bonus *= 1.3;
       if (hasSyn('dog', 50)) bonus *= 1.2;
+      if (chActive() === 'starlit') bonus *= 3;
       earnCoins(bonus, 'event');
       wishEvent('ministar', 1);
       spawnFloat(ev.clientX, ev.clientY, '+' + fmt(bonus), true);
@@ -3433,6 +3564,20 @@ function renderHud() {
   $('stat-souls-total').textContent = S.prestige.totalSoulsEarned;
   $('stat-soul-bonus').textContent = S.prestige.totalSoulsEarned * 5;
   $('stat-resets').textContent = S.prestige.totalResets;
+  // 도전 배지
+  const badge = $('challenge-badge');
+  if (chActive()) {
+    const c = challengeOf(chActive());
+    let txt = `${c.icon} ${c.name} 도전 중`;
+    if (chActive() === 'sprint') {
+      const left = Math.max(0, SPRINT_LIMIT - (Date.now() - S.challenge.startedAt) / 1000);
+      txt += ` — 남은 ${fmtTime(left)}`;
+    }
+    badge.textContent = txt;
+    badge.classList.add('on');
+  } else {
+    badge.classList.remove('on');
+  }
   renderEvoProgress();
 }
 
@@ -3538,6 +3683,10 @@ function migrateSave(data) {
   // v7 이하: 앨범 필드
   out.playTime = data.playTime || 0;
   out.createdAt = data.createdAt || data.lastSave || Date.now();
+
+  // v8 이하: 도전 런
+  out.challenge = Object.assign({ active: null, startedAt: 0 }, data.challenge || {});
+  out.codex.challenges = (data.codex && data.codex.challenges) || {};
   out.achievements = data.achievements || {};
   out.producers = Object.assign({}, defaultState().producers, data.producers || {});
   out.upgrades = data.upgrades || {};
@@ -3786,6 +3935,16 @@ function econTickBody() {
       : (currentTrait && hasSyn('unicorn', 100))
         ? `drop-shadow(0 0 14px ${currentTrait.pupil})`
         : '';
+    // 도전 런: 환생선 도달 = 완수, 서두르는 생은 시간 초과 시 무손실 해제
+    if (chActive()) {
+      if (soulsGain() >= 1) {
+        completeChallenge();
+      } else if (chActive() === 'sprint'
+          && (Date.now() - S.challenge.startedAt) / 1000 > SPRINT_LIMIT) {
+        toast('⏱️ 시간이 다 됐어요. 괜찮아요, 잃은 건 없어요!');
+        abandonChallenge(true);
+      }
+    }
     recordCodex();
     checkStory();
     // 온보딩: 첫 친구를 아직 안 샀고 살 수 있을 때 한 번만 안내
