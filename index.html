@@ -784,19 +784,21 @@
     text-align: left;
     transition: transform .08s;
   }
-  .blessing-card:hover { border-color: var(--gold); transform: scale(1.02); }
+  .blessing-card:hover { transform: scale(1.02); }
   .blessing-card .b-icon { font-size: 28px; filter: drop-shadow(2px 2px 0 #00000044); }
-  .blessing-card .b-name { font-size: 14px; font-weight: bold; color: var(--gold); }
+  .blessing-card .b-name { font-size: 14px; font-weight: bold; }
+  .blessing-card .b-rarity { font-size: 10px; margin-left: 6px; opacity: .9; }
   .blessing-card .b-desc { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
-  #blessing-skip {
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-family: inherit;
-    font-size: 11px;
-    margin-top: 4px;
-    cursor: pointer;
-    text-decoration: underline;
+  .blessing-card.rarity-common { border-color: #555a6e; }
+  .blessing-card.rarity-rare { border-color: #56b8f2; }
+  .blessing-card.rarity-epic { border-color: #b48aff; box-shadow: 0 0 10px #b48aff33; }
+  .blessing-card.rarity-legendary {
+    border-color: var(--gold);
+    animation: leg-pulse .6s infinite alternate;
+  }
+  @keyframes leg-pulse {
+    from { box-shadow: 0 0 10px #ffd75e44; }
+    to { box-shadow: 0 0 22px #ffd75e99; }
   }
 
   /* ── 설정 모달 ── */
@@ -960,7 +962,10 @@
     <h3>🌟 진화 축복</h3>
     <div class="blessing-sub">진화한 슬라임이 축복을 하나 고를 수 있어요 (이번 생 한정)</div>
     <div id="blessing-cards"></div>
-    <button id="blessing-skip">이번엔 괜찮아</button>
+    <div class="settings-row">
+      <button class="settings-btn" id="blessing-reroll">🔁 리롤</button>
+      <button class="settings-btn" id="blessing-skip">괜찮아 (+1💫)</button>
+    </div>
   </div>
 </div>
 
@@ -1094,18 +1099,22 @@ const UPGRADES = [
   { id: 'click2',  icon: '📣', name: '슬라임 응원단', desc: '클릭에 초당 생산량의 5% 추가', cost: 5e6,    type: 'clickCps', value: 0.05 },
 ];
 
+/* 외형 진화는 레벨 마일스톤. 레벨 요구치는 기하 곡선(레벨당 2배)이라
+   수입의 지수 성장과 맞물려 게임 내내 레벨업 리듬이 일정하다 */
 const STAGES = [
-  { name: '아기 초록 슬라임', need: 0,
+  { name: '아기 초록 슬라임', atLevel: 1,
     pal: { b: '#5ad95a', l: '#aef2a4', d: '#37a837', o: '#1b4a26' } },
-  { name: '바다 슬라임', need: 10000,
+  { name: '바다 슬라임', atLevel: 5,
     pal: { b: '#56b8f2', l: '#aee2ff', d: '#3380c2', o: '#16365c' } },
-  { name: '딸기 슬라임', need: 1e6,
+  { name: '딸기 슬라임', atLevel: 10,
     pal: { b: '#f78fc0', l: '#ffc8e2', d: '#c2538e', o: '#591238' } },
-  { name: '황금 킹 슬라임', need: 1e8,
+  { name: '황금 킹 슬라임', atLevel: 15,
     pal: { b: '#f7c948', l: '#ffeaa8', d: '#c79232', o: '#5c4312' }, crown: true },
-  { name: '전설의 갓 슬라임', need: 1e10,
+  { name: '전설의 갓 슬라임', atLevel: 20,
     pal: null, crown: true, rainbow: true },
 ];
+
+const MAX_LEVEL = 60;
 
 /* 환생 특성: cost = (현재 레벨 + 1) 젤리 영혼 */
 const PERKS = [
@@ -1114,7 +1123,8 @@ const PERKS = [
   { id: 'starlight', icon: '🌠', name: '별빛 친화',   desc: '황금별 등장 간격 -8%',    max: 5,  per: 0.08 },
   { id: 'softtime',  icon: '🛌', name: '말랑한 시간', desc: '오프라인 보상 +10%p',     max: 5,  per: 0.10 },
   { id: 'combo',     icon: '🥁', name: '콤보 본능',   desc: '콤보 지속 +0.15초',       max: 5,  per: 0.15 },
-  { id: 'evoseed',   icon: '🌱', name: '진화의 씨앗', desc: '진화 요구치 -5%',         max: 5,  per: 0.05 },
+  { id: 'evoseed',   icon: '🌱', name: '진화의 씨앗', desc: '레벨 요구치 -5%',         max: 5,  per: 0.05 },
+  { id: 'instinct',  icon: '🔮', name: '별의 직감',   desc: '상위 등급 축복 확률 증가', max: 5,  per: 5 },
 ];
 
 /* 슬라임 방 장식: 1회 구매, 환생해도 유지 */
@@ -1417,25 +1427,65 @@ const NEWS = [
   { cond: () => Object.keys(S.codex.challenges).length > 0, text: '이상한 생을 살아본 슬라임, 회고록 집필 중.' },
 ];
 
-/* 진화 축복: 진화할 때마다 3택 1, 이번 생 한정.
-   대부분 가산/할인 — 곱연산 폭발 방지. 성향에 맞는 축복이 더 자주 나온다. */
+/* 진화 축복: 레벨업마다 3택 1, 이번 생 한정.
+   4등급 — 일반(스택 가능, 소폭 가산) / 희귀(변형) / 영웅(빌드 정의) / 전설(게임 체인저).
+   fx는 BC(축복 캐시)를 변형하는 함수. 효과 추가 시 computeBlessCache 필드 확인. */
+const RARITY = {
+  common:    { name: '일반', color: '#c8c8d8', w: 70 },
+  rare:      { name: '희귀', color: '#56b8f2', w: 22 },
+  epic:      { name: '영웅', color: '#b48aff', w: 7 },
+  legendary: { name: '전설', color: '#ffd75e', w: 1 },
+};
+
 const BLESSINGS = [
-  { id: 'elastic',     icon: '🪀', name: '말랑 탄성',     desc: '콤보가 5부터 시작해요',          tag: 'click' },
-  { id: 'luckytip',    icon: '🍀', name: '작은 행운',     desc: '퍼펙트 말랑 확률 +2%p',          tag: 'click' },
-  { id: 'sparkfinger', icon: '✨', name: '반짝 손끝',     desc: '클릭 코인 +10%',                 tag: 'click' },
-  { id: 'comboKeep',   icon: '🥁', name: '박자 기억',     desc: '콤보 지속시간 +0.25초',          tag: 'click' },
-  { id: 'firststep',   icon: '👣', name: '친구의 첫걸음', desc: '친구 가격 -8%',                  tag: 'farm' },
-  { id: 'quietrich',   icon: '🤫', name: '조용한 부자',   desc: '자동 생산 +8%',                  tag: 'farm' },
-  { id: 'cheapup',     icon: '🏷️', name: '젤리 할인권',   desc: '강화 가격 -15%',                 tag: 'farm' },
-  { id: 'starhunch',   icon: '🌟', name: '별의 예감',     desc: '황금별 등장 간격 -12%',          tag: 'star' },
-  { id: 'starlonger',  icon: '🕯️', name: '오래 머무는 별', desc: '황금별 체류 +3초',               tag: 'star' },
-  { id: 'partylong',   icon: '🎉', name: '긴 파티',       desc: '광란·파티 지속 +3초',            tag: 'star' },
-  { id: 'minirain',    icon: '🌠', name: '별똥별 소나기', desc: '미니 별똥별 +2개',               tag: 'star' },
-  { id: 'napecon',     icon: '😴', name: '낮잠 경제',     desc: '오프라인 보상 +10%p',            tag: 'dream' },
-  { id: 'dustsense',   icon: '💫', name: '별가루 감각',   desc: '소원 보상 별가루 +1',            tag: 'dream' },
-  { id: 'slowcrown',   icon: '👑', name: '느린 왕관',     desc: '진화 요구치 -4%',                tag: 'meta' },
-  { id: 'soulwhisper', icon: '🍮', name: '영혼의 속삭임', desc: '이번 생 환생 영혼 +1',           tag: 'meta' },
-  { id: 'warmstart',   icon: '🔥', name: '따뜻한 시작',   desc: '클릭과 생산 +5%',                tag: 'meta' },
+  // ── 일반 (스택 가능) ──
+  { id: 'sparkfinger', icon: '✨', name: '반짝 손끝',     desc: '클릭 코인 +8%',        rarity: 'common', tag: 'click', stack: true, fx: c => { c.clickMul *= 1.08; } },
+  { id: 'quietrich',   icon: '🤫', name: '조용한 부자',   desc: '자동 생산 +6%',        rarity: 'common', tag: 'farm',  stack: true, fx: c => { c.cpsMul *= 1.06; } },
+  { id: 'warmstart',   icon: '🔥', name: '따뜻한 시작',   desc: '클릭과 생산 +4%',      rarity: 'common', tag: 'meta',  stack: true, fx: c => { c.clickMul *= 1.04; c.cpsMul *= 1.04; } },
+  { id: 'comboKeep',   icon: '🥁', name: '박자 기억',     desc: '콤보 지속 +0.2초',     rarity: 'common', tag: 'click', stack: true, fx: c => { c.comboWindow += 0.2; } },
+  { id: 'firststep',   icon: '👣', name: '친구의 첫걸음', desc: '친구 가격 -5%',        rarity: 'common', tag: 'farm',  stack: true, fx: c => { c.prodDisc *= 0.95; } },
+  { id: 'cheapup',     icon: '🏷️', name: '젤리 할인권',   desc: '강화 가격 -10%',       rarity: 'common', tag: 'farm',  stack: true, fx: c => { c.upDisc *= 0.9; } },
+  { id: 'dustsense',   icon: '💫', name: '별가루 감각',   desc: '소원 별가루 +1',       rarity: 'common', tag: 'dream', stack: true, fx: c => { c.wishDust += 1; } },
+  { id: 'starlonger',  icon: '🕯️', name: '오래 머무는 별', desc: '황금별 체류 +2초',     rarity: 'common', tag: 'star',  stack: true, fx: c => { c.starLinger += 2; } },
+  { id: 'napecon',     icon: '😴', name: '낮잠 경제',     desc: '오프라인 +5%p',        rarity: 'common', tag: 'dream', stack: true, fx: c => { c.offlineAdd += 0.05; } },
+  { id: 'minirain',    icon: '🌠', name: '별똥별 소나기', desc: '미니 별똥별 +1개',     rarity: 'common', tag: 'star',  stack: true, fx: c => { c.miniCount += 1; } },
+  { id: 'jellysnack',  icon: '🍮', name: '젤리 간식',     desc: '레벨 요구치 -3%',      rarity: 'common', tag: 'meta',  stack: true, fx: c => { c.evoNeed *= 0.97; } },
+  { id: 'tinyluck',    icon: '🍀', name: '작은 행운',     desc: '행운 +4',              rarity: 'common', tag: 'meta',  stack: true, fx: c => { c.luck += 4; } },
+  { id: 'festspark',   icon: '🎇', name: '축제 불씨',     desc: '퍼펙트 확률 +1%p',     rarity: 'common', tag: 'click', stack: true, fx: c => { c.perfectAdd += 0.01; } },
+  { id: 'drumbeat',    icon: '🪘', name: '북소리',        desc: '콤보 배율 효과 +8%',   rarity: 'common', tag: 'click', stack: true, fx: c => { c.comboAmp += 0.08; } },
+  { id: 'starcrumb',   icon: '⭐', name: '별 부스러기',   desc: '별 코인 보상 +10%',    rarity: 'common', tag: 'star',  stack: true, fx: c => { c.starBonus *= 1.1; } },
+  { id: 'pocketwind',  icon: '🌬️', name: '주머니 바람',   desc: '황금별 간격 -5%',      rarity: 'common', tag: 'star',  stack: true, fx: c => { c.starInt *= 0.95; } },
+
+  // ── 희귀 ──
+  { id: 'elastic',     icon: '🪀', name: '말랑 탄성',     desc: '콤보가 5부터 시작해요',           rarity: 'rare', tag: 'click', fx: c => { c.comboStart = Math.max(c.comboStart, 5); } },
+  { id: 'luckytip',    icon: '🍀', name: '네잎 행운',     desc: '퍼펙트 확률 +2%p',                rarity: 'rare', tag: 'click', fx: c => { c.perfectAdd += 0.02; } },
+  { id: 'starhunch',   icon: '🌟', name: '별의 예감',     desc: '황금별 간격 -12%',                rarity: 'rare', tag: 'star',  fx: c => { c.starInt *= 0.88; } },
+  { id: 'partylong',   icon: '🎉', name: '긴 파티',       desc: '광란·파티 지속 +3초',             rarity: 'rare', tag: 'star',  fx: c => { c.frenzyDur += 3; c.partyDur += 3; } },
+  { id: 'slowcrown',   icon: '👑', name: '느린 왕관',     desc: '레벨 요구치 -6%',                 rarity: 'rare', tag: 'meta',  fx: c => { c.evoNeed *= 0.94; } },
+  { id: 'soulwhisper', icon: '🍮', name: '영혼의 속삭임', desc: '이번 생 환생 영혼 +1',            rarity: 'rare', tag: 'meta',  fx: c => { c.soulFlat += 1; } },
+  { id: 'goldenpaw',   icon: '🐾', name: '황금 발자국',   desc: '친구 가격 -12%',                  rarity: 'rare', tag: 'farm',  fx: c => { c.prodDisc *= 0.88; } },
+  { id: 'dreamfeast',  icon: '🛌', name: '꿈의 만찬',     desc: '오프라인 +15%p',                  rarity: 'rare', tag: 'dream', fx: c => { c.offlineAdd += 0.15; } },
+  { id: 'starshower',  icon: '☄️', name: '유성우',        desc: '미니 별똥별 +3개',                rarity: 'rare', tag: 'star',  fx: c => { c.miniCount += 3; } },
+  { id: 'perfectecho', icon: '🔔', name: '퍼펙트 메아리', desc: '퍼펙트 배율 x5 → x7',             rarity: 'rare', tag: 'click', fx: c => { c.perfectPower += 2; } },
+  { id: 'luckyscent',  icon: '🌸', name: '행운의 향기',   desc: '행운 +12',                        rarity: 'rare', tag: 'meta',  fx: c => { c.luck += 12; } },
+  { id: 'clickstorm',  icon: '⚡', name: '클릭 폭풍',     desc: '클릭 코인 +20%',                  rarity: 'rare', tag: 'click', fx: c => { c.clickMul *= 1.2; } },
+  { id: 'herdcall',    icon: '📯', name: '목동의 뿔피리', desc: '자동 생산 +15%',                  rarity: 'rare', tag: 'farm',  fx: c => { c.cpsMul *= 1.15; } },
+  { id: 'wishwell',    icon: '⛲', name: '소원 우물',     desc: '소원 별가루 +2',                  rarity: 'rare', tag: 'dream', fx: c => { c.wishDust += 2; } },
+
+  // ── 영웅 (빌드 정의) ──
+  { id: 'comboheart',  icon: '💗', name: '콤보의 심장',   desc: '콤보 상한 50 → 80',               rarity: 'epic', tag: 'click', fx: c => { c.comboCap = Math.max(c.comboCap, 80); } },
+  { id: 'doublestar',  icon: '🌟', name: '겹별',          desc: '황금별 체류 2배 · 별 보상 +25%',  rarity: 'epic', tag: 'star',  fx: c => { c.starLingerMul *= 2; c.starBonus *= 1.25; } },
+  { id: 'midasclick',  icon: '👑', name: '마이다스 손',   desc: '클릭에 초당 생산 3% 추가',        rarity: 'epic', tag: 'click', fx: c => { c.clickCps += 0.03; } },
+  { id: 'nightshift',  icon: '🌙', name: '밤의 근무',     desc: '오프라인 보상 100% · 한도 +4시간', rarity: 'epic', tag: 'dream', fx: c => { c.offlineFull = true; c.offlineCap += 4; } },
+  { id: 'frenzyking',  icon: '🐲', name: '광란의 왕',     desc: '광란 배율 +2',                    rarity: 'epic', tag: 'star',  fx: c => { c.frenzyMulAdd += 2; } },
+  { id: 'evostone',    icon: '🪨', name: '진화의 돌',     desc: '레벨 요구치 -12%',                rarity: 'epic', tag: 'meta',  fx: c => { c.evoNeed *= 0.88; } },
+  { id: 'fortunecat',  icon: '🐱', name: '복고양이',      desc: '행운 +25',                        rarity: 'epic', tag: 'meta',  fx: c => { c.luck += 25; } },
+
+  // ── 전설 (게임 체인저) ──
+  { id: 'twinstars',    icon: '✨', name: '쌍둥이 별',    desc: '황금별이 연달아 2개씩 찾아와요',          rarity: 'legendary', tag: 'star',  fx: c => { c.twinStars = true; } },
+  { id: 'eternalcombo', icon: '♾️', name: '영원한 박자',  desc: '콤보가 시간으로 끊기지 않아요',           rarity: 'legendary', tag: 'click', fx: c => { c.comboEternal = true; } },
+  { id: 'perfectchain', icon: '💞', name: '퍼펙트 연쇄',  desc: '퍼펙트 확률 2배 · 퍼펙트마다 콤보 +5',    rarity: 'legendary', tag: 'click', fx: c => { c.perfectX2 = true; c.perfectCombo = 5; } },
+  { id: 'jackpot',      icon: '🎰', name: '잭팟',         desc: '모든 수입 +30%',                          rarity: 'legendary', tag: 'meta',  fx: c => { c.globalMulX *= 1.3; } },
 ];
 
 const TRAIT_BLESSING_TAG = { muscle: 'click', ranch: 'farm', star: 'star', dream: 'dream' };
@@ -1532,6 +1582,7 @@ let festWait = 60;          // 다음 축제까지 남은 시간
 let currentTab = 'producers';
 let buyMode = '1';
 let stageIdx = 0;
+let slimeLevel = 1;
 let blinkTimer = 3;
 let blinking = 0;
 let currentTrait = null;    // 0.5초마다 갱신
@@ -1738,7 +1789,7 @@ function earnShare(key) {
 
 function producerCost(p, owned) {
   if (owned === undefined) owned = S.producers[p.id];
-  return Math.ceil(p.baseCost * Math.pow(1.15, owned) * (hasBless('firststep') ? 0.92 : 1));
+  return Math.ceil(p.baseCost * Math.pow(1.15, owned) * BC.prodDisc);
 }
 
 function bulkInfo(p) {
@@ -1799,9 +1850,9 @@ function clickSynMul() {
   return m;
 }
 
-function frenzyDuration() { return 20 + (hasSyn('dragon', 10) ? 2 : 0) + (hasBless('partylong') ? 3 : 0); }
-function partyDuration() { return 30 + (hasSyn('whale', 25) ? 5 : 0) + (hasBless('partylong') ? 3 : 0); }
-function offlineCapHours() { return 8 + (hasSyn('cat', 25) ? 1 : 0) + (hasSyn('whale', 10) ? 2 : 0); }
+function frenzyDuration() { return 20 + (hasSyn('dragon', 10) ? 2 : 0) + BC.frenzyDur; }
+function partyDuration() { return 30 + (hasSyn('whale', 25) ? 5 : 0) + BC.partyDur; }
+function offlineCapHours() { return 8 + (hasSyn('cat', 25) ? 1 : 0) + (hasSyn('whale', 10) ? 2 : 0) + BC.offlineCap; }
 function offlineSynMul() { return (hasSyn('cat', 10) ? 1.1 : 1) * (hasSyn('whale', 100) ? 1.15 : 1); }
 function dreamThreshold() { return hasSyn('cat', 50) ? 0.18 : 0.25; }
 
@@ -1812,22 +1863,40 @@ function soulMul() { return 1 + S.prestige.totalSoulsEarned * 0.05; }
 
 function globalMul() {
   const codexBonus = hasSyn('unicorn', 50) ? 1 + 0.005 * codexEntryCount() : 1;
-  return (1 + achCount() * 0.01) * soulMul() * codexBonus;
+  const levelMul = 1 + (slimeLevel - 1) * 0.02;  // 레벨당 +2% (이번 생)
+  return (1 + achCount() * 0.01) * soulMul() * codexBonus * levelMul * BC.globalMulX;
 }
 
-function comboWindow() { return 0.9 + 0.15 * perkLv('combo') + (hasBless('comboKeep') ? 0.25 : 0); }
+function comboWindow() { return 0.9 + 0.15 * perkLv('combo') + BC.comboWindow; }
 
 function offlineRate() {
-  return Math.min(1, 0.5 + 0.1 * perkLv('softtime') + (hasBless('napecon') ? 0.1 : 0));
+  if (BC.offlineFull) return 1;
+  return Math.min(1, 0.5 + 0.1 * perkLv('softtime') + BC.offlineAdd);
 }
 
-function effNeed(i) {
-  return STAGES[i].need * (1 - 0.05 * perkLv('evoseed')) * (hasBless('slowcrown') ? 0.96 : 1);
+/* 레벨 L에 도달하기 위한 누적 코인 (L1 = 0, 이후 레벨당 2배) */
+function levelNeed(L) {
+  if (L <= 1) return 0;
+  const reduct = (1 - 0.05 * perkLv('evoseed')) * BC.evoNeed;
+  return 100 * Math.pow(2, L - 2) * reduct;
+}
+
+function currentLevelFor(total) {
+  if (total < levelNeed(2)) return 1;
+  let L = 2;
+  while (L < MAX_LEVEL && total >= levelNeed(L + 1)) L++;
+  return L;
+}
+
+function stageForLevel(level) {
+  let idx = 0;
+  for (let i = 0; i < STAGES.length; i++) if (level >= STAGES[i].atLevel) idx = i;
+  return idx;
 }
 
 function soulsGain() {
   const base = Math.floor(Math.sqrt(S.totalEarned / 6e7) * (hasSyn('planet', 5) ? 1.05 : 1));
-  return base >= 1 ? base + (hasBless('soulwhisper') ? 1 : 0) : 0;
+  return base >= 1 ? base + BC.soulFlat : 0;
 }
 
 function decorClickMul() {
@@ -1845,7 +1914,7 @@ function decorCpsMul() {
 function starLinger() {
   let bonus = 0;
   for (const d of DECOR) if (S.decor[d.id] && d.boost.star) bonus += d.boost.star;
-  return 10 + bonus * decorAmp() + (hasSyn('dog', 10) ? 1 : 0) + (hasBless('starlonger') ? 3 : 0);
+  return (10 + bonus * decorAmp() + (hasSyn('dog', 10) ? 1 : 0) + BC.starLinger) * BC.starLingerMul;
 }
 
 function clickPower() {
@@ -1858,8 +1927,8 @@ function clickPower() {
   }
   if (chActive() === 'silence') return 0;  // 침묵의 손: 클릭 수입 봉인
   const sticky = 1 + 0.25 * perkLv('sticky');
-  const bless = (hasBless('sparkfinger') ? 1.1 : 1) * (hasBless('warmstart') ? 1.05 : 1);
-  return add * mul * globalMul() * sticky * decorClickMul() * clickSynMul() * bless + totalCps() * cpsPart;
+  return add * mul * globalMul() * sticky * decorClickMul() * clickSynMul() * BC.clickMul
+    + totalCps() * (cpsPart + BC.clickCps);
 }
 
 function cpsMulFactor() {
@@ -1871,8 +1940,7 @@ function cpsMulFactor() {
     * planetMul()
     * (hasSyn('whale', 50) ? 1.1 : 1)
     * (hasSyn('planet', 25) ? 1.1 : 1)
-    * (hasBless('quietrich') ? 1.08 : 1)
-    * (hasBless('warmstart') ? 1.05 : 1)
+    * BC.cpsMul
     * (chActive() === 'starlit' ? 0.05 : 1);  // 별빛 사냥꾼: 생산 5%
 }
 
@@ -1883,10 +1951,10 @@ function totalCps() {
 }
 
 function comboMul() {
-  const amp = hasSyn('chick', 25) ? 1.1 : 1;
-  return 1 + Math.min(combo, 50) * 0.02 * amp;
+  const amp = (hasSyn('chick', 25) ? 1.1 : 1) + BC.comboAmp;
+  return 1 + Math.min(combo, BC.comboCap) * 0.02 * amp;
 }
-function frenzyMul() { return frenzyTimer > 0 ? (hasSyn('dragon', 25) ? 8 : 7) : 1; }
+function frenzyMul() { return frenzyTimer > 0 ? (hasSyn('dragon', 25) ? 8 : 7) + BC.frenzyMulAdd : 1; }
 function partyMul() { return partyTimer > 0 ? 5 : 1; }
 
 /* ════════════════════════ 사운드 (WebAudio) ════════════════════════ */
@@ -2159,15 +2227,16 @@ const slimeWrap = $('slime-wrap');
 
 function doClick(x, y) {
   // 퍼펙트 말랑: 3% 확률로 x5 — 손맛용 잭팟 (작은 행운 축복 +2%p)
-  const perfect = Math.random() < (0.03 + (hasBless('luckytip') ? 0.02 : 0));
+  const perfect = Math.random() < (0.03 + BC.perfectAdd) * (BC.perfectX2 ? 2 : 1);
   let gain = clickPower() * comboMul() * frenzyMul();
-  if (perfect) gain *= 5;
+  if (perfect) gain *= BC.perfectPower;
   earnCoins(gain, 'click');
   S.totalClicks++;
   S.stats.run.clicks++;
 
   combo++;
-  if (hasBless('elastic') && combo < 5) combo = 5;
+  if (combo < BC.comboStart) combo = BC.comboStart;
+  if (perfect && BC.perfectCombo) combo += BC.perfectCombo;
   comboTimer = comboWindow();
   if (combo > S.stats.run.bestCombo) S.stats.run.bestCombo = combo;
   if (combo > S.stats.lifetime.bestCombo) S.stats.lifetime.bestCombo = combo;
@@ -2246,11 +2315,6 @@ function spawnSparks(x, y) {
 
 /* ════════════════════════ 진화 / 성향 ════════════════════════ */
 
-function currentStageFor(total) {
-  let idx = 0;
-  for (let i = 0; i < STAGES.length; i++) if (total >= effNeed(i)) idx = i;
-  return idx;
-}
 
 function confettiBurst() {
   const r = slimeCv.getBoundingClientRect();
@@ -2266,22 +2330,32 @@ function confettiBurst() {
 }
 
 function checkEvolution() {
-  const idx = currentStageFor(S.totalEarned);
-  if (idx > stageIdx) {
-    const jumped = idx - stageIdx;
-    stageIdx = idx;
-    renderStageName();
+  const newLevel = currentLevelFor(S.totalEarned);
+  if (newLevel <= slimeLevel) return;
+  const jumped = newLevel - slimeLevel;
+  slimeLevel = newLevel;
+  const newStage = stageForLevel(slimeLevel);
+
+  queueBlessing(jumped);  // 레벨업마다 축복 3택 1 (점프 시 누적)
+
+  if (newStage > stageIdx) {
+    // 외형 진화 마일스톤: 큰 축제
+    stageIdx = newStage;
     const flash = $('evo-flash');
     flash.classList.remove('go', 'rebirth');
     void flash.offsetWidth;
     flash.classList.add('go');
     confettiBurst();
     sndEvo();
-    queueBlessing(jumped);  // 진화마다 축복 3택 1 (단계 점프 시 누적)
-    toast(`🎉 진화! <b>${STAGES[idx].name}</b> 등장!`);
+    toast(`🎉 Lv.${slimeLevel} 진화! <b>${STAGES[newStage].name}</b> 등장!`);
     showQuip(QUIPS.evolve[Math.floor(Math.random() * QUIPS.evolve.length)]);
-    save();
+  } else {
+    // 일반 레벨업: 가벼운 축하
+    sndAch();
+    toast(`⬆️ <b>레벨 ${slimeLevel}!</b> 수입 +2% · 축복을 골라보세요`);
   }
+  renderStageName();
+  save();
 }
 
 function detectTrait() {
@@ -2296,29 +2370,32 @@ const ALL_TRAITS = [...TRAITS, SAMSARA_TRAIT];
 
 function renderStageName() {
   const el = $('stage-name');
+  const base = `Lv.${slimeLevel} ${STAGES[stageIdx].name}`;
   const aura = hasSamsaraAura() ? ' · <span class="trait" style="color:#b48aff">윤회의 고리</span>' : '';
   if (currentTrait) {
-    el.innerHTML = `${STAGES[stageIdx].name} · <span class="trait">${currentTrait.name}</span>${aura}`;
+    el.innerHTML = `${base} · <span class="trait">${currentTrait.name}</span>${aura}`;
   } else if (aura) {
-    el.innerHTML = STAGES[stageIdx].name + aura;
+    el.innerHTML = base + aura;
   } else {
-    el.textContent = STAGES[stageIdx].name;
+    el.textContent = base;
   }
 }
 
 function renderEvoProgress() {
   const bar = $('evo-progress-bar');
   const label = $('evo-progress-label');
-  if (stageIdx >= STAGES.length - 1) {
+  if (slimeLevel >= MAX_LEVEL) {
     bar.style.width = '100%';
-    label.textContent = '✨ 최종 진화 완료! ✨';
+    label.textContent = '✨ 최고 레벨! 우주가 슬라임을 우러러봐요 ✨';
     return;
   }
-  const cur = effNeed(stageIdx);
-  const next = effNeed(stageIdx + 1);
-  const pct = Math.min(100, (S.totalEarned - cur) / (next - cur) * 100);
+  const cur = levelNeed(slimeLevel);
+  const next = levelNeed(slimeLevel + 1);
+  const pct = Math.max(0, Math.min(100, (S.totalEarned - cur) / (next - cur) * 100));
   bar.style.width = pct + '%';
-  label.textContent = `${STAGES[stageIdx + 1].name}까지 ${fmt(Math.max(0, next - S.totalEarned))} 코인 (${pct.toFixed(1)}%)`;
+  const nextStage = STAGES.find(st => st.atLevel === slimeLevel + 1);
+  label.textContent = `Lv.${slimeLevel + 1}까지 ${fmt(Math.max(0, next - S.totalEarned))} 코인 (${pct.toFixed(1)}%)`
+    + (nextStage ? ` · ✨ 다음 레벨에 ${nextStage.name} 진화!` : '');
 }
 
 /* ════════════════════════ 업적 ════════════════════════ */
@@ -2428,7 +2505,7 @@ function wishEvent(type, amount) {
     else w.progress += amount;
     if (w.progress >= w.target) {
       S.wishes.active.splice(i, 1);
-      const rw = w.reward + (hasBless('dustsense') ? 1 : 0);
+      const rw = w.reward + BC.wishDust;
       S.stardust += rw;
       S.wishes.completed++;
       completedAny = true;
@@ -2446,6 +2523,49 @@ function wishEvent(type, amount) {
 /* ════════════════════════ 진화 축복 ════════════════════════ */
 
 function hasBless(id) { return S.runBlessings.includes(id); }
+function blessCount(id) { return S.runBlessings.filter(x => x === id).length; }
+
+/* 축복 캐시: runBlessings가 바뀔 때만 재계산 (클릭 핫패스에서 순회 방지) */
+let BC = null;
+
+function computeBlessCache() {
+  const c = {
+    clickMul: 1, cpsMul: 1, globalMulX: 1, clickCps: 0,
+    comboStart: 0, comboWindow: 0, comboAmp: 0, comboCap: 50, comboEternal: false,
+    perfectAdd: 0, perfectPower: 5, perfectX2: false, perfectCombo: 0,
+    starInt: 1, starLinger: 0, starLingerMul: 1, starBonus: 1, miniCount: 0,
+    frenzyDur: 0, partyDur: 0, frenzyMulAdd: 0,
+    offlineAdd: 0, offlineFull: false, offlineCap: 0,
+    wishDust: 0, prodDisc: 1, upDisc: 1, evoNeed: 1, soulFlat: 0,
+    luck: 0, twinStars: false,
+  };
+  for (const id of S.runBlessings) {
+    const b = BLESSINGS.find(x => x.id === id);
+    if (b) b.fx(c);
+  }
+  BC = c;
+}
+computeBlessCache();  // 초기 상태로 즉시 1회 (load 전 BC 참조 안전)
+
+function luckTotal() { return BC.luck + perkLv('instinct') * 5; }
+
+/* 등급 추첨: 행운이 상위 등급 확률을 끌어올린다 */
+function pickRarity() {
+  const L = luckTotal();
+  let w = {
+    common: Math.max(10, RARITY.common.w - L * 0.75),
+    rare: RARITY.rare.w + L * 0.4,
+    epic: RARITY.epic.w + L * 0.25,
+    legendary: RARITY.legendary.w + L * 0.1,
+  };
+  const total = w.common + w.rare + w.epic + w.legendary;
+  let r = Math.random() * total;
+  for (const k of ['common', 'rare', 'epic', 'legendary']) {
+    r -= w[k];
+    if (r <= 0) return k;
+  }
+  return 'common';
+}
 
 function chActive() { return S.challenge.active; }
 
@@ -2458,50 +2578,94 @@ function monoSpecies() {
 }
 
 let pendingBlessings = 0;
+const REROLL_BASE = 3;
+let rerollCost = REROLL_BASE;   // 리롤할수록 +2, 새 선택마다 리셋 (Balatro식)
+
+function drawOneBlessing(excludeIds) {
+  // 1) 등급 추첨 → 2) 해당 등급 풀에서 성향 태그 3배 가중 추첨
+  const favTag = currentTrait ? TRAIT_BLESSING_TAG[currentTrait.key] : (hasSamsaraAura() ? 'meta' : null);
+  const order = ['legendary', 'epic', 'rare', 'common'];
+  let rarity = pickRarity();
+  let startIdx = order.indexOf(rarity);
+  for (let step = startIdx; step < order.length; step++) {
+    const r = order[step];
+    const pool = BLESSINGS.filter(b =>
+      b.rarity === r && !excludeIds.includes(b.id) && (b.stack || !hasBless(b.id)));
+    if (!pool.length) continue;  // 등급 풀 고갈 시 하위 등급으로
+    const weights = pool.map(b => b.tag === favTag ? 3 : 1);
+    const total = weights.reduce((a, w) => a + w, 0);
+    let roll = Math.random() * total;
+    for (let i = 0; i < pool.length; i++) {
+      roll -= weights[i];
+      if (roll <= 0) return pool[i];
+    }
+    return pool[pool.length - 1];
+  }
+  return null;
+}
 
 function drawBlessingChoices() {
-  const pool = BLESSINGS.filter(b => !hasBless(b.id));
-  if (pool.length < 3) return pool;
-  // 성향 태그 가중치 3배
-  const favTag = currentTrait ? TRAIT_BLESSING_TAG[currentTrait.key] : (hasSamsaraAura() ? 'meta' : null);
   const picks = [];
-  const candidates = pool.slice();
-  while (picks.length < 3 && candidates.length) {
-    const weights = candidates.map(b => b.tag === favTag ? 3 : 1);
-    const total = weights.reduce((a, w) => a + w, 0);
-    let r = Math.random() * total;
-    let idx = 0;
-    for (; idx < candidates.length; idx++) {
-      r -= weights[idx];
-      if (r <= 0) break;
-    }
-    picks.push(candidates.splice(Math.min(idx, candidates.length - 1), 1)[0]);
+  for (let i = 0; i < 3; i++) {
+    const b = drawOneBlessing(picks.map(x => x.id));
+    if (b) picks.push(b);
   }
   return picks;
 }
 
-function openBlessingModal() {
+function renderBlessingCards() {
   const choices = drawBlessingChoices();
-  if (!choices.length) { pendingBlessings = 0; return; }
+  if (!choices.length) { pendingBlessings = 0; $('blessing-overlay').classList.remove('open'); return false; }
   const wrap = $('blessing-cards');
   wrap.innerHTML = '';
   for (const b of choices) {
+    const r = RARITY[b.rarity];
+    const owned = b.stack ? blessCount(b.id) : 0;
     const card = document.createElement('button');
-    card.className = 'blessing-card';
+    card.className = 'blessing-card rarity-' + b.rarity;
     card.innerHTML = `
       <span class="b-icon">${spriteHtml('blessings', b.id, b.icon, { size: 34 })}</span>
-      <span><span class="b-name">${b.name}</span><div class="b-desc">${b.desc}</div></span>`;
+      <span style="flex:1"><span class="b-name" style="color:${r.color}">${b.name}</span>
+        <span class="b-rarity" style="color:${r.color}">${r.name}</span>
+        <div class="b-desc">${b.desc}${owned ? ` · 보유 ${owned}개` : ''}</div></span>`;
     card.addEventListener('click', () => pickBlessing(b));
     wrap.appendChild(card);
   }
+  // 리롤/스킵 버튼 상태
+  $('blessing-reroll').textContent = `🔁 리롤 (별가루 ${rerollCost})`;
+  $('blessing-reroll').disabled = S.stardust < rerollCost;
+  return true;
+}
+
+function openBlessingModal() {
+  rerollCost = REROLL_BASE;
+  if (!renderBlessingCards()) return;
   $('blessing-overlay').classList.add('open');
+}
+
+function rerollBlessings() {
+  if (S.stardust < rerollCost) return;
+  S.stardust -= rerollCost;
+  rerollCost += 2;
+  beep(523, 0.07);
+  renderBlessingCards();
+  save();
 }
 
 function pickBlessing(b) {
   S.runBlessings.push(b.id);
   S.codex.blessings[b.id] = true;
+  computeBlessCache();
   sndAch();
-  toast(`${b.icon} <b>${b.name}</b>의 축복을 받았어요!`);
+  const r = RARITY[b.rarity];
+  toast(`${b.icon} <b style="color:${r.color}">[${r.name}] ${b.name}</b>의 축복을 받았어요!`);
+  if (b.rarity === 'legendary') { confettiBurst(); sndRebirth(); }
+  closeBlessingModal();
+}
+
+function skipBlessing() {
+  S.stardust += 1;  // 패스에도 작은 보상 — 모든 선택이 유의미하게
+  toast('💫 이번엔 괜찮아 — 별가루 +1');
   closeBlessingModal();
 }
 
@@ -2516,7 +2680,7 @@ function closeBlessingModal() {
 function queueBlessing(count) {
   pendingBlessings += count;
   if (!$('blessing-overlay').classList.contains('open')) {
-    setTimeout(openBlessingModal, 900);  // 진화 연출 먼저
+    setTimeout(openBlessingModal, 900);  // 레벨업 연출 먼저
   }
 }
 
@@ -2627,6 +2791,9 @@ function doPrestige(challengeId = null) {
   combo = 0; comboTimer = 0; frenzyTimer = 0; partyTimer = 0;
   frenzyEarned = 0; festActive = 0; festWait = 60;
   stageIdx = 0;
+  slimeLevel = 1;
+  rerollCost = REROLL_BASE;
+  computeBlessCache();
 
   sndRebirth();
   const flash = $('evo-flash');
@@ -3095,10 +3262,13 @@ function buildPrestigeTab() {
     `🍮 보유 영혼 <b>${S.prestige.souls}</b>개 · 총 획득 <b>${S.prestige.totalSoulsEarned}</b>개<br>` +
     `모든 수입 +${S.prestige.totalSoulsEarned * 5}% (총 획득 기준 — 특성을 사도 줄지 않아요)<br>` +
     `환생 ${S.prestige.totalResets}회 · 이번 생의 플레이스타일: ${playstyleName()}` +
+    `<br>행운 ${luckTotal()}` +
     (S.runBlessings.length
-      ? `<br>이번 생의 축복: ${S.runBlessings.map(id => {
+      ? `<br>이번 생의 축복: ${[...new Set(S.runBlessings)].map(id => {
           const b = BLESSINGS.find(x => x.id === id);
-          return b ? `${b.icon}${b.name}` : '';
+          if (!b) return '';
+          const n = blessCount(id);
+          return `<span style="color:${RARITY[b.rarity].color}">${b.icon}${b.name}${n > 1 ? `x${n}` : ''}</span>`;
         }).join(' · ')}`
       : '');
   shopList.appendChild(info);
@@ -3227,7 +3397,7 @@ function refreshShop() {
     for (const el of shopList.querySelectorAll('.shop-item')) {
       const u = UPGRADES.find(x => x.id === el.dataset.id);
       if (!u) continue;
-      const cost = u.cost * (S.buffs.discount ? 0.5 : 1) * (hasBless('cheapup') ? 0.85 : 1);
+      const cost = u.cost * (S.buffs.discount ? 0.5 : 1) * BC.upDisc;
       el.querySelector('.shop-cost').textContent = fmt(cost) + ' 코인' + (S.buffs.discount ? ' (50%↓)' : '');
       el.classList.toggle('locked', S.coins < cost);
     }
@@ -3293,7 +3463,7 @@ function buyProducer(p) {
 }
 
 function buyUpgrade(u) {
-  const cost = u.cost * (S.buffs.discount ? 0.5 : 1) * (hasBless('cheapup') ? 0.85 : 1);
+  const cost = u.cost * (S.buffs.discount ? 0.5 : 1) * BC.upDisc;
   if (S.upgrades[u.id] || S.coins < cost) return;
   S.coins -= cost;
   S.upgrades[u.id] = true;
@@ -3332,7 +3502,7 @@ let starVisible = 0;
 
 function starInterval() {
   return (40 + Math.random() * 60) * (1 - 0.08 * perkLv('starlight')) * (hasSyn('dog', 25) ? 0.95 : 1)
-    * (hasBless('starhunch') ? 0.88 : 1);
+    * BC.starInt;
 }
 
 function starSpawnRect() {
@@ -3360,10 +3530,18 @@ function spawnStar() {
   }
 }
 
+let twinFollow = false;
 function hideStar() {
   starVisible = 0;
   starEl.style.display = 'none';
-  starTimer = starInterval();
+  // 쌍둥이 별: 연달아 한 번 더
+  if (BC.twinStars && !twinFollow) {
+    twinFollow = true;
+    starTimer = 1.5;
+  } else {
+    twinFollow = false;
+    starTimer = starInterval();
+  }
 }
 
 const STAR_EVENTS = [
@@ -3376,6 +3554,7 @@ const STAR_EVENTS = [
       let bonus = Math.max(totalCps() * 90, clickPower() * 150, 50);
       if (hasSyn('dog', 50)) bonus *= 1.2;
       if (chActive() === 'starlit') bonus *= 3;
+      bonus *= BC.starBonus;
       earnCoins(bonus, 'event');
       spawnFloat(e.clientX, e.clientY, '+' + fmt(bonus), true);
       toast(`⭐ 행운의 보너스! <b>+${fmt(bonus)}</b> 코인!`);
@@ -3517,7 +3696,7 @@ function cloudFail() {
 }
 
 function spawnMiniStars() {
-  const count = 5 + (hasSyn('rabbit', 10) ? 1 : 0) + (hasBless('minirain') ? 2 : 0);
+  const count = 5 + (hasSyn('rabbit', 10) ? 1 : 0) + BC.miniCount;
   for (let i = 0; i < count; i++) {
     const img = document.createElement('img');
     img.src = starDataURL;
@@ -3532,6 +3711,7 @@ function spawnMiniStars() {
       if (hasSyn('rabbit', 25)) bonus *= 1.3;
       if (hasSyn('dog', 50)) bonus *= 1.2;
       if (chActive() === 'starlit') bonus *= 3;
+      bonus *= BC.starBonus;
       earnCoins(bonus, 'event');
       wishEvent('ministar', 1);
       spawnFloat(ev.clientX, ev.clientY, '+' + fmt(bonus), true);
@@ -3699,6 +3879,7 @@ function load() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return;
     S = migrateSave(JSON.parse(raw));
+    computeBlessCache();  // 오프라인 보상 계산 전에 축복 캐시 갱신
 
     // 오프라인 보상: 기본 50% + 말랑한 시간 특성 + 고양이/고래 시너지
     const away = Math.min((Date.now() - (S.lastSave || Date.now())) / 1000, offlineCapHours() * 3600);
@@ -3773,7 +3954,8 @@ $('settings-btn').addEventListener('click', () => {
   $('settings-overlay').classList.add('open');
 });
 $('close-settings-btn').addEventListener('click', () => $('settings-overlay').classList.remove('open'));
-$('blessing-skip').addEventListener('click', closeBlessingModal);
+$('blessing-skip').addEventListener('click', skipBlessing);
+$('blessing-reroll').addEventListener('click', rerollBlessings);
 $('settings-overlay').addEventListener('click', e => {
   if (e.target === $('settings-overlay')) $('settings-overlay').classList.remove('open');
 });
@@ -3829,7 +4011,7 @@ function econTickBody() {
   const income = totalCps() * frenzyMul() * partyMul() * dt;
   if (income > 0) earnCoins(income, 'idle');
 
-  if (comboTimer > 0) {
+  if (comboTimer > 0 && !BC.comboEternal) {  // 영원한 박자: 콤보 시간 미적용
     comboTimer -= dt;
     if (comboTimer <= 0) combo = 0;
   }
@@ -4010,7 +4192,9 @@ cloudEl.insertAdjacentHTML('beforeend',
   spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' }));
 
 load();
-stageIdx = currentStageFor(S.totalEarned);
+computeBlessCache();
+slimeLevel = currentLevelFor(S.totalEarned);
+stageIdx = stageForLevel(slimeLevel);
 currentTrait = detectTrait();
 recordCodex();
 renderStageName();
