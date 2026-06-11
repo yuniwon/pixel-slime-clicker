@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-main-ai",
+    "description": "main evolving cute slime character idle sprites for a cozy clicker game",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 768,
+    "height": 768,
+    "safe_margin_x": 84,
+    "safe_margin_y": 84,
+    "size": 768,
+    "safe_margin": 84
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "baby_green": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "baby green slime idle loop, frame 1 relaxed smile, frame 2 subtly squished upward with tiny blink-ready expression, same body and face"
+    },
+    "sea": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "sea blue slime idle loop, frame 1 relaxed smile, frame 2 gentle watery bob, same body and face"
+    },
+    "strawberry": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "strawberry pink slime idle loop, frame 1 sweet smile, frame 2 soft berry bounce, same body and face"
+    },
+    "gold_king": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "gold king slime idle loop with small crown, frame 1 proud smile, frame 2 royal soft bounce, same body crown and face"
+    },
+    "god": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "legendary god slime idle loop with crown and rainbow celestial body, frame 1 serene smile, frame 2 cosmic soft bounce, same body crown and face"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

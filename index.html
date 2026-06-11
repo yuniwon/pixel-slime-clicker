@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>픽셀 슬라임 클리커</title>
+<meta name="theme-color" content="#1a1033">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -581,6 +585,24 @@
   .story-entry .story-title { color: var(--gold); font-weight: bold; margin-bottom: 4px; font-size: 12px; }
   .story-entry.locked { opacity: .4; border-left-color: var(--border); }
 
+  /* ── 슬라임 앨범 ── */
+  .album-box {
+    background: var(--panel-light);
+    border: 3px solid var(--border);
+    padding: 10px 14px;
+    margin-bottom: 8px;
+  }
+  .album-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-dim);
+    padding: 4px 0;
+    border-bottom: 1px solid #00000033;
+  }
+  .album-row:last-child { border-bottom: none; }
+  .album-row b { color: var(--gold); }
+
   .shop-syn { color: #d9b84a; }
   .syn-line { font-size: 10px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
   .syn-line.on { color: var(--green); }
@@ -912,7 +934,7 @@
 
 /* ════════════════════════ 데이터 ════════════════════════ */
 
-const SAVE_VERSION = 7;
+const SAVE_VERSION = 8;
 const PRESTIGE_UNLOCK = 1e9;
 
 const PRODUCERS = [
@@ -1410,6 +1432,8 @@ function defaultState() {
     wishes: { active: [], completed: 0 },
     cosmetics: { owned: {}, equipped: {} },
     runBlessings: [],   // 이번 생의 축복 (환생 시 초기화)
+    playTime: 0,        // 함께한 시간(초) — 앨범용
+    createdAt: Date.now(),
     soundOn: true,
     lastSave: Date.now(),
   };
@@ -2828,6 +2852,35 @@ function buildRoomTab() {
       : `<div class="story-title">???</div>아직 기록되지 않은 이야기예요.`;
     shopList.appendChild(el);
   }
+
+  // 슬라임 앨범: 차가운 통계가 아니라 함께한 기억
+  const titleA = document.createElement('div');
+  titleA.className = 'room-section-title';
+  titleA.textContent = '📔 슬라임 앨범 — 함께한 기억';
+  shopList.appendChild(titleA);
+
+  const days = Math.max(1, Math.ceil((Date.now() - S.createdAt) / 86400000));
+  let bestFriend = null;
+  for (const p of PRODUCERS) {
+    const e = S.codex.friends[p.id];
+    if (e && (!bestFriend || e.maxOwned > bestFriend.max)) bestFriend = { name: p.name, max: e.maxOwned };
+  }
+  const albumRows = [
+    ['함께한 지', `${days}일째`],
+    ['함께한 시간', fmtTime(S.playTime)],
+    ['쓰다듬은 횟수', S.totalClicks.toLocaleString() + '번'],
+    ['평생 모은 코인', fmt(S.stats.lifetime.earned)],
+    ['가장 길었던 콤보', S.stats.lifetime.bestCombo + ''],
+    ['마중 나간 별', S.stats.lifetime.starsClicked + '개'],
+    ['이뤄준 소원', S.wishes.completed + '개'],
+    ['거쳐온 생', (S.prestige.totalResets + 1) + '번째'],
+    ['가장 아낀 친구', bestFriend ? `${bestFriend.name} (${bestFriend.max}마리)` : '아직 없어요'],
+  ];
+  const album = document.createElement('div');
+  album.className = 'album-box';
+  album.innerHTML = albumRows.map(([k, v]) =>
+    `<div class="album-row"><span>${k}</span><b>${v}</b></div>`).join('');
+  shopList.appendChild(album);
 }
 
 function buildPrestigeTab() {
@@ -3256,6 +3309,10 @@ function migrateSave(data) {
   // v6 이하: 진화 축복 기본값
   out.runBlessings = Array.isArray(data.runBlessings) ? data.runBlessings : [];
   out.codex.blessings = (data.codex && data.codex.blessings) || {};
+
+  // v7 이하: 앨범 필드
+  out.playTime = data.playTime || 0;
+  out.createdAt = data.createdAt || data.lastSave || Date.now();
   out.achievements = data.achievements || {};
   out.producers = Object.assign({}, defaultState().producers, data.producers || {});
   out.upgrades = data.upgrades || {};
@@ -3392,6 +3449,8 @@ function econTickBody() {
   lastEcon = now;
   if (dt <= 0) return;
   dt = Math.min(dt, 3600); // 안전 상한
+
+  S.playTime += dt;
 
   const income = totalCps() * frenzyMul() * partyMul() * dt;
   if (income > 0) earnCoins(income, 'idle');
@@ -3565,6 +3624,12 @@ renderHud();
 checkStory();
 // 온보딩: 완전 새 게임이면 첫 클릭 안내
 if (S.totalClicks === 0) setTimeout(() => showQuip('나를 말랑말랑 눌러봐!'), 1200);
+
+// PWA: http(s)에서만 서비스워커 등록 (file:// 더블클릭 실행은 그대로 동작)
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
 requestAnimationFrame(loop);
 </script>
 </body>
