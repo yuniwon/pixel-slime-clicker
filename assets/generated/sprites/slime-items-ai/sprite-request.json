@@ -134,6 +134,66 @@
       "fps": 1,
       "loop": false,
       "action": "evolution seed icon, glowing green seed sprouting two leaves, progression perk"
+    },
+    "instinct": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "small crystal ball icon with a tiny star inside, intuition perk"
+    },
+    "glove4": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "galaxy-patterned glove icon, deep blue with tiny stars, very strong click upgrade"
+    },
+    "glove5": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "nebula glove icon, purple-pink cosmic cloud pattern, ultimate click upgrade"
+    },
+    "hand4": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "rainbow fingertip talisman icon, small rainbow arc cap, click multiplier"
+    },
+    "hand5": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "cosmic fingertip talisman icon, dark space cap with one bright star, strongest click multiplier"
+    },
+    "snack4": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "galaxy donut icon, dark glaze with star sprinkles, production boost"
+    },
+    "snack5": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "star honey jar icon, glowing golden honey with a star on the label, production boost"
+    },
+    "snack6": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "cosmic layered cake icon, night-sky frosting with a crescent moon topper, strongest production boost"
+    },
+    "click3": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "tiny broadcast station icon, antenna tower with heart signal waves, click bonus"
+    },
+    "combo1u": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "soft metronome icon with a jelly pendulum, combo duration upgrade"
+    },
+    "star1u": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "small brass telescope on tripod icon, star frequency upgrade"
+    },
+    "star2u": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "horseshoe magnet icon attracting two tiny stars, star reward upgrade"
+    },
+    "perfect1": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "small oil bottle icon with a pink heart label, perfect click upgrade"
+    },
+    "gold1": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "small golden slime statue icon on a pedestal, global income upgrade"
+    },
+    "gold2": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "crown polish tin icon with a shining crown reflection, global income upgrade"
     }
   },
   "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",

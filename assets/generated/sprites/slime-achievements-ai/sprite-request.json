@@ -152,6 +152,70 @@
       "fps": 1,
       "loop": false,
       "action": "three rebirths achievement badge, deep blue reincarnation swirl medal"
+    },
+    "click50k": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "many small hands badge icon, thousand-hands clicking feat"
+    },
+    "click200k": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "tiny erupting volcano badge icon with jelly lava, extreme clicking feat"
+    },
+    "life1e12": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "sparkling coin tower badge icon reaching tiny clouds, trillion coins feat"
+    },
+    "life1e15": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "coin galaxy spiral badge icon, astronomical wealth feat"
+    },
+    "level25": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "rising arrow chart badge icon with a jelly sprout, level milestone"
+    },
+    "level30": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "small rocket badge icon punching through a cloud, level milestone"
+    },
+    "level40": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "spiral galaxy badge icon with a tiny slime silhouette, level milestone"
+    },
+    "reset5": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "five small suns in a row badge icon, fifth morning rebirth feat"
+    },
+    "reset10": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "infinity loop ribbon badge icon in purple, rebirth mastery feat"
+    },
+    "allCh": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "military style medal badge icon with four small stars, challenge conqueror feat"
+    },
+    "legendB": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "radiant gold card badge icon with sunburst, legendary blessing feat"
+    },
+    "bless20": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "open scroll badge icon with small stamp marks, blessing collector feat"
+    },
+    "wish25": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "small vending machine badge icon dispensing stars, wish granting feat"
+    },
+    "wish100": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "rainbow over a star pile badge icon, wish abundance feat"
+    },
+    "cloud10": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "smiling cloud with a tiny couch badge icon, cloud counselor feat"
+    },
+    "friend300": {
+      "frames": 1, "fps": 1, "loop": false,
+      "action": "small stadium full of tiny animal dots badge icon, slime kingdom feat"
     }
   },
   "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",

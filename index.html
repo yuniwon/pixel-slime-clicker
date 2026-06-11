@@ -206,6 +206,14 @@
     to { transform: scale(1); opacity: 1; }
   }
   .fr-move { display: inline-block; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+  .fly-coin {
+    position: fixed;
+    width: 18px;
+    height: 18px;
+    image-rendering: pixelated;
+    z-index: 55;
+    pointer-events: none;
+  }
   .fr-frames {
     display: inline-block;
     background-repeat: no-repeat;
@@ -878,13 +886,16 @@
     padding: 12px 22px;
     font-size: 14px;
     z-index: 100;
-    transition: transform .3s ease;
+    transition: transform .3s ease, opacity .3s ease, visibility .3s;
     box-shadow: 4px 4px 0 #00000066;
     text-align: center;
     line-height: 1.6;
     max-width: 90vw;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
-  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; }
 
   /* ── 진화 플래시 ── */
   #evo-flash {
@@ -911,14 +922,16 @@
     /* 토스트: 모바일에선 상단 고정 + 화면 폭 안으로 */
     #toast {
       bottom: auto;
-      top: 60px;
+      top: 8px;
       font-size: 12px;
       padding: 10px 14px;
       width: max-content;
       max-width: calc(100vw - 24px);
-      transform: translateX(-50%) translateY(-90px);
+      transform: translateX(-50%) translateY(-120%);
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
+    /* 광란/파티 배너: 모바일에선 하단으로 — 상단 정보와 겹침 방지 */
+    #buff-banner { top: auto; bottom: 30px; font-size: 12px; padding: 6px 12px; }
   }
 </style>
 </head>
@@ -1128,7 +1141,34 @@ const UPGRADES = [
   { id: 'snack3',  icon: '🍕', name: '우주 피자',     desc: '친구들 생산량 x2',          cost: 8e6,     type: 'cpsMul',   value: 2 },
   { id: 'click1',  icon: '👆', name: '응원봉',        desc: '클릭에 초당 생산량의 1% 추가', cost: 100000, type: 'clickCps', value: 0.01 },
   { id: 'click2',  icon: '📣', name: '슬라임 응원단', desc: '클릭에 초당 생산량의 5% 추가', cost: 5e6,    type: 'clickCps', value: 0.05 },
+  // ── 후반 확장 (콘텐츠 사막 방지) ──
+  { id: 'glove4',   icon: '🧤', name: '은하 장갑',      desc: '클릭당 +120 코인',             cost: 4e7,   type: 'clickAdd', value: 120 },
+  { id: 'glove5',   icon: '🧤', name: '성운 장갑',      desc: '클릭당 +600 코인',             cost: 9e8,   type: 'clickAdd', value: 600 },
+  { id: 'hand4',    icon: '✨', name: '무지개 손가락',  desc: '클릭 코인 x3',                 cost: 3e8,   type: 'clickMul', value: 3 },
+  { id: 'hand5',    icon: '✨', name: '우주 손가락',    desc: '클릭 코인 x4',                 cost: 5e10,  type: 'clickMul', value: 4 },
+  { id: 'snack4',   icon: '🍩', name: '은하 도넛',      desc: '친구들 생산량 x2',             cost: 2e8,   type: 'cpsMul',   value: 2 },
+  { id: 'snack5',   icon: '🍯', name: '별꿀 단지',      desc: '친구들 생산량 x2.5',           cost: 6e9,   type: 'cpsMul',   value: 2.5 },
+  { id: 'snack6',   icon: '🎂', name: '우주 케이크',    desc: '친구들 생산량 x3',             cost: 2e11,  type: 'cpsMul',   value: 3 },
+  { id: 'click3',   icon: '📢', name: '슬라임 방송국',  desc: '클릭에 초당 생산량의 10% 추가', cost: 4e8,  type: 'clickCps', value: 0.1 },
+  { id: 'combo1u',  icon: '🎼', name: '말랑 메트로놈',  desc: '콤보 지속시간 +0.3초',         cost: 5e7,   type: 'comboWin', value: 0.3 },
+  { id: 'star1u',   icon: '🔭', name: '별 망원경',      desc: '황금별 등장 간격 -10%',        cost: 1.5e8, type: 'starInt',  value: 0.1 },
+  { id: 'star2u',   icon: '🧲', name: '별빛 자석',      desc: '별 코인 보상 +25%',            cost: 8e9,   type: 'starBon',  value: 1.25 },
+  { id: 'perfect1', icon: '💖', name: '퍼펙트 오일',    desc: '퍼펙트 말랑 확률 +1%p',        cost: 1e9,   type: 'perfAdd',  value: 0.01 },
+  { id: 'gold1',    icon: '🪙', name: '황금 슬라임상',  desc: '모든 수입 +10%',               cost: 1e10,  type: 'globMul',  value: 1.1 },
+  { id: 'gold2',    icon: '👑', name: '왕관 광택제',    desc: '모든 수입 +15%',               cost: 1e12,  type: 'globMul',  value: 1.15 },
 ];
+
+/* 강화 타입별 집계 (신규 타입용) */
+function upSum(type) {
+  let v = 0;
+  for (const u of UPGRADES) if (S.upgrades[u.id] && u.type === type) v += u.value;
+  return v;
+}
+function upProd(type) {
+  let v = 1;
+  for (const u of UPGRADES) if (S.upgrades[u.id] && u.type === type) v *= u.value;
+  return v;
+}
 
 /* 외형 진화는 레벨 마일스톤. 레벨 요구치는 기하 곡선(레벨당 2배)이라
    수입의 지수 성장과 맞물려 게임 내내 레벨업 리듬이 일정하다 */
@@ -1328,6 +1368,23 @@ const ACHIEVEMENTS = [
   { id: 'allUp',     icon: '🏆', name: '강화 완전체',     desc: '모든 강화 구매하기' },
   { id: 'rebirth1',  icon: '🌸', name: '윤회의 시작',     desc: '첫 환생하기' },
   { id: 'rebirth3',  icon: '🌀', name: '깊은 층의 슬라임', desc: '환생 3회 달성하기' },
+  // ── 후반 업적 ──
+  { id: 'click50k',  icon: '🖐️', name: '천수관음',        desc: '총 50,000번 클릭하기' },
+  { id: 'click200k', icon: '🌋', name: '말랑의 화산',     desc: '총 200,000번 클릭하기' },
+  { id: 'life1e12',  icon: '💫', name: '조 단위의 꿈',    desc: '평생 1조 코인 모으기' },
+  { id: 'life1e15',  icon: '🌠', name: '경 단위의 전설',  desc: '평생 1,000조 코인 모으기' },
+  { id: 'level25',   icon: '📈', name: '계속 자라는 중',  desc: '레벨 25 도달하기' },
+  { id: 'level30',   icon: '🚀', name: '하늘을 뚫고',     desc: '레벨 30 도달하기' },
+  { id: 'level40',   icon: '🌌', name: '우주의 끝에서',   desc: '레벨 40 도달하기' },
+  { id: 'reset5',    icon: '🔄', name: '다섯 번째 아침',  desc: '환생 5회 달성하기' },
+  { id: 'reset10',   icon: '♾️', name: '윤회의 달인',     desc: '환생 10회 달성하기' },
+  { id: 'allCh',     icon: '🎖️', name: '이상한 생 정복자', desc: '도전 런 4종 모두 완수하기' },
+  { id: 'legendB',   icon: '🌟', name: '전설을 만나다',   desc: '전설 축복 받아보기' },
+  { id: 'bless20',   icon: '📜', name: '축복 수집가',     desc: '축복 도감 20종 채우기' },
+  { id: 'wish25',    icon: '💫', name: '소원 자판기',     desc: '소원 25개 이뤄주기' },
+  { id: 'wish100',   icon: '🌈', name: '소원 부자',       desc: '소원 100개 이뤄주기' },
+  { id: 'cloud10',   icon: '🌤️', name: '먹구름 전문 상담가', desc: '먹구름 10번 달래주기' },
+  { id: 'friend300', icon: '🏟️', name: '슬라임 왕국',     desc: '친구 총 300마리 모으기' },
 ];
 
 const ACH_CONDITIONS = {
@@ -1352,6 +1409,22 @@ const ACH_CONDITIONS = {
   allUp:     () => UPGRADES.every(u => S.upgrades[u.id]),
   rebirth1:  () => S.prestige.totalResets >= 1,
   rebirth3:  () => S.prestige.totalResets >= 3,
+  click50k:  () => S.totalClicks >= 50000,
+  click200k: () => S.totalClicks >= 200000,
+  life1e12:  () => S.stats.lifetime.earned >= 1e12,
+  life1e15:  () => S.stats.lifetime.earned >= 1e15,
+  level25:   () => slimeLevel >= 25,
+  level30:   () => slimeLevel >= 30,
+  level40:   () => slimeLevel >= 40,
+  reset5:    () => S.prestige.totalResets >= 5,
+  reset10:   () => S.prestige.totalResets >= 10,
+  allCh:     () => CHALLENGES.every(c => S.codex.challenges[c.id]),
+  legendB:   () => BLESSINGS.some(b => b.rarity === 'legendary' && S.codex.blessings[b.id]),
+  bless20:   () => Object.keys(S.codex.blessings).length >= 20,
+  wish25:    () => S.wishes.completed >= 25,
+  wish100:   () => S.wishes.completed >= 100,
+  cloud10:   () => (S.stats.lifetime.cloudsSoothed || 0) >= 10,
+  friend300: () => PRODUCERS.reduce((a, p) => a + S.producers[p.id], 0) >= 300,
 };
 
 /* 성향(분기 진화)과 대사 */
@@ -1622,6 +1695,7 @@ let silentTick = false;     // finalSave 중 토스트/말풍선 억제
 let hintFriendShown = false; // 온보딩: 첫 친구 고용 힌트 (세션당 1회)
 let newsTimer = 16;          // 말랑 뉴스 다음 표시까지
 let newsHideTimer = null;
+let coinFlyTimer = 2.5;      // 친구 코인 배달 간격
 
 /* ════════════════════════ 유틸 ════════════════════════ */
 
@@ -1895,10 +1969,10 @@ function soulMul() { return 1 + S.prestige.totalSoulsEarned * 0.05; }
 function globalMul() {
   const codexBonus = hasSyn('unicorn', 50) ? 1 + 0.005 * codexEntryCount() : 1;
   const levelMul = 1 + (slimeLevel - 1) * 0.02;  // 레벨당 +2% (이번 생)
-  return (1 + achCount() * 0.01) * soulMul() * codexBonus * levelMul * BC.globalMulX;
+  return (1 + achCount() * 0.01) * soulMul() * codexBonus * levelMul * BC.globalMulX * upProd('globMul');
 }
 
-function comboWindow() { return 0.9 + 0.15 * perkLv('combo') + BC.comboWindow; }
+function comboWindow() { return 0.9 + 0.15 * perkLv('combo') + BC.comboWindow + upSum('comboWin'); }
 
 function offlineRate() {
   if (BC.offlineFull) return 1;
@@ -2154,15 +2228,18 @@ function drawSlime(t) {
   if (hasSamsaraAura()) drawTraitOverlay(slimeCtx, 'samsara', t);
 }
 
-/* 코인 아이콘 (8x8) */
+/* 코인 아이콘 (8x8) — 배달 연출용 데이터URL도 함께 */
+let COIN_DATA_URL = '';
 (function drawCoin() {
-  const c = $('coin-icon').getContext('2d');
+  const cv = $('coin-icon');
+  const c = cv.getContext('2d');
   const map = ['..oooo..', '.oyyyyo.', 'oyylyyyo', 'oylyyyyo', 'oyyyyydo', 'oyyyyddo', '.oyyddo.', '..oooo..'];
   const col = { o: '#8a6d1f', y: '#ffd75e', l: '#fff3c4', d: '#d4a73c' };
   map.forEach((row, y) => [...row].forEach((ch, x) => {
     if (ch === '.') return;
     c.fillStyle = col[ch]; c.fillRect(x, y, 1, 1);
   }));
+  COIN_DATA_URL = cv.toDataURL();
 })();
 
 /* 황금별 (16x16) — 미니 별똥별용 데이터 URL도 함께 생성 */
@@ -2258,7 +2335,7 @@ const slimeWrap = $('slime-wrap');
 
 function doClick(x, y) {
   // 퍼펙트 말랑: 3% 확률로 x5 — 손맛용 잭팟 (작은 행운 축복 +2%p)
-  const perfect = Math.random() < (0.03 + BC.perfectAdd) * (BC.perfectX2 ? 2 : 1);
+  const perfect = Math.random() < (0.03 + BC.perfectAdd + upSum('perfAdd')) * (BC.perfectX2 ? 2 : 1);
   let gain = clickPower() * comboMul() * frenzyMul();
   if (perfect) gain *= BC.perfectPower;
   earnCoins(gain, 'click');
@@ -2994,6 +3071,39 @@ function rebuildFriends() {
   });
 }
 
+/* 코인 배달: 친구 자리에서 코인이 카운터로 날아온다 — "같이 번다" 체감 */
+function flyCoinFromFriend() {
+  if (document.hidden || totalCps() <= 0) return;
+  const friends = friendsLayer.querySelectorAll('.friend');
+  if (!friends.length) return;
+  const f = friends[Math.floor(Math.random() * friends.length)];
+  const fr = f.getBoundingClientRect();
+  const cr = $('coin-display').getBoundingClientRect();
+  if (!fr.width || !cr.width) return;
+  const img = document.createElement('img');
+  img.src = COIN_DATA_URL;
+  img.className = 'fly-coin';
+  const sx = fr.left + fr.width / 2;
+  const sy = fr.top + fr.height / 3;
+  img.style.left = sx + 'px';
+  img.style.top = sy + 'px';
+  document.body.appendChild(img);
+  const dx = cr.left + cr.width / 2 - sx;
+  const dy = cr.top + cr.height / 2 - sy;
+  img.animate([
+    { transform: 'translate(0,0) scale(1)', opacity: 1 },
+    { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 40}px) scale(1.1)`, opacity: 1, offset: 0.55 },
+    { transform: `translate(${dx}px, ${dy}px) scale(.5)`, opacity: 0.9 },
+  ], { duration: 750, easing: 'ease-in' }).onfinish = () => {
+    img.remove();
+    const coinEl = $('coin-display');
+    coinEl.classList.remove('pop');
+    void coinEl.offsetWidth;
+    coinEl.classList.add('pop');
+  };
+  setTimeout(() => img.remove(), 1200);
+}
+
 /* 화면 회전/크기 변경 시 친구 재배치 */
 let resizeDebounce = null;
 window.addEventListener('resize', () => {
@@ -3570,7 +3680,8 @@ let starVisible = 0;
 
 function starInterval() {
   return (40 + Math.random() * 60) * (1 - 0.08 * perkLv('starlight')) * (hasSyn('dog', 25) ? 0.95 : 1)
-    * BC.starInt;
+    * BC.starInt
+    * (1 - upSum('starInt'));
 }
 
 function starSpawnRect() {
@@ -3626,7 +3737,7 @@ const STAR_EVENTS = [
       let bonus = Math.max(totalCps() * 90, clickPower() * 150, 50);
       if (hasSyn('dog', 50)) bonus *= 1.2;
       if (chActive() === 'starlit') bonus *= 3;
-      bonus *= BC.starBonus;
+      bonus *= BC.starBonus * upProd('starBon');
       earnCoins(bonus, 'event');
       spawnFloat(e.clientX, e.clientY, '+' + fmt(bonus), true);
       toast(`⭐ 행운의 보너스! <b>+${fmt(bonus)}</b> 코인!`);
@@ -3681,7 +3792,7 @@ starEl.addEventListener('pointerdown', e => {
    실패해도 위로 간식, 무시해도 아무 일 없음 */
 
 const cloudEl = $('raincloud');
-let cloudTimer = 150 + Math.random() * 150;  // 첫 등장 2.5~5분
+let cloudTimer = 80 + Math.random() * 80;  // 첫 등장 1.3~2.7분
 let cloudState = 'hidden';                    // hidden | drift | challenge
 let cloudLife = 0;
 let cloudTime = 0;
@@ -3689,6 +3800,8 @@ let cloudClicks = 0;
 let cloudNeed = 0;
 
 function spawnCloud() {
+  // 탭이 안 보일 때 떴다 사라지면 손님을 영영 못 봄 — 잠시 미룸
+  if (document.hidden) { cloudTimer = 30; return; }
   cloudState = 'drift';
   cloudLife = 14;
   const pos = starSpawnRect();
@@ -3706,7 +3819,7 @@ function hideCloud() {
   cloudState = 'hidden';
   cloudEl.style.display = 'none';
   $('cloud-bar').style.width = '0%';
-  cloudTimer = 200 + Math.random() * 200;
+  cloudTimer = 150 + Math.random() * 150;
 }
 
 cloudEl.addEventListener('pointerdown', e => {
@@ -3786,7 +3899,7 @@ function spawnMiniStars() {
       if (hasSyn('rabbit', 25)) bonus *= 1.3;
       if (hasSyn('dog', 50)) bonus *= 1.2;
       if (chActive() === 'starlit') bonus *= 3;
-      bonus *= BC.starBonus;
+      bonus *= BC.starBonus * upProd('starBon');
       earnCoins(bonus, 'event');
       wishEvent('ministar', 1);
       spawnFloat(ev.clientX, ev.clientY, '+' + fmt(bonus), true);
@@ -4150,6 +4263,13 @@ function econTickBody() {
   if (newsTimer <= 0) {
     showNews();
     newsTimer = 26 + Math.random() * 22;
+  }
+
+  // 친구 코인 배달 (2~3.5초 간격)
+  coinFlyTimer -= dt;
+  if (coinFlyTimer <= 0) {
+    if (!silentTick) flyCoinFromFriend();
+    coinFlyTimer = 2 + Math.random() * 1.5;
   }
 
   // 먹구름 손님
