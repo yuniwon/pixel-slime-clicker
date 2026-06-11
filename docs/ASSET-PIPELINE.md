@@ -75,7 +75,21 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | slime-wishes-ai | 7 (소원 타입) | ✅ 생성·연결 완료 |
 | slime-cosmetics-ai | 11 (꾸미기) | ⚠️ 부분 연결 (핑크 3종 폴백) → green 크로마로 재생성 대기 |
 | slime-items-ai | 18 (강화/특성) | ⚠️ prestige 회색화 → 보라 묘사로 재생성 대기 |
-| slime-guests-ai | 2 (먹구름 손님: raincloud 2프레임 + raincloud-happy) | ⏳ 요청서 작성됨, 생성 대기 |
+| slime-guests-ai | 4 (먹구름·별똥이 + happy 표정) | ✅ 생성·연결 완료 |
+
+## 디자인 시스템 발 신규 요청 (claude.ai/design LiveGameScreen 핸드오프)
+
+현재 CSS/캔버스 임시 표현으로 구현됨 — 스프라이트가 오면 교체. 출처: 디자인 번들 `reference/sprite-requests.md`
+
+| 우선순위 | 항목 | 현재 임시 표현 | 스펙 |
+|---|---|---|---|
+| ★★★ | 콤보 오라 4단계 (말랑/따끈/후끈/불타는) | CSS radial-gradient + 파티클 | 384² ×4단계 ×2프레임 |
+| ★★★ | 코인 더미 3단계 (1만/100만/1억) | 미구현 | 256² ×3 |
+| ★★ | 슬라임 표정 변형 (기쁨/놀람/뿌듯) | squish만 | main 아틀라스 확장 |
+| ★★ | 황금별 전용 스프라이트 | 수제 16px 캔버스 | 256² 2프레임 |
+| ★★ | 클릭 이펙트 (장갑 팝) | float 숫자만 | 192² 3프레임 |
+| ★ | 지면 텍스처 (진화 단계별 5종) | 글로우 그라디언트 | 412×80 타일 |
+| ★ | 트로피 선반 프레임 | 반투명 스트립 | 412×40 타일 |
 
 ## 캔버스 직접 렌더 (스프라이트 교체 대상 아님)
 
