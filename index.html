@@ -672,6 +672,57 @@
     z-index: 49;
   }
 
+  /* ── 진화 축복 모달 ── */
+  #blessing-overlay {
+    position: fixed;
+    inset: 0;
+    background: #000000bb;
+    z-index: 210;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  #blessing-overlay.open { display: flex; }
+  #blessing-modal {
+    background: var(--panel);
+    border: 4px solid var(--gold);
+    box-shadow: 6px 6px 0 #00000066, 0 0 30px #ffd75e44;
+    width: min(380px, 92vw);
+    padding: 18px;
+    text-align: center;
+  }
+  #blessing-modal h3 { color: var(--gold); font-size: 15px; margin-bottom: 4px; letter-spacing: 1px; }
+  #blessing-modal .blessing-sub { font-size: 11px; color: var(--text-dim); margin-bottom: 14px; }
+  .blessing-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    background: var(--panel-light);
+    border: 3px solid var(--border);
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
+    text-align: left;
+    transition: transform .08s;
+  }
+  .blessing-card:hover { border-color: var(--gold); transform: scale(1.02); }
+  .blessing-card .b-icon { font-size: 28px; filter: drop-shadow(2px 2px 0 #00000044); }
+  .blessing-card .b-name { font-size: 14px; font-weight: bold; color: var(--gold); }
+  .blessing-card .b-desc { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+  #blessing-skip {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 11px;
+    margin-top: 4px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
   /* ── 설정 모달 ── */
   #settings-overlay {
     position: fixed;
@@ -824,6 +875,15 @@
 <div id="evo-flash"></div>
 <div id="toast"></div>
 
+<div id="blessing-overlay">
+  <div id="blessing-modal">
+    <h3>🌟 진화 축복</h3>
+    <div class="blessing-sub">진화한 슬라임이 축복을 하나 고를 수 있어요 (이번 생 한정)</div>
+    <div id="blessing-cards"></div>
+    <button id="blessing-skip">이번엔 괜찮아</button>
+  </div>
+</div>
+
 <div id="settings-overlay">
   <div id="settings-modal">
     <h3>⚙️ 설정</h3>
@@ -852,7 +912,7 @@
 
 /* ════════════════════════ 데이터 ════════════════════════ */
 
-const SAVE_VERSION = 6;
+const SAVE_VERSION = 7;
 const PRESTIGE_UNLOCK = 1e9;
 
 const PRODUCERS = [
@@ -1273,6 +1333,29 @@ const NEWS = [
   { cond: () => S.wishes.completed >= 5, text: '소원 성취 전문 슬라임, 비결은 "그냥 꾸준히".' },
 ];
 
+/* 진화 축복: 진화할 때마다 3택 1, 이번 생 한정.
+   대부분 가산/할인 — 곱연산 폭발 방지. 성향에 맞는 축복이 더 자주 나온다. */
+const BLESSINGS = [
+  { id: 'elastic',     icon: '🪀', name: '말랑 탄성',     desc: '콤보가 5부터 시작해요',          tag: 'click' },
+  { id: 'luckytip',    icon: '🍀', name: '작은 행운',     desc: '퍼펙트 말랑 확률 +2%p',          tag: 'click' },
+  { id: 'sparkfinger', icon: '✨', name: '반짝 손끝',     desc: '클릭 코인 +10%',                 tag: 'click' },
+  { id: 'comboKeep',   icon: '🥁', name: '박자 기억',     desc: '콤보 지속시간 +0.25초',          tag: 'click' },
+  { id: 'firststep',   icon: '👣', name: '친구의 첫걸음', desc: '친구 가격 -8%',                  tag: 'farm' },
+  { id: 'quietrich',   icon: '🤫', name: '조용한 부자',   desc: '자동 생산 +8%',                  tag: 'farm' },
+  { id: 'cheapup',     icon: '🏷️', name: '젤리 할인권',   desc: '강화 가격 -15%',                 tag: 'farm' },
+  { id: 'starhunch',   icon: '🌟', name: '별의 예감',     desc: '황금별 등장 간격 -12%',          tag: 'star' },
+  { id: 'starlonger',  icon: '🕯️', name: '오래 머무는 별', desc: '황금별 체류 +3초',               tag: 'star' },
+  { id: 'partylong',   icon: '🎉', name: '긴 파티',       desc: '광란·파티 지속 +3초',            tag: 'star' },
+  { id: 'minirain',    icon: '🌠', name: '별똥별 소나기', desc: '미니 별똥별 +2개',               tag: 'star' },
+  { id: 'napecon',     icon: '😴', name: '낮잠 경제',     desc: '오프라인 보상 +10%p',            tag: 'dream' },
+  { id: 'dustsense',   icon: '💫', name: '별가루 감각',   desc: '소원 보상 별가루 +1',            tag: 'dream' },
+  { id: 'slowcrown',   icon: '👑', name: '느린 왕관',     desc: '진화 요구치 -4%',                tag: 'meta' },
+  { id: 'soulwhisper', icon: '🍮', name: '영혼의 속삭임', desc: '이번 생 환생 영혼 +1',           tag: 'meta' },
+  { id: 'warmstart',   icon: '🔥', name: '따뜻한 시작',   desc: '클릭과 생산 +5%',                tag: 'meta' },
+];
+
+const TRAIT_BLESSING_TAG = { muscle: 'click', ranch: 'farm', star: 'star', dream: 'dream' };
+
 const SLIME_MAP = [
   '................',
   '................',
@@ -1322,10 +1405,11 @@ function defaultState() {
     prestige: { souls: 0, totalSoulsEarned: 0, totalResets: 0, perks: {} },
     decor: {},
     story: {},
-    codex: { stages: {}, traits: {}, friends: {} },
+    codex: { stages: {}, traits: {}, friends: {}, blessings: {} },
     stardust: 0,
     wishes: { active: [], completed: 0 },
     cosmetics: { owned: {}, equipped: {} },
+    runBlessings: [],   // 이번 생의 축복 (환생 시 초기화)
     soundOn: true,
     lastSave: Date.now(),
   };
@@ -1470,7 +1554,7 @@ function earnShare(key) {
 
 function producerCost(p, owned) {
   if (owned === undefined) owned = S.producers[p.id];
-  return Math.ceil(p.baseCost * Math.pow(1.15, owned));
+  return Math.ceil(p.baseCost * Math.pow(1.15, owned) * (hasBless('firststep') ? 0.92 : 1));
 }
 
 function bulkInfo(p) {
@@ -1531,8 +1615,8 @@ function clickSynMul() {
   return m;
 }
 
-function frenzyDuration() { return 20 + (hasSyn('dragon', 10) ? 2 : 0); }
-function partyDuration() { return 30 + (hasSyn('whale', 25) ? 5 : 0); }
+function frenzyDuration() { return 20 + (hasSyn('dragon', 10) ? 2 : 0) + (hasBless('partylong') ? 3 : 0); }
+function partyDuration() { return 30 + (hasSyn('whale', 25) ? 5 : 0) + (hasBless('partylong') ? 3 : 0); }
 function offlineCapHours() { return 8 + (hasSyn('cat', 25) ? 1 : 0) + (hasSyn('whale', 10) ? 2 : 0); }
 function offlineSynMul() { return (hasSyn('cat', 10) ? 1.1 : 1) * (hasSyn('whale', 100) ? 1.15 : 1); }
 function dreamThreshold() { return hasSyn('cat', 50) ? 0.18 : 0.25; }
@@ -1547,16 +1631,19 @@ function globalMul() {
   return (1 + achCount() * 0.01) * soulMul() * codexBonus;
 }
 
-function comboWindow() { return 0.9 + 0.15 * perkLv('combo'); }
+function comboWindow() { return 0.9 + 0.15 * perkLv('combo') + (hasBless('comboKeep') ? 0.25 : 0); }
 
-function offlineRate() { return Math.min(1, 0.5 + 0.1 * perkLv('softtime')); }
+function offlineRate() {
+  return Math.min(1, 0.5 + 0.1 * perkLv('softtime') + (hasBless('napecon') ? 0.1 : 0));
+}
 
 function effNeed(i) {
-  return STAGES[i].need * (1 - 0.05 * perkLv('evoseed'));
+  return STAGES[i].need * (1 - 0.05 * perkLv('evoseed')) * (hasBless('slowcrown') ? 0.96 : 1);
 }
 
 function soulsGain() {
-  return Math.floor(Math.sqrt(S.totalEarned / 6e7) * (hasSyn('planet', 5) ? 1.05 : 1));
+  const base = Math.floor(Math.sqrt(S.totalEarned / 6e7) * (hasSyn('planet', 5) ? 1.05 : 1));
+  return base >= 1 ? base + (hasBless('soulwhisper') ? 1 : 0) : 0;
 }
 
 function decorClickMul() {
@@ -1574,7 +1661,7 @@ function decorCpsMul() {
 function starLinger() {
   let bonus = 0;
   for (const d of DECOR) if (S.decor[d.id] && d.boost.star) bonus += d.boost.star;
-  return 10 + bonus * decorAmp() + (hasSyn('dog', 10) ? 1 : 0);
+  return 10 + bonus * decorAmp() + (hasSyn('dog', 10) ? 1 : 0) + (hasBless('starlonger') ? 3 : 0);
 }
 
 function clickPower() {
@@ -1586,7 +1673,8 @@ function clickPower() {
     if (u.type === 'clickCps') cpsPart += u.value;
   }
   const sticky = 1 + 0.25 * perkLv('sticky');
-  return add * mul * globalMul() * sticky * decorClickMul() * clickSynMul() + totalCps() * cpsPart;
+  const bless = (hasBless('sparkfinger') ? 1.1 : 1) * (hasBless('warmstart') ? 1.05 : 1);
+  return add * mul * globalMul() * sticky * decorClickMul() * clickSynMul() * bless + totalCps() * cpsPart;
 }
 
 function cpsMulFactor() {
@@ -1597,7 +1685,9 @@ function cpsMulFactor() {
   return mul * globalMul() * (1 + 0.2 * perkLv('promise')) * decorCpsMul()
     * planetMul()
     * (hasSyn('whale', 50) ? 1.1 : 1)
-    * (hasSyn('planet', 25) ? 1.1 : 1);
+    * (hasSyn('planet', 25) ? 1.1 : 1)
+    * (hasBless('quietrich') ? 1.08 : 1)
+    * (hasBless('warmstart') ? 1.05 : 1);
 }
 
 function totalCps() {
@@ -1856,8 +1946,8 @@ function showNews() {
 const slimeWrap = $('slime-wrap');
 
 function doClick(x, y) {
-  // 퍼펙트 말랑: 3% 확률로 x5 — 손맛용 잭팟
-  const perfect = Math.random() < 0.03;
+  // 퍼펙트 말랑: 3% 확률로 x5 — 손맛용 잭팟 (작은 행운 축복 +2%p)
+  const perfect = Math.random() < (0.03 + (hasBless('luckytip') ? 0.02 : 0));
   let gain = clickPower() * comboMul() * frenzyMul();
   if (perfect) gain *= 5;
   earnCoins(gain, 'click');
@@ -1865,6 +1955,7 @@ function doClick(x, y) {
   S.stats.run.clicks++;
 
   combo++;
+  if (hasBless('elastic') && combo < 5) combo = 5;
   comboTimer = comboWindow();
   if (combo > S.stats.run.bestCombo) S.stats.run.bestCombo = combo;
   if (combo > S.stats.lifetime.bestCombo) S.stats.lifetime.bestCombo = combo;
@@ -1965,6 +2056,7 @@ function confettiBurst() {
 function checkEvolution() {
   const idx = currentStageFor(S.totalEarned);
   if (idx > stageIdx) {
+    const jumped = idx - stageIdx;
     stageIdx = idx;
     renderStageName();
     const flash = $('evo-flash');
@@ -1973,6 +2065,7 @@ function checkEvolution() {
     flash.classList.add('go');
     confettiBurst();
     sndEvo();
+    queueBlessing(jumped);  // 진화마다 축복 3택 1 (단계 점프 시 누적)
     toast(`🎉 진화! <b>${STAGES[idx].name}</b> 등장!`);
     showQuip(QUIPS.evolve[Math.floor(Math.random() * QUIPS.evolve.length)]);
     save();
@@ -2123,10 +2216,11 @@ function wishEvent(type, amount) {
     else w.progress += amount;
     if (w.progress >= w.target) {
       S.wishes.active.splice(i, 1);
-      S.stardust += w.reward;
+      const rw = w.reward + (hasBless('dustsense') ? 1 : 0);
+      S.stardust += rw;
       S.wishes.completed++;
       completedAny = true;
-      toast(`💫 소원 성취! <b>${wishText(w)}</b><br><small>별가루 +${w.reward}</small>`);
+      toast(`💫 소원 성취! <b>${wishText(w)}</b><br><small>별가루 +${rw}</small>`);
       sndAch();
     }
   }
@@ -2134,6 +2228,73 @@ function wishEvent(type, amount) {
     initWishes();
     save();
     if (currentTab === 'wishes') buildShop();
+  }
+}
+
+/* ════════════════════════ 진화 축복 ════════════════════════ */
+
+function hasBless(id) { return S.runBlessings.includes(id); }
+
+let pendingBlessings = 0;
+
+function drawBlessingChoices() {
+  const pool = BLESSINGS.filter(b => !hasBless(b.id));
+  if (pool.length < 3) return pool;
+  // 성향 태그 가중치 3배
+  const favTag = currentTrait ? TRAIT_BLESSING_TAG[currentTrait.key] : (hasSamsaraAura() ? 'meta' : null);
+  const picks = [];
+  const candidates = pool.slice();
+  while (picks.length < 3 && candidates.length) {
+    const weights = candidates.map(b => b.tag === favTag ? 3 : 1);
+    const total = weights.reduce((a, w) => a + w, 0);
+    let r = Math.random() * total;
+    let idx = 0;
+    for (; idx < candidates.length; idx++) {
+      r -= weights[idx];
+      if (r <= 0) break;
+    }
+    picks.push(candidates.splice(Math.min(idx, candidates.length - 1), 1)[0]);
+  }
+  return picks;
+}
+
+function openBlessingModal() {
+  const choices = drawBlessingChoices();
+  if (!choices.length) { pendingBlessings = 0; return; }
+  const wrap = $('blessing-cards');
+  wrap.innerHTML = '';
+  for (const b of choices) {
+    const card = document.createElement('button');
+    card.className = 'blessing-card';
+    card.innerHTML = `
+      <span class="b-icon">${b.icon}</span>
+      <span><span class="b-name">${b.name}</span><div class="b-desc">${b.desc}</div></span>`;
+    card.addEventListener('click', () => pickBlessing(b));
+    wrap.appendChild(card);
+  }
+  $('blessing-overlay').classList.add('open');
+}
+
+function pickBlessing(b) {
+  S.runBlessings.push(b.id);
+  S.codex.blessings[b.id] = true;
+  sndAch();
+  toast(`${b.icon} <b>${b.name}</b>의 축복을 받았어요!`);
+  closeBlessingModal();
+}
+
+function closeBlessingModal() {
+  $('blessing-overlay').classList.remove('open');
+  pendingBlessings = Math.max(0, pendingBlessings - 1);
+  save();
+  if (pendingBlessings > 0) setTimeout(openBlessingModal, 400);
+  if (currentTab === 'prestige' || currentTab === 'room') buildShop();
+}
+
+function queueBlessing(count) {
+  pendingBlessings += count;
+  if (!$('blessing-overlay').classList.contains('open')) {
+    setTimeout(openBlessingModal, 900);  // 진화 연출 먼저
   }
 }
 
@@ -2234,6 +2395,9 @@ function doPrestige() {
   S.upgrades = {};
   S.buffs.discount = false;
   S.stats.run = defaultState().stats.run;  // 이번 생 통계만 초기화
+  S.runBlessings = [];                      // 축복도 이번 생 한정
+  pendingBlessings = 0;
+  $('blessing-overlay').classList.remove('open');
   combo = 0; comboTimer = 0; frenzyTimer = 0; partyTimer = 0;
   frenzyEarned = 0; festActive = 0; festWait = 60;
   stageIdx = 0;
@@ -2574,6 +2738,25 @@ function buildRoomTab() {
   });
   shopList.appendChild(traitGrid);
 
+  // 축복 도감
+  const titleB = document.createElement('div');
+  titleB.className = 'room-section-title';
+  titleB.textContent = `🌟 축복 도감 (${Object.keys(S.codex.blessings).length}/${BLESSINGS.length})`;
+  shopList.appendChild(titleB);
+
+  const blessGrid = document.createElement('div');
+  blessGrid.className = 'codex-grid cols4';
+  BLESSINGS.forEach(b => {
+    const seen = !!S.codex.blessings[b.id];
+    const active = hasBless(b.id);
+    const cell = document.createElement('div');
+    cell.className = 'codex-cell' + (seen ? ' seen' : '');
+    cell.innerHTML = `<div style="font-size:20px">${seen ? b.icon : '❓'}</div>` +
+      (seen ? `${b.name}${active ? '<br><span style="color:var(--green)">진행 중</span>' : ''}` : '???');
+    blessGrid.appendChild(cell);
+  });
+  shopList.appendChild(blessGrid);
+
   // 친구 도감
   const title4 = document.createElement('div');
   title4.className = 'room-section-title';
@@ -2632,7 +2815,13 @@ function buildPrestigeTab() {
   info.innerHTML =
     `🍮 보유 영혼 <b>${S.prestige.souls}</b>개 · 총 획득 <b>${S.prestige.totalSoulsEarned}</b>개<br>` +
     `모든 수입 +${S.prestige.totalSoulsEarned * 5}% (총 획득 기준 — 특성을 사도 줄지 않아요)<br>` +
-    `환생 ${S.prestige.totalResets}회 · 이번 생의 플레이스타일: ${playstyleName()}`;
+    `환생 ${S.prestige.totalResets}회 · 이번 생의 플레이스타일: ${playstyleName()}` +
+    (S.runBlessings.length
+      ? `<br>이번 생의 축복: ${S.runBlessings.map(id => {
+          const b = BLESSINGS.find(x => x.id === id);
+          return b ? `${b.icon}${b.name}` : '';
+        }).join(' · ')}`
+      : '');
   shopList.appendChild(info);
 
   // 환생 버튼
@@ -2709,7 +2898,7 @@ function refreshShop() {
     for (const el of shopList.querySelectorAll('.shop-item')) {
       const u = UPGRADES.find(x => x.id === el.dataset.id);
       if (!u) continue;
-      const cost = u.cost * (S.buffs.discount ? 0.5 : 1);
+      const cost = u.cost * (S.buffs.discount ? 0.5 : 1) * (hasBless('cheapup') ? 0.85 : 1);
       el.querySelector('.shop-cost').textContent = fmt(cost) + ' 코인' + (S.buffs.discount ? ' (50%↓)' : '');
       el.classList.toggle('locked', S.coins < cost);
     }
@@ -2767,7 +2956,7 @@ function buyProducer(p) {
 }
 
 function buyUpgrade(u) {
-  const cost = u.cost * (S.buffs.discount ? 0.5 : 1);
+  const cost = u.cost * (S.buffs.discount ? 0.5 : 1) * (hasBless('cheapup') ? 0.85 : 1);
   if (S.upgrades[u.id] || S.coins < cost) return;
   S.coins -= cost;
   S.upgrades[u.id] = true;
@@ -2805,7 +2994,8 @@ let starTimer = 20 + Math.random() * 40;
 let starVisible = 0;
 
 function starInterval() {
-  return (40 + Math.random() * 60) * (1 - 0.08 * perkLv('starlight')) * (hasSyn('dog', 25) ? 0.95 : 1);
+  return (40 + Math.random() * 60) * (1 - 0.08 * perkLv('starlight')) * (hasSyn('dog', 25) ? 0.95 : 1)
+    * (hasBless('starhunch') ? 0.88 : 1);
 }
 
 function starSpawnRect() {
@@ -2898,7 +3088,7 @@ starEl.addEventListener('pointerdown', e => {
 });
 
 function spawnMiniStars() {
-  const count = 5 + (hasSyn('rabbit', 10) ? 1 : 0);
+  const count = 5 + (hasSyn('rabbit', 10) ? 1 : 0) + (hasBless('minirain') ? 2 : 0);
   for (let i = 0; i < count; i++) {
     const img = document.createElement('img');
     img.src = starDataURL;
@@ -3041,6 +3231,10 @@ function migrateSave(data) {
     owned: (data.cosmetics && data.cosmetics.owned) || {},
     equipped: (data.cosmetics && data.cosmetics.equipped) || {},
   };
+
+  // v6 이하: 진화 축복 기본값
+  out.runBlessings = Array.isArray(data.runBlessings) ? data.runBlessings : [];
+  out.codex.blessings = (data.codex && data.codex.blessings) || {};
   out.achievements = data.achievements || {};
   out.producers = Object.assign({}, defaultState().producers, data.producers || {});
   out.upgrades = data.upgrades || {};
@@ -3127,6 +3321,7 @@ $('settings-btn').addEventListener('click', () => {
   $('settings-overlay').classList.add('open');
 });
 $('close-settings-btn').addEventListener('click', () => $('settings-overlay').classList.remove('open'));
+$('blessing-skip').addEventListener('click', closeBlessingModal);
 $('settings-overlay').addEventListener('click', e => {
   if (e.target === $('settings-overlay')) $('settings-overlay').classList.remove('open');
 });
