@@ -34,6 +34,18 @@
       "fps": 1,
       "loop": false,
       "action": "the same rain cloud creature now relieved and happy, closed smiling eyes, small sun peeking from behind its puff, no raindrops"
+    },
+    "starlet": {
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "small lost shooting star child, round gold star body with stubby points, teary worried eyes and one blue tear, two-frame nervous fidget"
+    },
+    "starlet-happy": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "the same little star now beaming with joy, closed happy eyes and open smile, tiny sparkle trail, ready to fly home"
     }
   },
   "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
