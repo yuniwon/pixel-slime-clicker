@@ -740,20 +740,27 @@
   }
   #evo-flash.rebirth { background: radial-gradient(circle, #e8dcff 0%, #8d5ce8 100%); }
 
-  /* ── 말랑 뉴스 티커 ── */
+  /* ── 말랑 뉴스 티커: 상단 전폭 스트립 ── */
   #news-ticker {
     position: absolute;
-    bottom: 10px;
-    left: 12px;
-    max-width: 64%;
-    font-size: 10px;
+    top: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 11px;
     color: var(--text-dim);
+    background: #00000044;
+    border-bottom: 2px solid #ffffff0d;
+    padding: 5px 12px;
     text-shadow: 1px 1px 0 #00000088;
     opacity: 0;
     transition: opacity 1.2s ease;
     pointer-events: none;
     z-index: 3;
     line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* ── 퍼펙트 말랑 ── */
@@ -1529,6 +1536,23 @@ const NEWS = [
   { cond: () => (S.stats.lifetime.cloudsSoothed || 0) > 0, text: '먹구름 손님, 간식 들고 재방문 예고.' },
   { cond: () => chActive() === 'silence', text: '침묵의 손 수행자 목격담: "손은 멈췄지만 마음은 말랑."' },
   { cond: () => Object.keys(S.codex.challenges).length > 0, text: '이상한 생을 살아본 슬라임, 회고록 집필 중.' },
+];
+
+/* 게임 팁: 뉴스 자리에 25% 확률로 섞여 나온다 — 시스템 안내 역할 */
+const TIPS = [
+  { cond: () => true, text: '황금별은 사라지기 전에 누르면 좋은 일이 생겨요.' },
+  { cond: () => true, text: '먹구름은 실패해도 잃는 게 없어요. 편하게 두드려요.' },
+  { cond: () => true, text: '친구는 10·25·50·100마리에서 특별한 시너지가 깨어나요.' },
+  { cond: () => true, text: '상점의 "회수 시간"이 짧을수록 본전을 빨리 뽑는 친구예요.' },
+  { cond: () => true, text: '빠르게 연타하면 콤보 배율이 올라가요.' },
+  { cond: () => S.prestige.totalResets === 0 && S.totalEarned > 1e6, text: '환생하면 영혼을 얻고, 영혼은 영원히 수입을 올려줘요.' },
+  { cond: () => S.prestige.totalResets >= 1, text: '축복 선택창에서 별가루로 리롤할 수 있어요.' },
+  { cond: () => S.prestige.totalResets >= 1, text: '환생해도 업적·장식·도감·영혼·특성은 남아요.' },
+  { cond: () => S.prestige.totalResets >= 2, text: '환생 탭의 도전 런 — 제약을 안고 가면 별가루 보상이 커요.' },
+  { cond: () => true, text: '클릭을 많이 하면, 별을 많이 잡으면… 슬라임의 성향이 변해요.' },
+  { cond: () => Object.keys(S.decor).length > 0, text: '장식을 놓으면 친구들이 좋아하는 자리로 이사 가요.' },
+  { cond: () => true, text: '소원을 이루면 별가루 — 별가루는 꾸미기와 리롤에 써요.' },
+  { cond: () => true, text: '오프라인에도 친구들이 일해요. 푹 쉬고 와도 괜찮아요.' },
 ];
 
 /* 진화 축복: 레벨업마다 3택 1, 이번 생 한정.
@@ -2335,11 +2359,13 @@ function randomQuip() {
 
 function showNews() {
   if (silentTick) return;
-  const pool = NEWS.filter(n => n.cond());
+  const useTip = Math.random() < 0.25;
+  const pool = (useTip ? TIPS : NEWS).filter(n => n.cond());
   if (!pool.length) return;
+  const item = pool[Math.floor(Math.random() * pool.length)];
   const el = $('news-ticker');
-  el.textContent = '📰 말랑 뉴스: ' + pool[Math.floor(Math.random() * pool.length)].text;
-  el.style.opacity = '.85';
+  el.textContent = (useTip ? '💡 ' : '📰 말랑 뉴스: ') + item.text;
+  el.style.opacity = '.92';
   clearTimeout(newsHideTimer);
   newsHideTimer = setTimeout(() => { el.style.opacity = '0'; }, 9000);
 }
@@ -4420,6 +4446,69 @@ renderHud();
 checkStory();
 // 온보딩: 완전 새 게임이면 첫 클릭 안내
 if (S.totalClicks === 0) setTimeout(() => showQuip('나를 말랑말랑 눌러봐!'), 1200);
+
+/* ── 밸런스 시뮬레이터 (개발용) ──
+   콘솔에서 simRun({ hours: 2, clicksPerSec: 4 }) 호출.
+   실제 경제 함수로 봇 플레이를 돌리고 상태는 완전 복원한다. */
+window.simRun = function simRun(opts = {}) {
+  const hours = opts.hours || 2;
+  const cpsClick = opts.clicksPerSec ?? 4;
+  const fromCurrent = !!opts.fromCurrent;  // true면 현재 세이브에서 이어서
+
+  const snapS = JSON.stringify(S);
+  const snapLevel = slimeLevel, snapStage = stageIdx, snapCombo = combo;
+
+  if (!fromCurrent) { S = migrateSave({}); computeBlessCache(); slimeLevel = 1; stageIdx = 0; }
+  const levelTimes = {};
+  let rebirthAt = null;
+  const coinMarks = {};
+  const marks = [1e6, 1e9, 1e12, 1e15];
+  const total = Math.round(hours * 3600);
+
+  for (let t = 0; t < total; t++) {
+    const g = clickPower() * comboMul() * cpsClick + totalCps();
+    S.coins += g; S.totalEarned += g;
+    combo = Math.min(combo + cpsClick, 100);
+    let nl = currentLevelFor(S.totalEarned);
+    while (nl > slimeLevel) {
+      slimeLevel++;
+      const b = BLESSINGS[Math.floor(Math.random() * BLESSINGS.length)];
+      if (b.stack || !S.runBlessings.includes(b.id)) S.runBlessings.push(b.id);
+      computeBlessCache();
+      levelTimes[slimeLevel] = (t / 60).toFixed(1);
+      nl = currentLevelFor(S.totalEarned);
+    }
+    stageIdx = stageForLevel(slimeLevel);
+    for (const u of UPGRADES) {
+      const c = u.cost * BC.upDisc;
+      if (!S.upgrades[u.id] && S.coins >= c) { S.coins -= c; S.upgrades[u.id] = true; }
+    }
+    for (const p of PRODUCERS) {
+      let gd = 0;
+      while (gd++ < 50) {
+        const c = producerCost(p);
+        if (S.coins >= c && c / (p.cps * cpsMulFactor()) < 600) { S.coins -= c; S.producers[p.id]++; }
+        else break;
+      }
+    }
+    if (!rebirthAt && soulsGain() >= 1) rebirthAt = (t / 60).toFixed(1);
+    for (const m of marks) {
+      if (!coinMarks[m] && S.totalEarned >= m) coinMarks[m] = (t / 60).toFixed(1);
+    }
+  }
+  const report = {
+    levelTimesMin: levelTimes,
+    rebirthLineMin: rebirthAt,
+    coinMilestonesMin: { '100만': coinMarks[1e6], '10억': coinMarks[1e9], '1조': coinMarks[1e12], '1000조': coinMarks[1e15] },
+    finalLevel: slimeLevel,
+    upgradesBought: Object.keys(S.upgrades).length + '/' + UPGRADES.length,
+    blessings: S.runBlessings.length,
+  };
+  S = migrateSave(JSON.parse(snapS)); computeBlessCache();
+  slimeLevel = snapLevel; stageIdx = snapStage; combo = snapCombo;
+  renderHud(); buildShop(); rebuildFriends();
+  return report;
+};
 
 // PWA: http(s)에서만 서비스워커 등록 (file:// 더블클릭 실행은 그대로 동작)
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
