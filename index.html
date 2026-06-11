@@ -1203,6 +1203,10 @@ const PERKS = [
   { id: 'combo',     icon: '🥁', name: '콤보 본능',   desc: '콤보 지속 +0.15초',       max: 5,  per: 0.15 },
   { id: 'evoseed',   icon: '🌱', name: '진화의 씨앗', desc: '레벨 요구치 -5%',         max: 5,  per: 0.05 },
   { id: 'instinct',  icon: '🔮', name: '별의 직감',   desc: '상위 등급 축복 확률 증가', max: 5,  per: 5 },
+  // ── 장기 영혼 싱크 (고비용) ──
+  { id: 'soulfire',  icon: '🔥', name: '영혼의 불꽃', desc: '모든 수입 +10%',          max: 20, per: 0.10, costMul: 5 },
+  { id: 'starborn',  icon: '🌟', name: '별의 혈통',   desc: '별 코인 보상 +20%',       max: 10, per: 0.20, costMul: 3 },
+  { id: 'deeproot',  icon: '🌳', name: '깊은 뿌리',   desc: '오프라인 한도 +2시간',    max: 10, per: 2,    costMul: 2 },
 ];
 
 /* 슬라임 방 장식: 1회 구매, 환생해도 유지 */
@@ -1946,7 +1950,13 @@ function bulkInfo(p) {
 }
 
 function perkLv(id) { return S.prestige.perks[id] || 0; }
-function perkCost(id) { return perkLv(id) + 1; }
+
+/* 특성 비용: (다음 레벨)² × 계수 — 영혼이 진짜 자원이 되도록 */
+function perkCost(id) {
+  const perk = PERKS.find(p => p.id === id);
+  const next = perkLv(id) + 1;
+  return next * next * ((perk && perk.costMul) || 1);
+}
 
 /* ── 친구 시너지 헬퍼 ── */
 function hasSyn(id, n) { return S.producers[id] >= n; }
@@ -1981,19 +1991,34 @@ function clickSynMul() {
 
 function frenzyDuration() { return 20 + (hasSyn('dragon', 10) ? 2 : 0) + BC.frenzyDur; }
 function partyDuration() { return 30 + (hasSyn('whale', 25) ? 5 : 0) + BC.partyDur; }
-function offlineCapHours() { return 8 + (hasSyn('cat', 25) ? 1 : 0) + (hasSyn('whale', 10) ? 2 : 0) + BC.offlineCap; }
+function offlineCapHours() {
+  return 8 + (hasSyn('cat', 25) ? 1 : 0) + (hasSyn('whale', 10) ? 2 : 0) + BC.offlineCap + 2 * perkLv('deeproot');
+}
+
+/* 별 코인 보상 통합 배율 (축복 + 강화 + 별의 혈통 특성) */
+function starRewardMul() {
+  return BC.starBonus * upProd('starBon') * (1 + 0.2 * perkLv('starborn'));
+}
 function offlineSynMul() { return (hasSyn('cat', 10) ? 1.1 : 1) * (hasSyn('whale', 100) ? 1.15 : 1); }
 function dreamThreshold() { return hasSyn('cat', 50) ? 0.18 : 0.25; }
 
 function achCount() { return Object.keys(S.achievements).length; }
 
-/* 영혼 보너스는 총 획득량 기준 — 특성을 사도 수입이 줄지 않는다 */
-function soulMul() { return 1 + S.prestige.totalSoulsEarned * 0.05; }
+/* 영혼 보너스: 총 획득량 기준 + 소프트캡 —
+   처음 100개 +5%, 다음 400개 +2%, 그 이후 +0.5% */
+function soulMul() {
+  const n = S.prestige.totalSoulsEarned;
+  return 1
+    + 0.05 * Math.min(n, 100)
+    + 0.02 * Math.min(Math.max(n - 100, 0), 400)
+    + 0.005 * Math.max(n - 500, 0);
+}
 
 function globalMul() {
   const codexBonus = hasSyn('unicorn', 50) ? 1 + 0.005 * codexEntryCount() : 1;
   const levelMul = 1 + (slimeLevel - 1) * 0.02;  // 레벨당 +2% (이번 생)
-  return (1 + achCount() * 0.01) * soulMul() * codexBonus * levelMul * BC.globalMulX * upProd('globMul');
+  const soulfire = 1 + 0.1 * perkLv('soulfire');
+  return (1 + achCount() * 0.01) * soulMul() * codexBonus * levelMul * BC.globalMulX * upProd('globMul') * soulfire;
 }
 
 function comboWindow() { return 0.9 + 0.15 * perkLv('combo') + BC.comboWindow + upSum('comboWin'); }
@@ -2038,9 +2063,14 @@ function stageForLevel(level) {
   return idx;
 }
 
+/* 영혼 획득: 로그 기반 — 누적코인이 지수로 커져도 영혼은 런의 "깊이"에 비례.
+   (구 sqrt 공식은 환생마다 영혼이 3배씩 폭주해 수입 배율이 며칠만에 x1000+) */
 function soulsGain() {
-  const base = Math.floor(Math.sqrt(S.totalEarned / 6e7) * (hasSyn('planet', 5) ? 1.05 : 1));
-  return base >= 1 ? base + BC.soulFlat : 0;
+  const E = S.totalEarned;
+  if (E < 6e7) return 0;
+  const depth = Math.log10(E / 6e7);
+  const base = Math.floor((1 + 3 * Math.pow(depth, 2.2)) * (hasSyn('planet', 5) ? 1.05 : 1));
+  return base + BC.soulFlat;
 }
 
 function decorClickMul() {
@@ -2696,7 +2726,11 @@ function computeBlessCache() {
 }
 computeBlessCache();  // 초기 상태로 즉시 1회 (load 전 BC 참조 안전)
 
-function luckTotal() { return BC.luck + perkLv('instinct') * 5; }
+function luckTotal() {
+  const raw = BC.luck + perkLv('instinct') * 5;
+  // 소프트캡: 30 초과분은 40%만 — 전설 독점 방지
+  return raw <= 30 ? raw : 30 + (raw - 30) * 0.4;
+}
 
 /* 등급 추첨: 행운이 상위 등급 확률을 끌어올린다 */
 function pickRarity() {
@@ -2727,8 +2761,8 @@ function monoSpecies() {
 }
 
 let pendingBlessings = 0;
-const REROLL_BASE = 3;
-let rerollCost = REROLL_BASE;   // 리롤할수록 +2, 새 선택마다 리셋 (Balatro식)
+function rerollBase() { return 3 + Math.floor(slimeLevel / 10) * 2; }  // 후반일수록 리롤도 비싸게
+let rerollCost = 3;   // 리롤할수록 +2, 새 선택마다 리셋 (Balatro식)
 
 function drawOneBlessing(excludeIds) {
   // 1) 등급 추첨 → 2) 해당 등급 풀에서 성향 태그 3배 가중 추첨
@@ -2794,7 +2828,7 @@ function renderBlessingCards() {
 let blessGuardUntil = 0;
 
 function openBlessingModal() {
-  rerollCost = REROLL_BASE;
+  rerollCost = rerollBase();
   if (!renderBlessingCards()) return;
   $('blessing-overlay').classList.add('open');
   // 연타 중 오터치 방지: 잠깐 입력 잠금 + 흐리게 표시
@@ -2957,7 +2991,7 @@ function doPrestige(challengeId = null) {
   frenzyEarned = 0; festActive = 0; festWait = 60;
   stageIdx = 0;
   slimeLevel = 1;
-  rerollCost = REROLL_BASE;
+  rerollCost = 3;
   computeBlessCache();
 
   sndRebirth();
@@ -3785,7 +3819,7 @@ const STAR_EVENTS = [
       let bonus = Math.max(totalCps() * 90, clickPower() * 150, 50);
       if (hasSyn('dog', 50)) bonus *= 1.2;
       if (chActive() === 'starlit') bonus *= 3;
-      bonus *= BC.starBonus * upProd('starBon');
+      bonus *= starRewardMul();
       earnCoins(bonus, 'event');
       spawnFloat(e.clientX, e.clientY, '+' + fmt(bonus), true);
       toast(`⭐ 행운의 보너스! <b>+${fmt(bonus)}</b> 코인!`);
@@ -3947,7 +3981,7 @@ function spawnMiniStars() {
       if (hasSyn('rabbit', 25)) bonus *= 1.3;
       if (hasSyn('dog', 50)) bonus *= 1.2;
       if (chActive() === 'starlit') bonus *= 3;
-      bonus *= BC.starBonus * upProd('starBon');
+      bonus *= starRewardMul();
       earnCoins(bonus, 'event');
       wishEvent('ministar', 1);
       spawnFloat(ev.clientX, ev.clientY, '+' + fmt(bonus), true);
