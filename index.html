@@ -57,6 +57,7 @@
     position: relative;
     z-index: 1;
     min-width: 0;
+    overflow: hidden;
   }
 
   #title {
@@ -171,21 +172,86 @@
     border-top-color: #2d1b4e;
   }
 
-  /* ── 친구 시각화 ── */
+  /* ── 친구 시각화: 행동 기반 주민 시스템 ── */
   #friends-layer {
     position: absolute;
     inset: 0;
     pointer-events: none;
     overflow: visible;
-    z-index: -1;
+    z-index: 0;
   }
   .friend {
     position: absolute;
     filter: drop-shadow(2px 2px 0 #00000044);
+    animation: friend-pop-in .3s ease-out;
   }
-  .friend-body {
-    display: inline-flex;
-    animation: friendbob ease-in-out infinite alternate;
+  @keyframes friend-pop-in {
+    from { transform: scale(.2); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .fr-move { display: inline-block; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+  .fr-frames {
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-position: var(--fx0) var(--fy);
+    animation: frframes steps(1) infinite;
+    image-rendering: auto;
+  }
+  @keyframes frframes {
+    0%, 50% { background-position: var(--fx0) var(--fy); }
+    50.1%, 100% { background-position: var(--fx1) var(--fy); }
+  }
+  .friend-emoji { font-size: 30px; }
+
+  .bv-peck { animation-name: bv-peck; animation-duration: 1.6s; }
+  @keyframes bv-peck {
+    0%, 52%, 100% { transform: translateY(0) rotate(0deg); }
+    62% { transform: translateY(4px) rotate(13deg); }
+    72% { transform: translateY(1px) rotate(3deg); }
+    82% { transform: translateY(4px) rotate(13deg); }
+  }
+  .bv-snooze { animation-name: bv-snooze; animation-duration: 3.6s; }
+  @keyframes bv-snooze {
+    0%, 100% { transform: scaleY(1) translateY(0); }
+    50% { transform: scaleY(.93) translateY(2px); }
+  }
+  .bv-run { animation-name: bv-run; animation-duration: 5.4s; animation-timing-function: linear; }
+  @keyframes bv-run {
+    0% { transform: translateX(-34px) scaleX(1); }
+    48% { transform: translateX(34px) scaleX(1); }
+    50% { transform: translateX(34px) scaleX(-1); }
+    98% { transform: translateX(-34px) scaleX(-1); }
+    100% { transform: translateX(-34px) scaleX(1); }
+  }
+  .bv-hop { animation-name: bv-hop; animation-duration: 6.5s; }
+  @keyframes bv-hop {
+    0%, 60%, 100% { transform: translateY(0); }
+    66% { transform: translateY(-72px) rotate(-6deg); }
+    72% { transform: translateY(-64px) rotate(4deg); }
+    80% { transform: translateY(0); }
+  }
+  .bv-shine { animation-name: bv-shine; animation-duration: 2.8s; }
+  @keyframes bv-shine {
+    0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 2px #ffffff44); }
+    50% { transform: translateY(-6px); filter: drop-shadow(0 0 10px #ffd75ecc); }
+  }
+  .bv-guard { animation-name: bv-guard; animation-duration: 4.2s; }
+  @keyframes bv-guard {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-4px) rotate(3deg); }
+  }
+  .bv-cross { animation-name: bv-cross; animation-duration: 46s; animation-timing-function: linear; }
+  @keyframes bv-cross {
+    0% { transform: translateX(calc(-1 * min(34vw, 300px))) scaleX(1); }
+    49% { transform: translateX(min(34vw, 300px)) scaleX(1); }
+    51% { transform: translateX(min(34vw, 300px)) scaleX(-1); }
+    100% { transform: translateX(calc(-1 * min(34vw, 300px))) scaleX(-1); }
+  }
+  .bv-orbit { animation-name: bv-orbit; animation-duration: 52s; animation-timing-function: linear; }
+  @keyframes bv-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fr-move, .fr-frames, #slime-canvas, .decor { animation: none !important; }
   }
   .sprite-icon {
     display: inline-block;
@@ -567,6 +633,32 @@
   #speech-bubble.bubble-gold { background: #ffeec4; border-color: #8a6d1f; color: #5c4312; }
   #speech-bubble.bubble-gold::after { border-top-color: #8a6d1f; }
 
+  /* ── 주스: 코인 팝 / 구매 플래시 / 환생 플래시 ── */
+  #coin-display.pop { animation: coinpop .15s ease-out; }
+  @keyframes coinpop { 50% { transform: scale(1.09); } }
+  .shop-item.bought { animation: boughtflash .45s ease-out; }
+  @keyframes boughtflash {
+    0% { transform: scale(.97); border-color: var(--gold); box-shadow: 0 0 16px #ffd75e99; }
+    100% { transform: scale(1); }
+  }
+  #evo-flash.rebirth { background: radial-gradient(circle, #e8dcff 0%, #8d5ce8 100%); }
+
+  /* ── 말랑 뉴스 티커 ── */
+  #news-ticker {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    max-width: 64%;
+    font-size: 10px;
+    color: var(--text-dim);
+    text-shadow: 1px 1px 0 #00000088;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+    z-index: 3;
+    line-height: 1.5;
+  }
+
   /* ── 퍼펙트 말랑 ── */
   .float-num.perfect {
     font-size: 32px;
@@ -684,9 +776,10 @@
   </div>
   <div id="coin-display"><canvas id="coin-icon" width="8" height="8"></canvas><span id="coin-num">0</span></div>
   <div id="cps-display">초당 0 코인</div>
+  <div id="friends-layer"></div>
+  <div id="news-ticker" aria-live="polite"></div>
   <div id="slime-wrap" role="button" tabindex="0" aria-label="슬라임 클릭 (스페이스/엔터 키로도 가능)">
     <div id="speech-bubble"></div>
-    <div id="friends-layer"></div>
     <canvas id="slime-canvas" width="16" height="17"></canvas>
     <div id="slime-shadow"></div>
   </div>
@@ -1156,6 +1249,30 @@ const QUIPS = {
   ],
 };
 
+/* 말랑 뉴스: 해금 상태에 따라 달라지는 한 줄 소식 */
+const NEWS = [
+  { cond: () => true, text: '오늘도 우주는 말랑하게 흐르는 중.' },
+  { cond: () => true, text: '슬라임 연구소: "클릭은 사랑의 언어일지도."' },
+  { cond: () => S.producers.chick > 0, text: '병아리 노조, 모이 대신 반짝이 휴가 요구.' },
+  { cond: () => S.producers.chick >= 25, text: '병아리 합창단, 새벽 삐약 공연으로 민원 1건.' },
+  { cond: () => S.producers.cat > 0, text: '고양이 경제학회: "낮잠도 생산성이다."' },
+  { cond: () => S.producers.dog > 0, text: '강아지, 황금별 물어오기 훈련 중 꼬리만 반짝.' },
+  { cond: () => S.producers.rabbit > 0, text: '로켓 토끼, 달 왕복 신기록. 연료는 당근 주스.' },
+  { cond: () => S.producers.unicorn > 0, text: '유니콘 무지개 통행료 인상 논란.' },
+  { cond: () => S.producers.dragon > 0, text: '아기 드래곤, 보물 더미 위 낮잠으로 경비 업무 태만 지적.' },
+  { cond: () => S.producers.whale > 0, text: '우주 고래 통과 후 별가루 민원 소폭 증가.' },
+  { cond: () => S.producers.planet > 0, text: '코인 행성 주민들, 자신이 화폐인지 천체인지 투표 중.' },
+  { cond: () => S.prestige.totalResets > 0, text: '윤회 경험자: "처음인데 처음 같지 않다."' },
+  { cond: () => S.decor.pond, text: '작은 연못 수영 강습 개설. 강사는 병아리.' },
+  { cond: () => S.decor.lamp, text: '별빛 램프 아래서 빈 소원, 성취율 체감 상승.' },
+  { cond: () => S.decor.fountain, text: '코인 분수에 동전 던지는 행위, 여기선 저축으로 분류.' },
+  { cond: () => S.stats.lifetime.bestCombo >= 30, text: '손가락 단련 학원, 수강생 급증.' },
+  { cond: () => achCount() >= 10, text: '업적 수집가 슬라임, 기념 박물관 건립 추진.' },
+  { cond: () => S.stardust >= 10, text: '별가루 부자 등장. 용처는 전부 꾸미기였다고.' },
+  { cond: () => !!S.cosmetics.equipped.bg, text: '하늘 색이 바뀌었지만 아무도 놀라지 않음. 흔한 일.' },
+  { cond: () => S.wishes.completed >= 5, text: '소원 성취 전문 슬라임, 비결은 "그냥 꾸준히".' },
+];
+
 const SLIME_MAP = [
   '................',
   '................',
@@ -1234,6 +1351,8 @@ let currentTrait = null;    // 0.5초마다 갱신
 let quipTimer = 30;
 let silentTick = false;     // finalSave 중 토스트/말풍선 억제
 let hintFriendShown = false; // 온보딩: 첫 친구 고용 힌트 (세션당 1회)
+let newsTimer = 16;          // 말랑 뉴스 다음 표시까지
+let newsHideTimer = null;
 
 /* ════════════════════════ 유틸 ════════════════════════ */
 
@@ -1721,6 +1840,17 @@ function randomQuip() {
   showQuip(pool[Math.floor(Math.random() * pool.length)]);
 }
 
+function showNews() {
+  if (silentTick) return;
+  const pool = NEWS.filter(n => n.cond());
+  if (!pool.length) return;
+  const el = $('news-ticker');
+  el.textContent = '📰 말랑 뉴스: ' + pool[Math.floor(Math.random() * pool.length)].text;
+  el.style.opacity = '.85';
+  clearTimeout(newsHideTimer);
+  newsHideTimer = setTimeout(() => { el.style.opacity = '0'; }, 9000);
+}
+
 /* ════════════════════════ 클릭 처리 ════════════════════════ */
 
 const slimeWrap = $('slime-wrap');
@@ -1753,6 +1883,12 @@ function doClick(x, y) {
     spawnSparks(x, y);
     sndClick();
   }
+  // 코인 카운터 팝
+  const coinEl = $('coin-display');
+  coinEl.classList.remove('pop');
+  void coinEl.offsetWidth;
+  coinEl.classList.add('pop');
+
   wishEvent('click', 1);
   wishEvent('combo', combo);
   checkEvolution();
@@ -1813,14 +1949,29 @@ function currentStageFor(total) {
   return idx;
 }
 
+function confettiBurst() {
+  const r = slimeCv.getBoundingClientRect();
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
+  for (let i = 0; i < 26; i++) {
+    setTimeout(() => spawnSparkAt(
+      cx + (Math.random() * 120 - 60),
+      cy + (Math.random() * 80 - 40),
+      SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)],
+    ), i * 28);
+  }
+}
+
 function checkEvolution() {
   const idx = currentStageFor(S.totalEarned);
   if (idx > stageIdx) {
     stageIdx = idx;
     renderStageName();
-    $('evo-flash').classList.remove('go');
-    void $('evo-flash').offsetWidth;
-    $('evo-flash').classList.add('go');
+    const flash = $('evo-flash');
+    flash.classList.remove('go', 'rebirth');
+    void flash.offsetWidth;
+    flash.classList.add('go');
+    confettiBurst();
     sndEvo();
     toast(`🎉 진화! <b>${STAGES[idx].name}</b> 등장!`);
     showQuip(QUIPS.evolve[Math.floor(Math.random() * QUIPS.evolve.length)]);
@@ -2088,9 +2239,10 @@ function doPrestige() {
   stageIdx = 0;
 
   sndRebirth();
-  $('evo-flash').classList.remove('go');
-  void $('evo-flash').offsetWidth;
-  $('evo-flash').classList.add('go');
+  const flash = $('evo-flash');
+  flash.classList.remove('go', 'rebirth');
+  void flash.offsetWidth;
+  flash.classList.add('go', 'rebirth');  // 환생은 보랏빛 별빛 플래시
   toast(`🌸 <b>환생!</b> 젤리 영혼 +${gain}<br><small>이번 생의 플레이스타일: <b>${style}</b></small>`);
   showQuip(QUIPS.rebirth[0]);
 
@@ -2116,45 +2268,121 @@ function buyPerk(perk) {
   save();
 }
 
-/* ════════════════════════ 친구 시각화 ════════════════════════ */
+/* ════════════════════════ 친구 시각화: 행동 기반 주민 ════════════════════════
+   친구는 둥둥 떠다니는 아이콘이 아니라 역할을 가진 방 주민으로 표시된다.
+   보유 장식에 따라 좋아하는 자리가 달라진다. */
 
 const friendsLayer = $('friends-layer');
 
-function slotPos(i) {
-  const ang = i * 2.39996;
-  const rx = 150 + (i % 3) * 30;
-  const ry = 70 + (i % 4) * 25;
-  return { x: Math.cos(ang) * rx, y: Math.sin(ang) * ry + 60 };
+const FRIEND_BEHAVIOR = {
+  chick:   { max: 3, anim: 'peck',
+    pos: () => S.decor.pond ? { left: '17%', bottom: '16%' } : { left: '38%', bottom: '12%' } },
+  cat:     { max: 2, anim: 'snooze',
+    pos: () => S.decor.mat ? { left: '22%', bottom: '42%' }
+      : (S.decor.cushion ? { left: '57%', bottom: '11%' } : { right: '36%', bottom: '14%' }) },
+  dog:     { max: 2, anim: 'run',
+    pos: () => S.decor.pond ? { left: '27%', bottom: '23%' } : { left: '46%', bottom: '7%' } },
+  rabbit:  { max: 2, anim: 'hop',
+    pos: () => S.decor.lamp ? { right: '22%', bottom: '27%' } : { right: '30%', bottom: '12%' } },
+  unicorn: { max: 2, anim: 'shine',
+    pos: () => S.decor.lamp ? { right: '13%', bottom: '31%' } : { right: '20%', bottom: '36%' } },
+  dragon:  { max: 2, anim: 'guard',
+    pos: () => S.decor.fountain ? { right: '15%', bottom: '52%' } : { left: '16%', bottom: '50%' } },
+  whale:   { max: 1, anim: 'cross',
+    pos: () => ({ left: '50%', top: S.decor.window ? '13%' : '20%' }) },
+  planet:  { max: 1, anim: 'orbit',
+    pos: () => ({ right: '9%', top: '24%' }) },
+};
+
+function friendCount(owned) {
+  if (owned >= 25) return 3;
+  if (owned >= 10) return 2;
+  if (owned >= 1) return 1;
+  return 0;
 }
 
-function friendTier(count) {
-  if (count >= 25) return 3;
-  if (count >= 10) return 2;
-  if (count >= 1) return 1;
-  return 0;
+/* 2프레임 스프라이트 애니메이션 (아틀라스에 친구별 2프레임 존재) */
+function friendSpriteAnimHtml(id, size) {
+  const frames = PRODUCER_SPRITE_LAYOUT[id];
+  if (!frames) {
+    const p = PRODUCERS.find(x => x.id === id);
+    return `<span class="friend-emoji">${p ? p.icon : '❓'}</span>`;
+  }
+  const f0 = frames[0];
+  const f1 = frames[1] || frames[0];
+  const scale = size / f0.w;
+  const style = [
+    `width:${size}px`,
+    `height:${size}px`,
+    `background-image:url('${PRODUCER_SPRITE_ATLAS}')`,
+    `background-size:${PRODUCER_SPRITE_SHEET.w * scale}px ${PRODUCER_SPRITE_SHEET.h * scale}px`,
+    `--fx0:${(-f0.x * scale).toFixed(1)}px`,
+    `--fx1:${(-f1.x * scale).toFixed(1)}px`,
+    `--fy:${(-f0.y * scale).toFixed(1)}px`,
+    `animation-duration:${(0.7 + Math.random() * 0.6).toFixed(2)}s`,
+    `animation-delay:${(Math.random() * 0.9).toFixed(2)}s`,
+  ].join(';');
+  return `<span class="sprite-icon fr-frames" aria-hidden="true" style="${style}"></span>`;
 }
 
 function rebuildFriends() {
   friendsLayer.innerHTML = '';
-  PRODUCERS.forEach((p, pi) => {
-    const tier = friendTier(S.producers[p.id]);
-    for (let k = 0; k < tier; k++) {
-      const pos = slotPos(pi * 3 + k);
+  PRODUCERS.forEach(p => {
+    const bhv = FRIEND_BEHAVIOR[p.id];
+    const owned = S.producers[p.id];
+    if (!bhv || !owned) return;
+    const n = Math.min(bhv.max, friendCount(owned));
+    const pos = bhv.pos();
+    for (let k = 0; k < n; k++) {
       const el = document.createElement('div');
       el.className = 'friend';
-      el.style.left = `calc(50% + ${pos.x}px)`;
-      el.style.top = `calc(45% + ${pos.y}px)`;
-      const inner = document.createElement('span');
-      inner.className = 'friend-body';
-      inner.innerHTML = producerSpriteHtml(p.id, p.icon, 'friend-sprite', k);
-      inner.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
-      inner.style.animationDelay = (Math.random() * 2) + 's';
-      if (Math.random() < 0.5) inner.style.transform = 'scaleX(-1)';
-      el.appendChild(inner);
+      el.dataset.id = p.id;
+      for (const key of ['left', 'right', 'top', 'bottom']) {
+        if (pos[key] === undefined) continue;
+        el.style[key] = (key === 'left' || key === 'right')
+          ? `calc(${pos[key]} + ${k * 46}px)`
+          : pos[key];
+      }
+      const mover = document.createElement('span');
+      mover.className = 'fr-move bv-' + bhv.anim;
+      mover.style.animationDelay = (Math.random() * 2.5).toFixed(2) + 's';
+      const size = (p.id === 'whale' || p.id === 'planet') ? 64 : 48;
+      mover.innerHTML = friendSpriteAnimHtml(p.id, size);
+      el.appendChild(mover);
       friendsLayer.appendChild(el);
     }
   });
 }
+
+/* 분위기 파티클: 드래곤 불꽃, 유니콘 반짝이 */
+function spawnSparkAt(x, y, color) {
+  const el = document.createElement('div');
+  el.className = 'spark';
+  el.style.background = color;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  const ang = Math.random() * Math.PI * 2;
+  const dist = 16 + Math.random() * 26;
+  el.animate([
+    { transform: 'translate(0,0) scale(1)', opacity: 1 },
+    { transform: `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist - 22}px) scale(0)`, opacity: 0 },
+  ], { duration: 600 + Math.random() * 300, easing: 'ease-out' });
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
+
+setInterval(() => {
+  if (document.hidden) return;
+  const ambient = [['dragon', '#ff9d4d'], ['unicorn', '#ffd9f2']];
+  for (const [id, color] of ambient) {
+    const el = friendsLayer.querySelector(`.friend[data-id="${id}"]`);
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    for (let i = 0; i < 3; i++) {
+      spawnSparkAt(r.left + r.width / 2, r.top + r.height / 3, color);
+    }
+  }
+}, 6500);
 
 /* ════════════════════════ 상점 ════════════════════════ */
 
@@ -2527,6 +2755,13 @@ function buyProducer(p) {
   wishEvent('hire', info.count);
   rebuildFriends();
   refreshShop();
+  // 구매 플래시
+  const itemEl = shopList.querySelector(`.shop-item[data-id="${p.id}"]`);
+  if (itemEl) {
+    itemEl.classList.remove('bought');
+    void itemEl.offsetWidth;
+    itemEl.classList.add('bought');
+  }
   renderHud();
   save();
 }
@@ -3002,6 +3237,13 @@ function econTickBody() {
   if (quipTimer <= 0) {
     randomQuip();
     quipTimer = 40 + Math.random() * 40;
+  }
+
+  // 말랑 뉴스 (26~48초 간격)
+  newsTimer -= dt;
+  if (newsTimer <= 0) {
+    showNews();
+    newsTimer = 26 + Math.random() * 22;
   }
 
   checkEvolution();
