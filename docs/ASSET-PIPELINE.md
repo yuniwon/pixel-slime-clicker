@@ -84,10 +84,10 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | slime-main-traits-ai | 16 (비핑크 4단계 × 4성향, 각 2f) | 📝 요청서 작성됨 — 성향을 입혀 구운 본체 변형 (액세서리가 곡면을 따라 닿게, 왕관과 자연 통합). magenta |
 | slime-strawberry-traits-ai | 4 (딸기 × 4성향, 각 2f) | 📝 요청서 작성됨 — 핑크는 green 크로마 분리 시트 |
 | slime-crystal-ai | 4 (젤리 결정 숙성: seed/sprout/bud/ripe 2프레임) | ✅ 생성·연결 완료 (green 크로마, 채도 정상 실측) |
-| slime-goldstar-ai | 2 (황금별 2f, 미니 별똥별 2f) | 📝 요청서 작성됨 — 현 16px 수제 캔버스 교체, 256² magenta |
-| slime-comboaura-ai | 4 (콤보 열기 tier0~3, 각 2f) | 📝 요청서 작성됨 — 슬라임 뒤에 깔 오라 링, 384² green (핑크 계열) |
-| slime-coinpile-ai | 3 (코인 더미 1만/100만/1억) | 📝 요청서 작성됨 — 무대 바닥 재산 풍경, 256² magenta |
-| slime-clickfx-ai | 1 (장갑 팝 3프레임 원샷) | 📝 요청서 작성됨 — 클릭 지점 버스트, 192² green (핑크 장갑) |
+| slime-goldstar-ai | 2 (황금별 2f, 미니 별똥별 2f) | ✅ 생성·연결 완료 — 캔버스에 셀 배경 + CSS 2f 반짝임, 캔버스 픽셀 폴백 |
+| slime-comboaura-ai | 4 (콤보 열기 tier0~3, 각 2f) | ✅ 생성·연결 완료 — 반투명 마법진 (슬라임 1.45배, JS 프레임 스왑), 그라디언트 폴백 |
+| slime-coinpile-ai | 3 (코인 더미 1만/100만/1억) | ✅ 생성·연결 완료 — 무대 우하단 + 접지 그림자, 임계 교차 시 교체 |
+| slime-clickfx-ai | 1 (장갑 팝 3프레임 원샷) | ✅ 생성·연결 완료 — 클릭 지점 44px 원샷, 파티클 캡 공유 |
 
 > 코덱스 실측 노트 (2026-06-12): green 크로마에서 보라(samsara) 추출 시 green fringe 미세 발생 —
 > 추출 허용치 상향으로 해결 가능, 시각 결과 깨끗. 보라 계열도 green 크로마 계속 사용.

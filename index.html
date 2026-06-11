@@ -464,6 +464,61 @@
   }
   @keyframes starwobble { from { transform: rotate(-12deg) scale(1);} to { transform: rotate(12deg) scale(1.12);} }
 
+  /* 황금별·미니별 스프라이트 모드: 캔버스 픽셀 대신 아틀라스 셀 + 2프레임 반짝임 */
+  #golden-star.gs-sprite, .mini-star.gs-sprite {
+    background-repeat: no-repeat;
+    background-size: 200% 200%;
+    image-rendering: auto;
+  }
+  #golden-star.gs-sprite { animation: starwobble .6s ease-in-out infinite alternate, gs-twinkle .9s steps(1) infinite; }
+  .mini-star.gs-sprite { animation: starwobble .5s ease-in-out infinite alternate, gs-twinkle .7s steps(1) infinite; }
+  @keyframes gs-twinkle {
+    0%, 100% { background-position-x: 0%; }
+    50% { background-position-x: 100%; }
+  }
+
+  /* 클릭 버스트: 장갑 팝 3프레임 원샷 */
+  .clickfx {
+    position: fixed;
+    width: 44px; height: 44px;
+    margin: -22px 0 0 -22px;
+    pointer-events: none;
+    z-index: 48;
+    background-image: url('assets/generated/sprites/slime-clickfx-ai/sprite-sheet-alpha.png');
+    background-size: 300% 100%;
+    background-repeat: no-repeat;
+    animation: clickfx-pop .27s linear forwards;
+  }
+  @keyframes clickfx-pop {
+    0% { background-position-x: 0%; opacity: .95; }
+    32.9% { background-position-x: 0%; }
+    33% { background-position-x: 50%; }
+    65.9% { background-position-x: 50%; }
+    66% { background-position-x: 100%; }
+    100% { background-position-x: 100%; opacity: 0; }
+  }
+
+  /* 코인 더미: 누적 재산의 풍경 — 무대 우하단, 접지 그림자 */
+  #coin-pile {
+    position: absolute;
+    right: 4%;
+    bottom: clamp(46px, 4.2vw, 100px);
+    z-index: 3;
+    pointer-events: none;
+  }
+  #coin-pile .sprite-icon { filter: drop-shadow(2px 2px 0 #00000055); }
+  #coin-pile::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -3px;
+    width: 72%;
+    height: 9px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse, #00000059 0%, transparent 68%);
+    z-index: -1;
+  }
+
   /* ── 먹구름 손님 ── */
   #raincloud {
     position: fixed;
@@ -1342,6 +1397,7 @@
     <span id="crystal-visual">🌱</span>
     <span id="crystal-label"></span>
   </div>
+  <div id="coin-pile" hidden aria-hidden="true"></div>
 </div>
 
 <div id="shop">
@@ -1639,6 +1695,14 @@ const TRAIT_ATLAS = {
   twoFrame: { star: true, samsara: true },
 };
 let traitAtlasOk = false;
+
+/* 이벤트·연출 아틀라스 4종 (코덱스 납품) — 로드 실패 시 기존 캔버스/그라디언트 폴백 */
+const FX_ATLASES = {
+  goldstar: { src: 'assets/generated/sprites/slime-goldstar-ai/sprite-sheet-alpha.png', ok: false },
+  comboaura: { src: 'assets/generated/sprites/slime-comboaura-ai/sprite-sheet-alpha.png', ok: false },
+  coinpile: { src: 'assets/generated/sprites/slime-coinpile-ai/sprite-sheet-alpha.png', ok: false },
+  clickfx: { src: 'assets/generated/sprites/slime-clickfx-ai/sprite-sheet-alpha.png', ok: false },
+};
 
 /* 액세서리 배치: 아트는 셀 중앙에 그려져 있으므로(실측 bbox 폭 ~0.78)
    레이어별로 줄여서 머리 위치에 앵커한다. s = 캔버스 대비 셀 스케일, cy = 셀 중심이 놓일 Y */
@@ -2354,6 +2418,15 @@ const SPRITE_ATLASES = {
       'starlet-happy':   [{ x: 0, y: 2688, w: 896, h: 896 }],
     },
   },
+  coinpile: {
+    src: 'assets/generated/sprites/slime-coinpile-ai/sprite-sheet-alpha.png',
+    sheet: { w: 256, h: 768 },
+    layout: {
+      pile1: [{ x: 0, y: 0,   w: 256, h: 256 }],
+      pile2: [{ x: 0, y: 256, w: 256, h: 256 }],
+      pile3: [{ x: 0, y: 512, w: 256, h: 256 }],
+    },
+  },
   crystal: {
     src: 'assets/generated/sprites/slime-crystal-ai/sprite-sheet-alpha.png',
     sheet: { w: 768, h: 1536 },
@@ -2697,6 +2770,7 @@ function comboTier() {
    매 프레임은 composite 속성(opacity/transform)만 — 페인트 비용(그라디언트·클래스)은
    단계가 바뀔 때만 갱신 (fixing-motion-performance) */
 let auraTierShown = -1;
+let auraFrameShown = -1;
 function updateComboVisual() {
   const tier = comboTier();
   const cbox = $('combo-box');
@@ -2712,11 +2786,30 @@ function updateComboVisual() {
   } else {
     cbox.classList.remove('on');
   }
-  aura.style.opacity = tier.r;
-  aura.style.transform = `translate(-50%,-50%) scale(${1 + tier.r * 0.45})`;
-  if (tier.t !== auraTierShown) {
+  const auraSpr = FX_ATLASES.comboaura.ok;
+  if (auraSpr) {
+    // 스프라이트 마법진: 반투명 + 슬라임의 ~1.45배 — 액자처럼 갇혀 보이지 않게
+    aura.style.opacity = Math.min(0.85, 0.22 + tier.r * 0.63);
+    const target = slimeCv.offsetWidth * 1.45 / (aura.offsetWidth || 320);
+    aura.style.transform = `translate(-50%,-50%) scale(${(target * (0.94 + tier.r * 0.12)).toFixed(3)})`;
+  } else {
+    aura.style.opacity = tier.r;
+    aura.style.transform = `translate(-50%,-50%) scale(${1 + tier.r * 0.45})`;
+  }
+  const f = auraSpr ? Math.floor(performance.now() / 550) % 2 : 0;
+  if (tier.t !== auraTierShown || f !== auraFrameShown) {
     auraTierShown = tier.t;
-    aura.style.background = `radial-gradient(circle, ${tier.t >= 3 ? '#ffd75e66' : '#ff8ac455'} 0%, ${tier.t >= 3 ? '#ff8ac433' : '#ff8ac422'} 38%, transparent 65%)`;
+    auraFrameShown = f;
+    if (auraSpr) {
+      aura.style.background = '';
+      aura.style.backgroundImage = `url('${FX_ATLASES.comboaura.src}')`;
+      aura.style.backgroundSize = '200% 400%';
+      aura.style.backgroundRepeat = 'no-repeat';
+      aura.style.backgroundPosition = `${f * 100}% ${(tier.t * 100 / 3).toFixed(2)}%`;
+    } else {
+      aura.style.backgroundImage = '';
+      aura.style.background = `radial-gradient(circle, ${tier.t >= 3 ? '#ffd75e66' : '#ff8ac455'} 0%, ${tier.t >= 3 ? '#ff8ac433' : '#ff8ac422'} 38%, transparent 65%)`;
+    }
     aura.classList.toggle('pulse', tier.t >= 2);
     slimeWrap.classList.toggle('heat', tier.t >= 2);
     document.querySelectorAll('.heat-particle').forEach(p => {
@@ -3090,6 +3183,16 @@ let COIN_DATA_URL = '';
 
 /* 황금별 (16x16) — 미니 별똥별용 데이터 URL도 함께 생성 */
 let starDataURL = '';
+/* 황금별 스프라이트 모드: 캔버스에 아틀라스 셀 배경 + 픽셀 비움 (2프레임은 CSS 반짝임) */
+function applyGoldstarSprite() {
+  if (!FX_ATLASES.goldstar.ok) return;
+  const cv = $('golden-star');
+  cv.classList.add('gs-sprite');
+  cv.style.backgroundImage = `url('${FX_ATLASES.goldstar.src}')`;
+  cv.style.backgroundPositionY = '0%';
+  cv.getContext('2d').clearRect(0, 0, 16, 16);
+}
+
 (function drawStar() {
   const cv = $('golden-star');
   const c = cv.getContext('2d');
@@ -3287,12 +3390,14 @@ function doClick(x, y) {
     spawnFloat(x, y - 10, '퍼펙트 말랑! +' + fmt(gain), false, true);
     spawnSparks(x, y);
     spawnSparks(x, y);
+    spawnClickFx(x, y);
     sndPerfect();
     haptic([12, 40, 12]);
     wishEvent('perfect', 1);
   } else {
     spawnFloat(x, y, '+' + fmt(gain), frenzyTimer > 0);
     spawnSparks(x, y);
+    spawnClickFx(x, y);
     sndClick();
     haptic(8);
   }
@@ -3381,7 +3486,18 @@ const SPARK_COLORS = ['#ffd75e', '#ff8ac4', '#7dff8a', '#56b8f2', '#ffffff'];
 const PARTICLE_CAP = 60;  // 백그라운드 탭 타이머 스로틀에도 DOM이 무한히 쌓이지 않게
 
 function particleCount() {
-  return document.querySelectorAll('.spark, .emoji-spark').length;
+  return document.querySelectorAll('.spark, .emoji-spark, .clickfx').length;
+}
+
+/* 클릭 버스트: 장갑 팝 3프레임 원샷 — 클릭 지점에 작게 */
+function spawnClickFx(x, y) {
+  if (!FX_ATLASES.clickfx.ok || particleCount() > PARTICLE_CAP) return;
+  const el = document.createElement('div');
+  el.className = 'clickfx';
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 320);
 }
 
 function spawnSparks(x, y) {
@@ -3795,16 +3911,15 @@ function renderCrystalBed(force) {
   }
   const el = crystalElapsed();
   const phase = el >= CRYSTAL.grow ? 3 : el >= CRYSTAL.early ? 2 : el >= 10 * 3600e3 ? 1 : 0;
-  if (!force && phase === crystalShownPhase && phase !== 3) return;  // 완숙은 주기 재렌더로 반짝임
+  // 라벨(%)은 시간이 흐르면 저절로 갱신 — 터치해야 바뀌면 "터치로 키우는 건가?" 오해를 만든다
+  $('crystal-label').textContent = phase === 3 ? '익었어요!' : Math.min(99, Math.round(el / CRYSTAL.grow * 100)) + '%';
+  bed.classList.toggle('ripe', phase >= 2);
+  if (!force && phase === crystalShownPhase && phase !== 3) return;  // 스프라이트 셀 교체만 캐시
   crystalShownPhase = phase;
   const ids = ['seed', 'sprout', 'bud', 'ripe'];
   const emo = ['🌱', '🌿', '💠', '💎'];
   const fr = phase === 3 ? Math.floor(Date.now() / 20000) % 2 : 0;  // ripe 2프레임 — tick 주기 스왑
   $('crystal-visual').innerHTML = spriteHtml('crystal', ids[phase], emo[phase], { size: 44, className: 'sprite-icon', frame: fr });
-  $('crystal-label').textContent = phase === 3 ? '익었어요!'
-    : phase === 2 ? Math.round(el / CRYSTAL.grow * 100) + '%'
-    : Math.round(el / CRYSTAL.grow * 100) + '%';
-  bed.classList.toggle('ripe', phase >= 2);
 }
 
 function crystalTick() {
@@ -3814,6 +3929,21 @@ function crystalTick() {
   while (crystalElapsed() >= CRYSTAL.auto) { crystalHarvest(true); autoN++; }
   if (autoN > 0) toast(`💎 자리 비운 동안 결정 <b>${autoN}개</b>가 저절로 영글었어요! (보유 ${S.crystal.count}개)`);
   renderCrystalBed();
+  renderCoinPile();
+}
+
+/* 코인 더미: 누적 재산이 무대의 풍경이 된다 (1만/100만/1억) */
+let coinPileShown = -1;
+function renderCoinPile(force) {
+  const el = $('coin-pile');
+  if (!FX_ATLASES.coinpile.ok) { el.hidden = true; return; }
+  const idx = S.totalEarned >= 1e8 ? 3 : S.totalEarned >= 1e6 ? 2 : S.totalEarned >= 1e4 ? 1 : 0;
+  if (!force && idx === coinPileShown) return;
+  coinPileShown = idx;
+  if (!idx) { el.hidden = true; return; }
+  el.hidden = false;
+  const size = Math.round(Math.min(88, Math.max(40, innerWidth * 0.044)));
+  el.innerHTML = spriteHtml('coinpile', 'pile' + idx, '💰', { size, className: 'sprite-icon' });
 }
 
 /* ════════════════════════ UX 흐름: 점진 해금 · 재화 스트립 · 뱃지 ════════════════════════
@@ -5475,10 +5605,20 @@ function starletArrive() {
 function spawnMiniStars() {
   const count = 5 + (hasSyn('rabbit', 10) ? 1 : 0) + BC.miniCount + (hasSyn('spirit', 100) ? 2 : 0);
   for (let i = 0; i < count; i++) {
-    const img = document.createElement('img');
-    img.src = starDataURL;
-    img.className = 'mini-star';
-    img.alt = '미니 별똥별';
+    let img;
+    if (FX_ATLASES.goldstar.ok) {
+      img = document.createElement('div');
+      img.className = 'mini-star gs-sprite';
+      img.style.backgroundImage = `url('${FX_ATLASES.goldstar.src}')`;
+      img.style.backgroundPositionY = '100%';   // 2행 = 미니 별똥별
+      img.setAttribute('role', 'img');
+      img.setAttribute('aria-label', '미니 별똥별');
+    } else {
+      img = document.createElement('img');
+      img.src = starDataURL;
+      img.className = 'mini-star';
+      img.alt = '미니 별똥별';
+    }
     const pos = starSpawnRect();
     img.style.left = pos.x + 'px';
     img.style.top = pos.y + 'px';
@@ -6048,6 +6188,18 @@ function pinkifyGray(d) {
     const t = Math.min(1, Math.max(0, (l - l0) / (l1 - l0)));
     d[p] = r0 + (r1 - r0) * t; d[p + 1] = g0 + (g1 - g0) * t; d[p + 2] = b0 + (b1 - b0) * t;
   }
+}
+
+// 이벤트·연출 아틀라스 프리로드 — 성공한 것만 스프라이트 모드로 전환
+for (const key in FX_ATLASES) {
+  const im = new Image();
+  im.onload = () => {
+    FX_ATLASES[key].ok = true;
+    if (key === 'goldstar') applyGoldstarSprite();
+    if (key === 'comboaura') { auraTierShown = -1; updateComboVisual(); }
+    if (key === 'coinpile') renderCoinPile(true);
+  };
+  im.src = FX_ATLASES[key].src;
 }
 
 // 성향 액세서리 아틀라스 프리로드 — 성공 시 글로우 대신 진짜 액세서리.
