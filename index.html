@@ -1592,6 +1592,32 @@ const TRAIT_ATLAS = {
 };
 let traitAtlasOk = false;
 
+/* 액세서리 배치: 아트는 셀 중앙에 그려져 있으므로(실측 bbox 폭 ~0.78)
+   레이어별로 줄여서 머리 위치에 앵커한다. s = 캔버스 대비 셀 스케일, cy = 셀 중심이 놓일 Y */
+const TRAIT_PLACE = {
+  muscle:  { s: 0.85, cy: 0.35 },  // 머리띠: 이마를 가로지름
+  ranch:   { s: 0.70, cy: 0.18 },  // 밀짚모자: 정수리
+  star:    { s: 1.00, cy: 0.50 },  // 별가루: 몸 전체 주변 (원래 풀셀 디자인)
+  dream:   { s: 0.70, cy: 0.18 },  // 잠모자: 정수리
+  samsara: { s: 0.64, cy: 0.06 },  // 고리: 머리 위 부유
+};
+
+function traitBgLayer(key, frame) {
+  const { s, cy } = TRAIT_PLACE[key];
+  const row = TRAIT_ATLAS.rows[key];
+  const col = TRAIT_ATLAS.twoFrame[key] ? frame : 0;
+  const tx = (1 - s) / 2;       // 가로 중앙 (아트가 셀 중앙 정렬)
+  const ty = cy - s / 2;        // 셀 중심이 cy에 오도록
+  // background-position % 역산: offset = (1 - bgSize) × p
+  const px = (tx - col * s) / (1 - 2 * s) * 100;
+  const py = (ty - row * s) / (1 - 5 * s) * 100;
+  return {
+    img: `url('${TRAIT_ATLAS.src}')`,
+    size: `${(s * 200).toFixed(1)}% ${(s * 500).toFixed(1)}%`,
+    pos: `${px.toFixed(2)}% ${py.toFixed(2)}%`,
+  };
+}
+
 const MAX_LEVEL = 60;
 
 /* 환생 특성: cost = (현재 레벨 + 1) 젤리 영혼 */
@@ -2916,18 +2942,18 @@ function applySlimeSprite(force) {
   const sig = `${stageIdx}|${slimeFrame}|${traitKey}|${ring}`;
   if (!force && sig === slimeSpriteSig) return true;
   slimeSpriteSig = sig;
-  const imgs = [], poss = [];
+  const imgs = [], sizes = [], poss = [];
   const addTrait = key => {  // 위에 그려질 레이어부터 — CSS 다중 배경은 첫 항목이 최상단
-    const fx = TRAIT_ATLAS.twoFrame[key] ? slimeFrame * 100 : 0;
-    imgs.push(`url('${TRAIT_ATLAS.src}')`);
-    poss.push(`${fx}% ${TRAIT_ATLAS.rows[key] * 25}%`);
+    const L = traitBgLayer(key, slimeFrame);
+    imgs.push(L.img); sizes.push(L.size); poss.push(L.pos);
   };
   if (traitKey && traitKey !== 'samsara') addTrait(traitKey);
   if (ring) addTrait('samsara');
   imgs.push(`url('${SLIME_ATLAS.src}')`);
+  sizes.push('200% 500%');  // 본체 셀 = 시트의 1/2 × 1/5
   poss.push(`${slimeFrame * 100}% ${stageIdx * 25}%`);
   slimeCv.style.backgroundImage = imgs.join(', ');
-  slimeCv.style.backgroundSize = imgs.map(() => '200% 500%').join(', ');  // 셀 = 시트의 1/2 × 1/5
+  slimeCv.style.backgroundSize = sizes.join(', ');
   slimeCv.style.backgroundRepeat = 'no-repeat';
   slimeCv.style.backgroundPosition = poss.join(', ');
   return true;
