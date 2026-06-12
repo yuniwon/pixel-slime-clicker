@@ -84,8 +84,9 @@
     overflow: hidden;
   }
 
+  /* 무대 중앙: 해상도 비례 (QHD에서도 의도한 체감 크기 — 모바일 블록이 고정값으로 덮음) */
   #title {
-    font-size: 22px;
+    font-size: clamp(20px, 1.35vw, 38px);
     letter-spacing: 2px;
     color: var(--gold);
     text-shadow: 3px 3px 0 #00000055;
@@ -93,7 +94,7 @@
   }
 
   #stage-name {
-    font-size: 13px;
+    font-size: clamp(12px, 0.85vw, 24px);
     color: var(--text-dim);
     margin-bottom: 8px;
   }
@@ -119,7 +120,7 @@
     background: #ffffff22;
     image-rendering: pixelated;
   }
-  #evo-progress-label { font-size: 11px; color: var(--text-dim); }
+  #evo-progress-label { font-size: clamp(10px, 0.7vw, 20px); color: var(--text-dim); }
 
   #challenge-badge {
     display: none;
@@ -134,7 +135,7 @@
   #challenge-badge.on { display: inline-block; }
 
   #coin-display {
-    font-size: 32px;
+    font-size: clamp(28px, 2vw, 56px);
     font-weight: bold;
     color: var(--gold);
     text-shadow: 2px 2px 0 #00000066;
@@ -143,10 +144,10 @@
     gap: 10px;
   }
 
-  #coin-icon { width: 28px; height: 28px; image-rendering: pixelated; animation: coinspin 2s steps(4) infinite; }
+  #coin-icon { width: clamp(24px, 1.7vw, 48px); height: clamp(24px, 1.7vw, 48px); image-rendering: pixelated; animation: coinspin 2s steps(4) infinite; }
   @keyframes coinspin { 0% { transform: scaleX(1);} 25%{ transform: scaleX(.2);} 50%{ transform: scaleX(-1);} 75%{ transform: scaleX(.2);} 100%{ transform: scaleX(1);} }
 
-  #cps-display { font-size: 14px; color: var(--green); margin-top: 4px; text-shadow: 1px 1px 0 #00000066; }
+  #cps-display { font-size: clamp(13px, 0.9vw, 25px); color: var(--green); margin-top: 4px; text-shadow: 1px 1px 0 #00000066; }
 
   #slime-wrap {
     margin: 24px 0 10px;
@@ -159,8 +160,9 @@
   #slime-wrap:focus-visible { filter: drop-shadow(0 0 8px var(--gold)); }
 
   #slime-canvas {
-    width: 288px;
-    height: 306px;
+    width: clamp(250px, 17vw, 420px);
+    height: auto;
+    aspect-ratio: 288 / 306;
     image-rendering: pixelated;
     animation: bob 2.2s ease-in-out infinite;
     transform-origin: 50% 100%;
@@ -179,7 +181,8 @@
   }
 
   #slime-shadow {
-    width: 200px; height: 26px;
+    width: clamp(175px, 11.8vw, 290px);
+    height: clamp(22px, 1.5vw, 38px);
     background: #00000055;
     border-radius: 50%;
     margin: -18px auto 0;
@@ -334,7 +337,7 @@
   #combo-box.on { visibility: visible; }
   #combo-chip {
     display: inline-block;
-    font-size: 12px;
+    font-size: clamp(11px, 0.8vw, 22px);
     padding: 3px 10px;
     white-space: nowrap;
     border: 2px solid var(--text-dim);
@@ -353,7 +356,7 @@
   #combo-aura {
     position: absolute;
     left: 50%; top: 46%;
-    width: 240px; height: 240px;
+    width: clamp(220px, 15vw, 380px); height: clamp(220px, 15vw, 380px);
     border-radius: 50%;
     pointer-events: none;
     z-index: -1;
@@ -378,10 +381,11 @@
 
   /* ── 콤보 승급: 경계를 넘는 그 한 클릭의 연출 ── */
   #tier-ring {
+    --trw: clamp(160px, 11vw, 270px);
     position: absolute;
     left: 50%; top: 50%;
-    width: 180px; height: 180px;
-    margin: -90px 0 0 -90px;
+    width: var(--trw); height: var(--trw);
+    margin: calc(var(--trw) / -2) 0 0 calc(var(--trw) / -2);
     border: 3px solid var(--gold);
     border-radius: 50%;
     transform: scale(0);
@@ -454,7 +458,7 @@
   /* ── 황금별 / 미니 별똥별 ── */
   #golden-star {
     position: fixed;
-    width: 64px; height: 64px;
+    width: clamp(56px, 4vw, 96px); height: clamp(56px, 4vw, 96px);
     cursor: pointer;
     z-index: 60;
     display: none;
@@ -2448,11 +2452,8 @@ const TINT_FILTERS = {
 };
 
 const SPRITE_TINTS = {
-  'cosmetics:aura-pink':   'pink',
-  'cosmetics:bubble-pink': 'pink',
-  'cosmetics:pt-heart':    'pink',
-  'blessings:soulwhisper': 'violet',
-  'items:prestige':        'violet',
+  // 2026-06-12 코덱스가 cosmetics·blessings 시트를 원천 색보정 — 해당 틴트 제거 (이중 보정 방지)
+  'items:prestige': 'violet',  // 재생성 대기 중인 마지막 회색 셀
 };
 
 /* 범용 스프라이트 렌더러.
@@ -3956,7 +3957,7 @@ const TAB_UNLOCKS = {
   wishes: () => slimeLevel >= 2 || S.stardust > 0 || S.wishes.completed > 0,
   achievements: () => slimeLevel >= 3 || achCount() >= 3,
   room: () => slimeLevel >= 4 || Object.keys(S.decor).length > 0,
-  prestige: () => S.totalEarned >= 2e7 || S.prestige.totalResets >= 1 || S.prestige.souls > 0,
+  prestige: () => S.totalEarned >= PRESTIGE_UNLOCK / 3 || S.prestige.totalResets >= 1 || S.prestige.souls > 0,
 };
 
 const TAB_UNLOCK_TOASTS = {
@@ -5073,6 +5074,7 @@ function buildPrestigeTab() {
       <div class="shop-desc">${unlocked
         ? `지금 환생하면 젤리 영혼 <b>+${gain}</b>개! (코인·친구·강화 초기화, 업적·영혼·특성 유지)`
         : `누적 ${fmt(PRESTIGE_UNLOCK)} 코인부터 환생할 수 있어요 (현재 ${fmt(S.totalEarned)})`}</div>
+      ${unlocked ? '' : `<div class="wish-bar-outer"><div class="wish-bar" style="width:${Math.min(100, S.totalEarned / PRESTIGE_UNLOCK * 100).toFixed(1)}%"></div></div>`}
     </div>`;
   if (unlocked && gain >= 1) btn.addEventListener('click', () => doPrestige(null));
   shopList.appendChild(btn);
@@ -5695,14 +5697,34 @@ function renderBuffBanner() {
   }
 }
 
+/* 토스트 큐: 연속 이벤트(수확+소원+업적 등)가 서로를 덮어써 메시지가 유실되던 것을
+   순차 표시로 — 큐가 있으면 표시 시간을 줄여 빨리 순환, 3개 초과는 버림 */
 let toastTimer = null;
+const toastQueue = [];
+let toastShowing = false;
+let toastLast = '';
 function toast(html) {
   if (silentTick) return;  // 닫기/숨김 저장 중에는 토스트 생략
+  if (toastShowing) {
+    if (html !== toastLast && toastQueue.length < 3 && !toastQueue.includes(html)) toastQueue.push(html);
+    return;
+  }
+  showToastNow(html);
+}
+function showToastNow(html) {
+  toastShowing = true;
+  toastLast = html;
   const el = $('toast');
   el.innerHTML = html;   // 주의: 내부 고정 문자열만 전달할 것 (사용자 입력 금지)
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+  toastTimer = setTimeout(() => {
+    el.classList.remove('show');
+    toastShowing = false;
+    if (toastQueue.length) {
+      setTimeout(() => { if (!toastShowing && toastQueue.length) showToastNow(toastQueue.shift()); }, 320);
+    }
+  }, toastQueue.length ? 2200 : 3000);
 }
 
 /* ════════════════════════ 저장 / 불러오기 ════════════════════════ */
@@ -6670,7 +6692,7 @@ window.uxCheck = async function uxCheck() {
     add('disclosure', 'Lv3 → 업적 탭 등장', visTabs().includes('achievements'));
     slimeLevel = 4; resetCaches(); updateTabVisibility();
     add('disclosure', 'Lv4 → 방 탭 등장', visTabs().includes('room'));
-    S.totalEarned = 2e7; resetCaches(); updateTabVisibility();
+    S.totalEarned = PRESTIGE_UNLOCK / 3; resetCaches(); updateTabVisibility();
     add('disclosure', '환생권 접근 → 환생 탭 등장', visTabs().includes('prestige'));
     slimeLevel = 5; renderCrystalBed(true);
     add('disclosure', 'Lv5 → 화단 등장 + 안내 기록', !$('crystal-bed').hidden && S.ui.bedSeen);
@@ -6678,7 +6700,7 @@ window.uxCheck = async function uxCheck() {
 
     // 기존 진행 세이브를 새 기기에서 로드: 해금 토스트 일괄 발사 금지
     freshState();
-    S.producers.chick = 5; slimeLevel = 9; S.totalEarned = 3e7; S.stardust = 4;
+    S.producers.chick = 5; slimeLevel = 9; S.totalEarned = PRESTIGE_UNLOCK; S.stardust = 4;
     muteToasts(); updateTabVisibility(true); window.toast = origToast;
     add('disclosure', '기존 진행 로드는 조용히 해금', toasts === 0 && S.ui.seenTabs.prestige === true, `toasts=${toasts}`);
     // 깊은 층 시작처럼 한 번에 여러 탭이 열리면 안내는 1개로 묶임

@@ -74,12 +74,12 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 
 | 아틀라스 | states | 상태 |
 |---|---|---|
-| slime-blessings-ai | 16 (진화 축복) | ⚠️ 연결됨, soulwhisper 회색화 → 라벤더 묘사로 재생성 대기 |
+| slime-blessings-ai | 16 (진화 축복) | ✅ 생성·연결 완료 — soulwhisper는 라벤더 atlas 보정 적용 |
 | slime-wishes-ai | 7 (소원 타입) | ✅ 생성·연결 완료 |
-| slime-cosmetics-ai | 11 (꾸미기) | ⚠️ 부분 연결 (핑크 3종 폴백) → green 크로마로 재생성 대기 |
+| slime-cosmetics-ai | 11 (꾸미기) | ✅ 생성·연결 완료 — 핑크 3종(aura/bubble/heart) atlas 보정 적용 |
 | slime-items-ai | 18 (강화/특성) | ⚠️ prestige 회색화 → 보라 묘사로 재생성 대기 |
 | slime-guests-ai | 4 (먹구름·별똥이 + happy 표정) | ✅ 생성·연결 완료 |
-| slime-main-ai | 5단계 ×2프레임 (본체) | ⚠️ 연결됨, strawberry 행 회색화 → 프리로드 시 `pinkifyGray()` 캔버스 베이크로 복원 중. green 크로마 재생성 시 코드 변경 없이 자동 정상화 |
+| slime-main-ai | 5단계 ×2프레임 (본체) | ✅ 연결됨 — strawberry 행 atlas 보정 적용, 런타임 `pinkifyGray()`는 잔여 폴백 |
 | slime-traits-ai | 5 (성향 액세서리: muscle/ranch/star 2f/dream/samsara 2f) | ⚠️ 시각 QA에서 제네릭 오버레이 한계 판정 (docs/VISUAL-QA.md) — 인터림: 모자류는 비왕관 단계만, star는 글로우 폴백, samsara 고리만 전 단계. 구운 변형으로 대체 예정 |
 | slime-main-traits-ai | 16 (비핑크 4단계 × 4성향, 각 2f) | 📝 요청서 작성됨 — 성향을 입혀 구운 본체 변형 (액세서리가 곡면을 따라 닿게, 왕관과 자연 통합). magenta |
 | slime-strawberry-traits-ai | 4 (딸기 × 4성향, 각 2f) | 📝 요청서 작성됨 — 핑크는 green 크로마 분리 시트 |
