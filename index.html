@@ -99,6 +99,17 @@
     margin-bottom: 8px;
   }
   #stage-name .trait { color: var(--gold); }
+  #cosmic-mark {
+    margin: -3px 0 7px;
+    padding: 3px 9px;
+    border: 2px solid #b48aff55;
+    background: #120c2488;
+    color: #d8c2ff;
+    font-size: clamp(10px, 0.62vw, 15px);
+    line-height: 1.35;
+    text-shadow: 1px 1px 0 #00000088;
+    box-shadow: 0 0 12px #8d5ce833;
+  }
 
   /* ── 진화 = 차오르는 슬라임 실루엣 (디자인 시스템 LiveGameScreen) ── */
   #evo-progress-wrap {
@@ -148,6 +159,23 @@
   @keyframes coinspin { 0% { transform: scaleX(1);} 25%{ transform: scaleX(.2);} 50%{ transform: scaleX(-1);} 75%{ transform: scaleX(.2);} 100%{ transform: scaleX(1);} }
 
   #cps-display { font-size: clamp(13px, 0.9vw, 25px); color: var(--green); margin-top: 4px; text-shadow: 1px 1px 0 #00000066; }
+
+  #daily-summary {
+    margin-top: 5px;
+    max-width: min(540px, 72vw);
+    padding: 4px 10px;
+    border: 2px solid #ffffff18;
+    background: #00000030;
+    color: var(--text-dim);
+    font-size: clamp(10px, 0.7vw, 16px);
+    line-height: 1.45;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 1px 1px 0 #00000066;
+  }
+  #daily-summary b { color: var(--gold); font-weight: normal; }
 
   #slime-wrap {
     margin: 24px 0 10px;
@@ -794,12 +822,14 @@
   .perk-item.maxed { border-color: var(--soul); opacity: .8; cursor: default; }
 
   #stats-bar {
+    display: none;
     border-top: 3px solid var(--border);
     padding: 10px 16px;
     font-size: 11px;
     color: var(--text-dim);
     line-height: 1.7;
   }
+  body.stats-open #stats-bar { display: block; }
   #stats-bar .soul { color: var(--soul); }
 
   /* ── 슬라임 방 (장식) ── */
@@ -833,6 +863,15 @@
     to { transform: translateY(-5px); }
   }
   .decor.center { transform: translateX(-50%); animation: none; }
+  .cosmic-seed-tree {
+    filter: drop-shadow(0 0 8px #fff8d6) drop-shadow(0 0 18px #b48affcc);
+    animation: cosmic-tree-breathe 3.8s ease-in-out infinite alternate;
+  }
+  .cosmic-seed-tree img { width: 56px; height: 64px; image-rendering: pixelated; }
+  @keyframes cosmic-tree-breathe {
+    from { opacity: .86; transform: translateX(-50%) translateY(-1px) scale(.98); }
+    to { opacity: 1; transform: translateX(-50%) translateY(3px) scale(1.04); }
+  }
 
   .room-section-title {
     font-size: 12px;
@@ -892,6 +931,7 @@
   }
   .story-entry .story-title { color: var(--gold); font-weight: bold; margin-bottom: 4px; font-size: 12px; }
   .story-entry.locked { opacity: .4; border-left-color: var(--border); }
+  .story-entry.cosmic-status.locked { opacity: .78; }
 
   /* ── 기록의 선반: 업적 트로피가 물리적으로 켜지는 공간 ── */
   #trophy-shelf {
@@ -1223,6 +1263,34 @@
   .settings-btn:hover { border-color: var(--gold); }
   .settings-btn.danger { border-color: #8a2b2b; color: #ff9a9a; }
 
+  #cosmic-ending-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 210;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at 50% 42%, #fff8d622 0%, transparent 24%),
+      radial-gradient(circle at 50% 50%, #8d5ce855 0%, transparent 45%),
+      #090512dd;
+    padding: 18px;
+  }
+  #cosmic-ending-overlay.open { display: flex; }
+  #cosmic-ending-card {
+    width: min(430px, 92vw);
+    border: 4px solid #b48aff;
+    background: #1a1033f2;
+    box-shadow: 6px 6px 0 #00000066, 0 0 28px #b48aff55;
+    padding: 18px;
+    text-align: center;
+    color: var(--text);
+  }
+  #cosmic-ending-seed { margin: 0 auto 8px; width: 64px; height: 70px; }
+  #cosmic-ending-seed img { width: 64px; height: 70px; image-rendering: pixelated; }
+  #cosmic-ending-card h3 { color: var(--gold); font-size: 16px; margin-bottom: 10px; }
+  #cosmic-ending-card p { color: var(--text-dim); font-size: 12px; line-height: 1.75; margin-bottom: 14px; }
+
   /* ── 토스트 ── */
   #toast {
     position: fixed;
@@ -1268,11 +1336,18 @@
     }
     #title { font-size: 13px; margin-top: 2px; }
     #stage-name { font-size: 10px; margin-bottom: 4px; }
+    #cosmic-mark { font-size: 9px; margin: -1px 0 3px; padding: 2px 7px; }
     #evo-silhouette { width: 26px; height: 28px; }
     #evo-progress-label { font-size: 9px; }
     #coin-display { font-size: 17px; gap: 6px; }
     #coin-icon { width: 17px; height: 17px; }
     #cps-display { font-size: 10px; margin-top: 1px; }
+    #daily-summary {
+      max-width: calc(100vw - 36px);
+      margin-top: 3px;
+      padding: 3px 7px;
+      font-size: 9px;
+    }
     #slime-wrap { margin: 6px 0 2px; }
     #slime-canvas { width: 108px; height: 115px; }
     #slime-shadow { width: 72px; height: 13px; margin-top: -10px; }
@@ -1286,6 +1361,7 @@
     #starlet-hint { font-size: 10px; top: -28px; }
     .mini-star { width: 24px; height: 24px; }
     .decor { font-size: 24px; }
+    .cosmic-seed-tree img { width: 42px; height: 48px; }
     #combo-box { height: 34px; margin-top: 4px; }
     #combo-label { font-size: 12px; }
     #combo-bar-outer { width: 140px; height: 8px; }
@@ -1338,10 +1414,11 @@
       padding: 4px 10px;
       font-size: 9px;
       line-height: 1.4;
-      display: flex;
+      display: none;
       flex-wrap: wrap;
       column-gap: 10px;
     }
+    body.stats-open #stats-bar { display: flex; }
     /* 토스트: 모바일에선 뉴스 스트립 아래 */
     #toast {
       bottom: auto;
@@ -1353,6 +1430,9 @@
       transform: translateX(-50%) translateY(-140%);
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
+    #cosmic-ending-card { padding: 14px; }
+    #cosmic-ending-card h3 { font-size: 14px; }
+    #cosmic-ending-card p { font-size: 11px; }
     /* 광란/파티 배너: 모바일에선 게임영역 하단, 선반 위 */
     #buff-banner { top: auto; bottom: 34px; font-size: 11px; padding: 5px 10px; }
     #news-ticker { font-size: 11px; padding: 5px 12px; }
@@ -1370,6 +1450,7 @@
   <div id="buff-banner"></div>
   <div id="title">픽셀 슬라임 클리커</div>
   <div id="stage-name">아기 초록 슬라임</div>
+  <div id="cosmic-mark" hidden>🌌 작은 우주 완성</div>
   <div id="evo-progress-wrap">
     <div id="evo-silhouette"></div>
     <div id="evo-progress-label"></div>
@@ -1377,6 +1458,7 @@
   <div id="challenge-badge"></div>
   <div id="coin-display"><canvas id="coin-icon" width="8" height="8"></canvas><span id="coin-num">0</span></div>
   <div id="cps-display">초당 0 코인</div>
+  <div id="daily-summary" aria-live="polite">오늘의 말랑: 천천히 눌러도 괜찮아요</div>
   <div id="friends-layer"></div>
   <div id="news-ticker" aria-live="polite"></div>
   <div id="slime-wrap" role="button" tabindex="0" aria-label="슬라임 클릭 (스페이스/엔터 키로도 가능)">
@@ -1456,8 +1538,8 @@
 
 <div id="blessing-overlay">
   <div id="blessing-modal">
-    <h3>🌟 진화 축복</h3>
-    <div class="blessing-sub">진화한 슬라임이 축복을 하나 고를 수 있어요 (이번 생 한정)</div>
+    <h3>🌟 이번 생의 축복</h3>
+    <div class="blessing-sub">진화한 슬라임이 이번 생의 성격을 하나 고를 수 있어요</div>
     <div id="blessing-cards"></div>
     <div class="settings-row">
       <button class="settings-btn" id="blessing-reroll">🔁 리롤</button>
@@ -1490,12 +1572,27 @@
     <div class="settings-row">
       <button class="settings-btn" id="import-save-btn">가져오기 (현재 진행을 덮어써요)</button>
     </div>
+    <h4>고급 정보</h4>
+    <div class="settings-row">
+      <button class="settings-btn" id="toggle-stats-btn">고급 통계 보기</button>
+    </div>
     <h4>위험 구역</h4>
     <div class="settings-row">
       <button class="settings-btn danger" id="reset-btn">🗑️ 처음부터 다시 시작 (전체 초기화)</button>
     </div>
     <div class="settings-row">
       <button class="settings-btn" id="close-settings-btn">닫기</button>
+    </div>
+  </div>
+</div>
+
+<div id="cosmic-ending-overlay" aria-live="polite">
+  <div id="cosmic-ending-card">
+    <div id="cosmic-ending-seed"></div>
+    <h3>작은 말랑 우주 완성</h3>
+    <p>갓 슬라임은 끝에 닿았고, 여러 생의 흔적은 방 한가운데 작은 씨앗으로 남았어요.<br>끝난 것이 아니라, 이제 이 우주는 당신이 한 번 완성한 곳이에요.</p>
+    <div class="settings-row">
+      <button class="settings-btn" id="close-cosmic-ending-btn">계속 말랑하기</button>
     </div>
   </div>
 </div>
@@ -1700,6 +1797,14 @@ const TRAIT_ATLAS = {
 };
 let traitAtlasOk = false;
 
+/* 딸기 성향 본체 아틀라스 (slime-strawberry-traits-ai): 핑크 단계는 오버레이 대신
+   성향을 본체에 구워서 곡면 접촉감을 살린다. muscle은 1프레임 눈 판독 약화로 보류 */
+const STRAWBERRY_TRAIT_ATLAS = {
+  src: 'assets/generated/sprites/slime-strawberry-traits-ai/sprite-sheet-alpha.png',
+  rows: { ranch: 1, star: 2, dream: 3 },
+};
+let strawberryTraitAtlasOk = false;
+
 /* 이벤트·연출 아틀라스 4종 (코덱스 납품) — 로드 실패 시 기존 캔버스/그라디언트 폴백 */
 const FX_ATLASES = {
   goldstar: { src: 'assets/generated/sprites/slime-goldstar-ai/sprite-sheet-alpha.png', ok: false },
@@ -1730,6 +1835,12 @@ function traitBgLayer(key, frame) {
   if (s >= 1) return { img, size: '100% 100%', pos: '50% 50%' };
   const py = (cy - s / 2) / (1 - s) * 100;  // 단일 이미지: offset = (1-s)H × p
   return { img, size: `${(s * 100).toFixed(1)}% ${(s * 100).toFixed(1)}%`, pos: `50% ${py.toFixed(2)}%` };
+}
+
+function bakedStrawberryTraitKey() {
+  if (!strawberryTraitAtlasOk || !currentTrait) return '';
+  if (STAGES[stageIdx].spriteId !== 'strawberry') return '';
+  return STRAWBERRY_TRAIT_ATLAS.rows[currentTrait.key] !== undefined ? currentTrait.key : '';
 }
 
 const MAX_LEVEL = 60;
@@ -1785,9 +1896,6 @@ const STORY = [
   { id: 'seed', title: '끝은 씨앗',
     cond: () => S.prestige.totalResets >= 1,
     text: '모든 것이 사라지는 순간, 슬라임은 알았다. 끝은 끝이 아니라 씨앗이라는 것을. 슬라임은 더 깊은 층에서 다시 눈을 떴다.' },
-  { id: 'cosmic', title: '우주 씨앗',
-    cond: () => !!S.cosmicSeed,
-    text: '다섯 번의 생을 거치고, 모든 모습과 모든 성향을 겪은 슬라임의 방에 작은 우주 씨앗이 내려앉았다. 끝이 아니다 — 우주 어딘가에서, 또 다른 별이 떨어질 준비를 하는 소리가 들린다. 당신은 이 작은 우주를 한 번, 완성했다.' },
   { id: 'trait-muscle', title: '눌림을 견디는 법',
     cond: () => S.codex.traits.muscle,
     text: '수없이 눌린 슬라임은 튕겨 오르는 법을 배웠다. 작은 머리띠는 오늘도 말랑한 용기의 표시다.' },
@@ -1803,6 +1911,9 @@ const STORY = [
   { id: 'trait-samsara', title: '기억하지 못하는 기억',
     cond: () => S.codex.traits.samsara,
     text: '몇 번을 다시 시작해도 손끝의 온기는 남았다. 슬라임은 기억하지 못하는 기억을 둥글게 품었다.' },
+  { id: 'cosmic', title: '마지막 장: 우주 씨앗',
+    cond: () => !!S.cosmicSeed,
+    text: '갓 슬라임은 우주를 보았고, 세 번 넘게 다시 태어난 생들은 방 곳곳에 흔적으로 남았다. 여러 성향과 기록과 장식이 한데 모인 밤, 작은 별나무가 씨앗처럼 내려앉았다. 끝이 아니다. 당신은 이 작은 말랑 우주를 한 번, 완성했다.' },
 ];
 
 /* 친구 시너지: 보유 수에 따라 자동 해금되는 역할 보너스 */
@@ -2081,6 +2192,13 @@ const QUIPS = {
     '처음인데 처음 같지 않아.',
     '보라빛 고리가 나를 감싸.',
   ],
+  cosmic: [
+    '우리 우주, 한 번 완성됐어.',
+    '저 씨앗은 끝이 아니라 다음 하늘이야.',
+    '방이 조금 더 넓어진 것 같아.',
+    '돌고 돌아도 여기는 우리 자리야.',
+    '작은 별나무가 숨 쉬고 있어.',
+  ],
   evolve: [
     '나… 변한 것 같아!',
     '두근두근… 새로운 내가 됐어!',
@@ -2116,6 +2234,8 @@ const NEWS = [
   { cond: () => S.producers.spirit > 0, text: '별의 정령, 잠든 별 깨우다 본인이 깜빡 졸아.' },
   { cond: () => S.producers.turtle > 0, text: '시간 거북 인터뷰: "서두르면 시간에 실례야."' },
   { cond: () => !!S.cosmicSeed, text: '우주 씨앗 발아 관측 — 학계 "말랑하다" 술렁.' },
+  { cond: () => !!S.cosmicSeed, text: '작은 말랑 우주 완성 기념식, 참석자 전원 조용히 반짝임.' },
+  { cond: () => !!S.cosmicSeed, text: '별나무 아래서 친구들이 다음 생 얘기를 나누는 중.' },
   { cond: () => (S.stats.lifetime.starletsHelped || 0) > 0, text: '집 찾은 별똥이, 하늘에서 감사 반짝임 보내와.' },
   { cond: () => (S.telemetry.starletsSeen || 0) > (S.stats.lifetime.starletsHelped || 0) + 2, text: '별똥이 가족, "데려다주는 분 어디 없나요" 호소.' },
   { cond: () => chActive() === 'silence', text: '침묵의 손 수행자 목격담: "손은 멈췄지만 마음은 말랑."' },
@@ -2134,13 +2254,14 @@ const TIPS = [
   { cond: () => S.prestige.totalResets >= 1, text: '축복 선택창에서 별가루로 리롤할 수 있어요.' },
   { cond: () => S.prestige.totalResets >= 1, text: '환생해도 업적·장식·도감·영혼·특성은 남아요.' },
   { cond: () => S.prestige.totalResets >= 2, text: '환생 탭의 도전 런 — 제약을 안고 가면 별가루 보상이 커요.' },
+  { cond: () => !!S.cosmicSeed, text: '우주 씨앗 이후에도 계속 키울 수 있어요. 완성한 우주를 더 예쁘게 돌보면 돼요.' },
   { cond: () => true, text: '클릭을 많이 하면, 별을 많이 잡으면… 슬라임의 성향이 변해요.' },
   { cond: () => Object.keys(S.decor).length > 0, text: '장식을 놓으면 친구들이 좋아하는 자리로 이사 가요.' },
   { cond: () => true, text: '소원을 이루면 별가루 — 별가루는 꾸미기와 리롤에 써요.' },
   { cond: () => true, text: '오프라인에도 친구들이 일해요. 푹 쉬고 와도 괜찮아요.' },
 ];
 
-/* 진화 축복: 레벨업마다 3택 1, 이번 생 한정.
+/* 진화 축복: 3레벨마다 3택 1, 이번 생 한정.
    4등급 — 일반(스택 가능, 소폭 가산) / 희귀(변형) / 영웅(빌드 정의) / 전설(게임 체인저).
    fx는 BC(축복 캐시)를 변형하는 함수. 효과 추가 시 computeBlessCache 필드 확인. */
 const RARITY = {
@@ -2331,6 +2452,32 @@ let coinFlyTimer = 2.5;      // 친구 코인 배달 간격
 /* ════════════════════════ 유틸 ════════════════════════ */
 
 const $ = id => document.getElementById(id);
+
+function ensureUiState() {
+  S.ui = S.ui || {};
+  S.ui.seenTabs = S.ui.seenTabs || {};
+  if (typeof S.ui.bedSeen !== 'boolean') S.ui.bedSeen = false;
+}
+
+const FIRST_VISIT_HINTS = {
+  producers: '🐾 <b>친구들</b>은 코인을 자동으로 모아요. 먼저 병아리 한 마리면 충분해요.',
+  wishes: '💫 <b>소원</b>은 작은 목표예요. 놓쳐도 괜찮고, 천천히 이뤄도 돼요.',
+  room: '🏠 <b>방</b>은 지나온 흔적을 모아두는 곳이에요. 장식과 도감은 환생해도 남아요.',
+  prestige: '🌸 <b>환생</b>은 처음으로 돌아가는 게 아니라 더 깊어지는 거예요.',
+  blessing: '🌟 <b>축복</b>은 이번 생의 작은 성격이에요. 마음 가는 방향을 골라봐요.',
+  crystal: '💎 <b>젤리 결정</b>은 기다리면 자라고, 놓쳐도 사라지지 않아요.',
+};
+
+function showOnceHint(id, delay = 0) {
+  ensureUiState();
+  const key = 'hint_' + id;
+  if (S.ui.seenTabs[key] || !FIRST_VISIT_HINTS[id]) return;
+  S.ui.seenTabs[key] = true;
+  const run = () => toast(FIRST_VISIT_HINTS[id]);
+  if (delay) setTimeout(run, delay);
+  else run();
+  save();
+}
 
 /* ════════════════════════ 스프라이트 레지스트리 ════════════════════════
    모든 아이콘은 spriteHtml()을 거친다. layout에 id가 없으면 이모지 폴백.
@@ -3088,9 +3235,10 @@ function traitAccessoryVisible() {
 
 function applySlimeSprite(force) {
   if (!slimeAtlasOk || !STAGES[stageIdx].spriteId) return false;
+  const bakedTraitKey = bakedStrawberryTraitKey();
   const traitKey = traitAccessoryVisible() ? currentTrait.key : '';
   const ring = traitAtlasOk && hasSamsaraAura();
-  const sig = `${stageIdx}|${slimeFrame}|${traitKey}|${ring}`;
+  const sig = `${stageIdx}|${slimeFrame}|${traitKey}|${bakedTraitKey}|${ring}`;
   if (!force && sig === slimeSpriteSig) return true;
   slimeSpriteSig = sig;
   const imgs = [], sizes = [], poss = [];
@@ -3099,10 +3247,16 @@ function applySlimeSprite(force) {
     imgs.push(L.img); sizes.push(L.size); poss.push(L.pos);
   };
   if (ring) addTrait('samsara');  // 고리가 최상단 — 모자 위에 떠야 가려지지 않는다
-  if (traitKey && traitKey !== 'samsara') addTrait(traitKey);
-  imgs.push(`url('${SLIME_ATLAS.src}')`);
-  sizes.push('200% 500%');  // 본체 셀 = 시트의 1/2 × 1/5
-  poss.push(`${slimeFrame * 100}% ${stageIdx * 25}%`);
+  if (bakedTraitKey) {
+    imgs.push(`url('${STRAWBERRY_TRAIT_ATLAS.src}')`);
+    sizes.push('200% 400%');  // 딸기 성향 본체 셀 = 시트의 1/2 × 1/4
+    poss.push(`${slimeFrame * 100}% ${(STRAWBERRY_TRAIT_ATLAS.rows[bakedTraitKey] * 100 / 3).toFixed(2)}%`);
+  } else {
+    if (traitKey && traitKey !== 'samsara') addTrait(traitKey);
+    imgs.push(`url('${SLIME_ATLAS.src}')`);
+    sizes.push('200% 500%');  // 본체 셀 = 시트의 1/2 × 1/5
+    poss.push(`${slimeFrame * 100}% ${stageIdx * 25}%`);
+  }
   slimeCv.style.backgroundImage = imgs.join(', ');
   slimeCv.style.backgroundSize = sizes.join(', ');
   slimeCv.style.backgroundRepeat = 'no-repeat';
@@ -3307,6 +3461,7 @@ function randomQuip() {
   const pool = QUIPS.generic.slice();
   if (currentTrait && QUIPS[currentTrait.key]) pool.push(...QUIPS[currentTrait.key], ...QUIPS[currentTrait.key]);
   if (hasSamsaraAura()) pool.push(...QUIPS.samsara);
+  if (S.cosmicSeed) pool.push(...QUIPS.cosmic, ...QUIPS.cosmic);
   showQuip(pool[Math.floor(Math.random() * pool.length)]);
 }
 
@@ -3457,9 +3612,9 @@ $('crystal-overlay').addEventListener('click', e => {
 });
 
 window.addEventListener('keydown', e => {
-  // Escape: 열려 있는 설정/결정 모달 닫기 (a11y — 키보드로 빠져나갈 길)
+  // Escape: 열려 있는 설정/결정/엔딩 모달 닫기 (a11y — 키보드로 빠져나갈 길)
   if (e.key === 'Escape') {
-    for (const id of ['settings-overlay', 'crystal-overlay']) {
+    for (const id of ['cosmic-ending-overlay', 'settings-overlay', 'crystal-overlay']) {
       const ov = $(id);
       if (ov.classList.contains('open')) { ov.classList.remove('open'); e.preventDefault(); return; }
     }
@@ -3545,11 +3700,15 @@ function confettiBurst() {
 function checkEvolution() {
   const newLevel = currentLevelFor(S.totalEarned);
   if (newLevel <= slimeLevel) return;
-  const jumped = newLevel - slimeLevel;
+  const oldLevel = slimeLevel;
+  const blessingSteps = [];
+  for (let lv = oldLevel + 1; lv <= newLevel; lv++) {
+    if (lv % 3 === 0) blessingSteps.push(lv);
+  }
   slimeLevel = newLevel;
   const newStage = stageForLevel(slimeLevel);
 
-  queueBlessing(jumped);  // 레벨업마다 축복 3택 1 (점프 시 누적)
+  if (blessingSteps.length) queueBlessing(blessingSteps.length);  // 3레벨마다 축복 3택 1
 
   if (newStage > stageIdx) {
     // 외형 진화 마일스톤: 큰 축제
@@ -3584,6 +3743,7 @@ const ALL_TRAITS = [...TRAITS, SAMSARA_TRAIT];
 /* 스테이지별 하늘 글로우 — 진화하면 세계의 빛이 바뀐다 (코스메틱 배경 미장착 시) */
 function applyStageGlow() {
   if (S.cosmetics.equipped.bg) document.body.style.removeProperty('--stage-glow');
+  else if (S.cosmicSeed) document.body.style.setProperty('--stage-glow', '#4b2a88');
   else document.body.style.setProperty('--stage-glow', STAGES[stageIdx].glow);
 }
 
@@ -3599,6 +3759,8 @@ function renderStageName() {
   } else {
     el.textContent = base;
   }
+  const mark = $('cosmic-mark');
+  if (mark) mark.hidden = !S.cosmicSeed;
 }
 
 /* 진화 게이지: 슬라임 실루엣이 아래부터 차오른다 */
@@ -3899,6 +4061,7 @@ function crystalUnlocked() {
     || Object.keys(S.crystal.friendLv).length > 0 || S.prestige.totalResets >= 1;
 }
 function renderCrystalBed(force) {
+  ensureUiState();
   const bed = $('crystal-bed');
   // 점진 공개: 첫 진화(Lv5) 전엔 메타 자원 숨김 — 첫 화면 노이즈 제거
   if (!crystalUnlocked()) { bed.hidden = true; return; }
@@ -3907,6 +4070,7 @@ function renderCrystalBed(force) {
     if (!S.ui.bedSeen) {
       S.ui.bedSeen = true;
       toast('💠 무대에 <b>화단</b>이 생겼어요! 젤리 결정이 하루에 걸쳐 익어요 — 눌러서 물을 줄 수 있어요');
+      showOnceHint('crystal', 700);
       sndAch();
     }
   }
@@ -3970,6 +4134,7 @@ const TAB_UNLOCK_TOASTS = {
 
 let tabVisCache = '';
 function updateTabVisibility(silent) {
+  ensureUiState();
   const mask = Object.keys(TAB_UNLOCKS).map(k => TAB_UNLOCKS[k]() ? 1 : 0).join('');
   if (mask === tabVisCache) return;
   tabVisCache = mask;
@@ -4047,6 +4212,7 @@ const CRYSTAL_LV_CAP = 10;
 
 function openCrystalModal() {
   $('crystal-overlay').classList.add('open');
+  showOnceHint('crystal');
   renderCrystalModal();
 }
 
@@ -4214,6 +4380,7 @@ function openBlessingModal() {
   if (!renderBlessingCards()) return;
   updateBlessingSub();
   $('blessing-overlay').classList.add('open');
+  showOnceHint('blessing', 250);
   // 연타 중 오터치 방지: 잠깐 입력 잠금 + 흐리게 표시
   blessGuardUntil = performance.now() + 700;
   $('blessing-modal').classList.add('guarding');
@@ -4234,7 +4401,7 @@ function rerollBlessings() {
 function updateBlessingSub() {
   const sub = document.querySelector('#blessing-modal .blessing-sub');
   if (sub) {
-    sub.textContent = '진화한 슬라임이 축복을 하나 고를 수 있어요 (이번 생 한정)'
+    sub.textContent = '이번 생이 어떤 느낌으로 자랄지 하나 골라봐요'
       + (pendingBlessings > 1 ? ` · 남은 선택 ${pendingBlessings}개` : '');
   }
 }
@@ -4247,6 +4414,7 @@ function pickBlessing(b) {
   sndAch();
   const r = RARITY[b.rarity];
   toast(`${b.icon} <b style="color:${r.color}">[${r.name}] ${b.name}</b>의 축복을 받았어요!`);
+  showQuip(['이번 생은 이 느낌이야.', '좋아, 이 방향으로 자라볼게.', '몸에 작은 표식이 남은 것 같아.'][S.runBlessings.length % 3]);
   if (b.rarity === 'legendary') { confettiBurst(); sndRebirth(); }
   afterBlessingChoice();
 }
@@ -4327,17 +4495,56 @@ function clickCosmetic(c) {
 }
 
 /* ════════════════════════ 우주 씨앗 (중간 엔딩) ════════════════════════
-   다섯 번의 생 + 갓 슬라임 + 모든 성향 — "이 작은 우주를 한 번 완성했다" */
+   갓 슬라임 + 충분한 윤회/성향/기록/방의 흔적 — "이 작은 우주를 한 번 완성했다" */
+
+function cosmicSeedStoryCount() {
+  return Object.keys(S.story || {}).filter(id => id !== 'cosmic').length;
+}
 
 function cosmicSeedReady() {
   return !S.cosmicSeed
-    && S.prestige.totalResets >= 5
-    && S.codex.stages[4]
-    && Object.keys(S.codex.traits).length >= 5;
+    && (S.codex.stages[4] || stageIdx >= 4)
+    && S.prestige.totalResets >= 3
+    && Object.keys(S.codex.traits || {}).length >= 3
+    && cosmicSeedStoryCount() >= 8
+    && Object.keys(S.decor || {}).length >= 4;
+}
+
+function cosmicSeedProgress() {
+  return {
+    god: !!(S.codex.stages[4] || stageIdx >= 4),
+    resets: Math.min(S.prestige.totalResets, 3),
+    traits: Math.min(Object.keys(S.codex.traits || {}).length, 3),
+    stories: Math.min(cosmicSeedStoryCount(), 8),
+    decor: Math.min(Object.keys(S.decor || {}).length, 4),
+  };
+}
+
+function openCosmicEnding() {
+  const overlay = $('cosmic-ending-overlay');
+  const seed = $('cosmic-ending-seed');
+  if (!overlay || !seed) return;
+  seed.innerHTML = cosmicSeedHtml();
+  overlay.classList.add('open');
+}
+
+function cosmicSeedStatusHtml() {
+  if (S.cosmicSeed) {
+    return '<div class="story-title">🌌 우주 씨앗</div>작은 별나무가 방에 뿌리내렸어요. 이 우주는 한 번 완성되었고, 그래도 계속 말랑하게 자랄 수 있어요.';
+  }
+  const p = cosmicSeedProgress();
+  const row = (done, label, count) => `<div class="syn-line${done ? ' on' : ''}">${done ? '✓' : '□'} ${label}${count ? ` — ${count}` : ''}</div>`;
+  return '<div class="story-title">🌌 우주 씨앗의 기척</div>아주 먼 별빛이 방의 흔적을 기다리고 있어요.' +
+    row(p.god, '갓 슬라임 도달') +
+    row(p.resets >= 3, '환생', `${p.resets}/3`) +
+    row(p.traits >= 3, '성향 발견', `${p.traits}/3`) +
+    row(p.stories >= 8, '별의 기록', `${p.stories}/8`) +
+    row(p.decor >= 4, '장식', `${p.decor}/4`);
 }
 
 function grantCosmicSeed() {
   S.cosmicSeed = true;
+  S.story.cosmic = true;
   const flash = $('evo-flash');
   flash.classList.remove('go', 'rebirth');
   void flash.offsetWidth;
@@ -4347,36 +4554,43 @@ function grantCosmicSeed() {
   sndRebirth();
   toast('🌌 <b>우주 씨앗</b>이 방에 내려앉았어요<br><small>당신은 이 작은 우주를 한 번 완성했습니다. 별의 기록에 마지막 장이 열렸어요.</small>');
   showQuip('우리가… 해냈구나. 고마워.');
+  openCosmicEnding();
+  renderStageName();
   renderDecor();
+  if (currentTab === 'room') buildShop();
   save();
 }
 
 function cosmicSeedHtml() {
-  // 12x12 픽셀 씨앗: 보랏빛 발아체
+  // 픽셀 별나무: 새 에셋 없이 중간 엔딩의 영구 증표를 그린다.
   const map = [
-    '.....gg.....',
-    '....gllg....',
-    '.....gg.....',
-    '....pppp....',
-    '..ppllllpp..',
-    '.plllsslllp.',
-    '.plsslssslp.',
-    '.plllsslllp.',
-    '..ppllllpp..',
-    '....pppp....',
-    '...oooooo...',
-    '..oooooooo..',
+    '.......s.......',
+    '......sls......',
+    '....sslllss....',
+    '.....lpppl.....',
+    '...sllpppll....',
+    '.....lpppl..s..',
+    '......lpl......',
+    '......lpl......',
+    '.....glplg.....',
+    '....gglplgg....',
+    '......gpg......',
+    '.....ppppp.....',
+    '...ppllllpp....',
+    '..ppllssllpp...',
+    '...ppllllpp....',
+    '.....ooooo.....',
   ];
   const col = { g: '#7dff8a', l: '#d8c2ff', p: '#8d5ce8', s: '#fff8d6', o: '#3a2a5e' };
   const cv = document.createElement('canvas');
-  cv.width = 12; cv.height = 12;
+  cv.width = Math.max(...map.map(row => row.length)); cv.height = map.length;
   const ctx = cv.getContext('2d');
   map.forEach((row, y) => [...row].forEach((ch, x) => {
     if (ch === '.') return;
     ctx.fillStyle = col[ch];
     ctx.fillRect(x, y, 1, 1);
   }));
-  return `<img src="${cv.toDataURL()}" alt="우주 씨앗" style="width:44px;height:44px;image-rendering:pixelated;">`;
+  return `<img src="${cv.toDataURL()}" alt="우주 씨앗">`;
 }
 
 /* ════════════════════════ 슬라임 방 (장식) ════════════════════════ */
@@ -4387,11 +4601,10 @@ function renderDecor() {
   // 우주 씨앗: 엔딩 도달의 영구 증표 — 방 한가운데 위에서 빛난다
   if (S.cosmicSeed) {
     const seed = document.createElement('div');
-    seed.className = 'decor sky';
+    seed.className = 'decor sky cosmic-seed-tree';
     seed.style.left = '50%';
-    seed.style.top = '7%';
+    seed.style.top = '8%';
     seed.style.transform = 'translateX(-50%)';
-    seed.style.filter = 'drop-shadow(0 0 12px #b48affcc)';
     seed.innerHTML = cosmicSeedHtml();
     layer.appendChild(seed);
   }
@@ -4993,6 +5206,11 @@ function buildRoomTab() {
     shopList.appendChild(el);
   });
 
+  const cosmicStatus = document.createElement('div');
+  cosmicStatus.className = 'story-entry cosmic-status' + (S.cosmicSeed ? '' : ' locked');
+  cosmicStatus.innerHTML = cosmicSeedStatusHtml();
+  shopList.appendChild(cosmicStatus);
+
   // 별의 기록
   const unlockedCount = Object.keys(S.story).length;
   const title5 = document.createElement('div');
@@ -5033,8 +5251,10 @@ function buildRoomTab() {
     ['거쳐온 생', (S.prestige.totalResets + 1) + '번째'],
     ['달래준 먹구름', (S.stats.lifetime.cloudsSoothed || 0) + '번'],
     ['데려다준 별똥이', (S.stats.lifetime.starletsHelped || 0) + '번'],
-    ['완수한 도전', Object.keys(S.codex.challenges).length + '/' + CHALLENGES.length],
-    ['우주 씨앗', S.cosmicSeed ? '🌌 싹틈 — 우주를 한 번 완성함' : '아직 잠들어 있음'],
+    ['완수한 도전', S.prestige.totalResets >= CHALLENGE_UNLOCK_RESETS
+      ? Object.keys(S.codex.challenges).length + '/' + CHALLENGES.length
+      : '나중에 열려요'],
+    ['우주 씨앗', S.cosmicSeed ? '🌌 싹틈 — 우주를 한 번 완성함' : (S.prestige.totalResets ? '아직 잠들어 있음' : '아주 먼 별빛')],
     ['가장 아낀 친구', bestFriend ? `${bestFriend.name} (${bestFriend.max}마리)` : '아직 없어요'],
   ];
   const album = document.createElement('div');
@@ -5107,8 +5327,8 @@ function buildPrestigeTab() {
     el.innerHTML = `
       <div class="shop-icon">🔒</div>
       <div class="shop-info">
-        <div class="shop-name">도전 런</div>
-        <div class="shop-desc">환생 ${CHALLENGE_UNLOCK_RESETS}회부터 열려요 (현재 ${S.prestige.totalResets}회)</div>
+        <div class="shop-name">도전 런 — 나중에 열려요</div>
+        <div class="shop-desc">지금은 첫 환생 흐름에 집중해도 괜찮아요. 환생 ${CHALLENGE_UNLOCK_RESETS}회부터 이상한 이번 생을 고를 수 있어요. (현재 ${S.prestige.totalResets}회)</div>
       </div>`;
     shopList.appendChild(el);
   } else {
@@ -5274,6 +5494,7 @@ document.querySelectorAll('.tab').forEach(tab => {
     tab.classList.add('active');
     currentTab = tab.dataset.tab;
     buildShop();
+    showOnceHint(currentTab);
   });
 });
 
@@ -5648,6 +5869,33 @@ function spawnMiniStars() {
 
 /* ════════════════════════ HUD / 토스트 ════════════════════════ */
 
+function dailySummaryText() {
+  const first = S.daily && S.daily.lastFirstSquish === todayKey()
+    ? '<b>첫 말랑 완료</b>'
+    : '첫 말랑은 기다리는 중';
+  const wishes = S.wishes && Array.isArray(S.wishes.active)
+    ? S.wishes.active.filter(w => w.progress > 0).length
+    : 0;
+  const wishLine = TAB_UNLOCKS.wishes()
+    ? `소원 ${wishes}/3 살짝 진행`
+    : '소원은 곧 찾아와요';
+  let crystalLine = '결정은 첫 진화 뒤에';
+  if (crystalUnlocked() && S.crystal.plantedAt) {
+    const elapsed = crystalElapsed();
+    if (elapsed >= CRYSTAL.grow) crystalLine = '결정이 익었어요';
+    else {
+      const hours = Math.max(1, Math.ceil((CRYSTAL.grow - elapsed) / 3600e3));
+      crystalLine = `결정 ${hours}시간 천천히 숙성 중`;
+    }
+  }
+  return `오늘의 말랑: ${first} · ${wishLine} · ${crystalLine}`;
+}
+
+function renderDailySummary() {
+  const el = $('daily-summary');
+  if (el) el.innerHTML = dailySummaryText();
+}
+
 function renderHud() {
   updateTabVisibility();
   updateResStrip();
@@ -5680,6 +5928,7 @@ function renderHud() {
   } else {
     badge.classList.remove('on');
   }
+  renderDailySummary();
   renderEvoProgress();
 }
 
@@ -5821,6 +6070,8 @@ function migrateSave(data) {
   out.achievements = data.achievements || {};
   out.producers = Object.assign({}, defaultState().producers, data.producers || {});
   out.upgrades = data.upgrades || {};
+  out.ui = Object.assign({ seenTabs: {}, bedSeen: false }, data.ui || {});
+  out.ui.seenTabs = Object.assign({}, (data.ui && data.ui.seenTabs) || {});
   out.version = SAVE_VERSION;
   return out;
 }
@@ -5910,6 +6161,9 @@ function importSaveCode(code) {
 $('settings-btn').addEventListener('click', () => {
   $('export-area').value = exportSaveCode();
   $('import-area').value = '';
+  $('toggle-stats-btn').textContent = document.body.classList.contains('stats-open')
+    ? '고급 통계 숨기기'
+    : '고급 통계 보기';
   $('settings-overlay').classList.add('open');
 });
 $('close-settings-btn').addEventListener('click', () => $('settings-overlay').classList.remove('open'));
@@ -5927,6 +6181,16 @@ $('import-save-btn').addEventListener('click', () => {
   const code = $('import-area').value;
   if (!code.trim()) return;
   if (confirm('현재 진행을 덮어쓰고 이 세이브를 불러올까요?')) importSaveCode(code);
+});
+$('close-cosmic-ending-btn').addEventListener('click', () => $('cosmic-ending-overlay').classList.remove('open'));
+$('cosmic-ending-overlay').addEventListener('click', e => {
+  if (e.target === $('cosmic-ending-overlay')) $('cosmic-ending-overlay').classList.remove('open');
+});
+$('toggle-stats-btn').addEventListener('click', () => {
+  document.body.classList.toggle('stats-open');
+  $('toggle-stats-btn').textContent = document.body.classList.contains('stats-open')
+    ? '고급 통계 숨기기'
+    : '고급 통계 보기';
 });
 
 /* 닫기/숨김 직전 마지막 경과분까지 정산 후 저장 (토스트 없이) */
@@ -5959,10 +6223,11 @@ function econTick(silent = false) {
 }
 
 function gamePaused() {
-  // 축복 선택·설정·결정 먹이기 중에는 시간이 멈춘다 — 광란 중에도 찬찬히 고를 수 있게
+  // 축복 선택·설정·결정 먹이기·엔딩 감상 중에는 시간이 멈춘다 — 찬찬히 고를 수 있게
   return $('blessing-overlay').classList.contains('open')
     || $('settings-overlay').classList.contains('open')
-    || $('crystal-overlay').classList.contains('open');
+    || $('crystal-overlay').classList.contains('open')
+    || $('cosmic-ending-overlay').classList.contains('open');
 }
 
 function econTickBody() {
@@ -6259,6 +6524,15 @@ for (const key in FX_ATLASES) {
 
 (() => {
   const im = new Image();
+  im.onload = () => {
+    strawberryTraitAtlasOk = true;
+    slimeSpriteSig = '';
+  };
+  im.src = STRAWBERRY_TRAIT_ATLAS.src;
+})();
+
+(() => {
+  const im = new Image();
   const ready = () => { slimeAtlasOk = true; slimeSpriteSig = ''; silhouetteStage = -1; };
   im.onload = () => {
     try {
@@ -6346,6 +6620,7 @@ renderHud();
 checkStory();
 // 온보딩: 완전 새 게임이면 첫 클릭 안내
 if (S.totalClicks === 0) setTimeout(() => showQuip('나를 말랑말랑 눌러봐!'), 1200);
+if (S.totalClicks === 0 && S.totalEarned === 0) showOnceHint('producers', 2600);
 
 /* ── 밸런스 시뮬레이터 (개발용) ──
    콘솔에서 simRun({ hours: 2, clicksPerSec: 4 }) 호출.

@@ -4,7 +4,7 @@
   "engine": "component-row",
   "character": {
     "id": "slime-strawberry-traits-ai",
-    "description": "",
+    "description": "strawberry pink slime wearing baked trait outfits, green chroma because pink must stay saturated",
     "base_image": null
   },
   "cell": {
@@ -17,14 +17,14 @@
     "safe_margin": 84
   },
   "chroma_key": {
-    "name": "magenta",
-    "hex": "#FF00FF",
+    "name": "green",
+    "hex": "#00FF00",
     "rgb": [
-      255,
       0,
-      255
+      255,
+      0
     ],
-    "selection": "fallback"
+    "selection": "manual"
   },
   "states": {
     "strawberry_muscle": {

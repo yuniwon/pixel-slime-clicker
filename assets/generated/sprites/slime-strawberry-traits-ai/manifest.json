@@ -1,0 +1,124 @@
+{
+  "characterId": "slime-strawberry-traits-ai",
+  "engine": "component-row",
+  "game_input": "sprite-sheet-alpha.png",
+  "degraded_static_fallback": false,
+  "curation_applied": false,
+  "sprite_sheet_alpha": "sprite-sheet-alpha.png",
+  "sprite_sheet_alpha_report": "sprite-sheet-alpha.report.json",
+  "base_image": null,
+  "cell": {
+    "shape": "square",
+    "width": 768,
+    "height": 768,
+    "safe_margin_x": 84,
+    "safe_margin_y": 84,
+    "size": 768,
+    "safe_margin": 84
+  },
+  "chroma_key": {
+    "name": "green",
+    "hex": "#00FF00",
+    "rgb": [
+      0,
+      255,
+      0
+    ],
+    "selection": "manual"
+  },
+  "animation": {
+    "cellWidth": 768,
+    "cellHeight": 768,
+    "columns": 2,
+    "rows": {
+      "strawberry_muscle": {
+        "row": 0,
+        "frames": 2,
+        "fps": 2,
+        "loop": true
+      },
+      "strawberry_ranch": {
+        "row": 1,
+        "frames": 2,
+        "fps": 2,
+        "loop": true
+      },
+      "strawberry_star": {
+        "row": 2,
+        "frames": 2,
+        "fps": 2,
+        "loop": true
+      },
+      "strawberry_dream": {
+        "row": 3,
+        "frames": 2,
+        "fps": 2,
+        "loop": true
+      }
+    }
+  },
+  "frame_layout": {
+    "sheetWidth": 1536,
+    "sheetHeight": 3072,
+    "cellWidth": 768,
+    "cellHeight": 768,
+    "rows": {
+      "strawberry_muscle": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 0,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "strawberry_ranch": [
+        {
+          "x": 0,
+          "y": 768,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 768,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "strawberry_star": [
+        {
+          "x": 0,
+          "y": 1536,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 1536,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "strawberry_dream": [
+        {
+          "x": 0,
+          "y": 2304,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 2304,
+          "w": 768,
+          "h": 768
+        }
+      ]
+    }
+  }
+}

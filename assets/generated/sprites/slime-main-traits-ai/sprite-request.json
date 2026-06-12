@@ -4,7 +4,7 @@
   "engine": "component-row",
   "character": {
     "id": "slime-main-traits-ai",
-    "description": "",
+    "description": "main slime wearing baked trait outfits, accessory attached to body curve",
     "base_image": null
   },
   "cell": {
@@ -24,7 +24,7 @@
       0,
       255
     ],
-    "selection": "fallback"
+    "selection": "manual"
   },
   "states": {
     "baby_green_muscle": {
