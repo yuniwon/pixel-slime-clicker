@@ -850,22 +850,21 @@
   /* 클릭 버스트: 장갑 팝 3프레임 원샷 */
   .clickfx {
     position: fixed;
-    width: 44px; height: 44px;
-    margin: -22px 0 0 -22px;
+    width: 76px; height: 76px;
+    margin: -38px 0 0 -38px;
     pointer-events: none;
-    z-index: 48;
+    z-index: 51;
     background-image: url('assets/generated/sprites/slime-clickfx-ai/sprite-sheet-alpha.png');
     background-size: 300% 100%;
     background-repeat: no-repeat;
-    animation: clickfx-pop .27s linear forwards;
+    filter: saturate(1.18) contrast(1.06) drop-shadow(0 3px 0 #00000066);
+    animation: clickfx-pop .52s linear forwards;
   }
   @keyframes clickfx-pop {
-    0% { background-position-x: 0%; opacity: .95; }
-    32.9% { background-position-x: 0%; }
-    33% { background-position-x: 50%; }
-    65.9% { background-position-x: 50%; }
-    66% { background-position-x: 100%; }
-    100% { background-position-x: 100%; opacity: 0; }
+    0%, 74.9% { background-position-x: 0%; opacity: 1; transform: scale(.96); }
+    75%, 88.9% { background-position-x: 50%; opacity: 1; transform: scale(1.04); }
+    89%, 96% { background-position-x: 100%; opacity: .82; transform: scale(1.12); }
+    100% { background-position-x: 100%; opacity: 0; transform: scale(1.16); }
   }
 
   /* 코인 더미: 누적 재산의 풍경 — 무대 우하단, 접지 그림자 */
@@ -3241,6 +3240,39 @@ function placeStagePart(root, id, rect) {
   if (!('animation' in rect)) el.style.animation = 'none';
 }
 
+function placeStageUtility(id, x, y) {
+  const el = $(id);
+  const area = $('game-area');
+  if (!el || !area || el.hidden) return;
+  const ar = area.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  const w = r.width || 56;
+  const h = r.height || 64;
+  el.style.left = Math.round(clampNum(x, 12, ar.width - w - 12)) + 'px';
+  el.style.top = Math.round(clampNum(y, 120, ar.height - h - 42)) + 'px';
+  el.style.right = 'auto';
+  el.style.bottom = 'auto';
+}
+
+function layoutStageUtilityAnchors(areaRect, slimeRect) {
+  const cx = slimeRect.left - areaRect.left + slimeRect.width / 2;
+  const slimeTop = slimeRect.top - areaRect.top;
+  const stageW = clampNum(slimeRect.width * 1.42, 330, 560);
+  const stageH = clampNum(slimeRect.height * 0.88, 170, 430);
+  const mobile = areaRect.width < 760;
+
+  placeStageUtility(
+    'crystal-bed',
+    cx - stageW * (mobile ? 0.50 : 0.60),
+    slimeTop + stageH * (mobile ? 0.48 : 0.46),
+  );
+  placeStageUtility(
+    'coin-pile',
+    cx + stageW * (mobile ? 0.35 : 0.40),
+    slimeTop + stageH * (mobile ? 0.70 : 0.76),
+  );
+}
+
 function layoutStageBackdropSprites() {
   const root = $('stage-backdrop');
   const area = $('game-area');
@@ -3248,12 +3280,13 @@ function layoutStageBackdropSprites() {
   if (!root || !area || !slime) return;
 
   const areaRect = area.getBoundingClientRect();
+  const slimeRect = slime.getBoundingClientRect();
+  layoutStageUtilityAnchors(areaRect, slimeRect);
   if (areaRect.width < 760) {
     clearStageBackdropLayout(root);
     return;
   }
 
-  const slimeRect = slime.getBoundingClientRect();
   const cx = slimeRect.left - areaRect.left + slimeRect.width / 2;
   const slimeTop = slimeRect.top - areaRect.top;
   const slimeW = slimeRect.width;
@@ -4506,7 +4539,7 @@ function spawnClickFx(x, y) {
   el.style.left = x + 'px';
   el.style.top = y + 'px';
   document.body.appendChild(el);
-  setTimeout(() => el.remove(), 320);
+  setTimeout(() => el.remove(), 580);
 }
 
 function stopSpriteGesture(e) {
@@ -4967,6 +5000,7 @@ function renderCrystalBed(force) {
   const emo = ['🌱', '🌿', '💠', '💎'];
   const fr = phase === 3 ? Math.floor(Date.now() / 20000) % 2 : 0;  // ripe 2프레임 — tick 주기 스왑
   $('crystal-visual').innerHTML = spriteHtml('crystal', ids[phase], emo[phase], { size: 44, className: 'sprite-icon', frame: fr });
+  requestAnimationFrame(layoutStageBackdropSprites);
 }
 
 function crystalTick() {
@@ -4991,6 +5025,7 @@ function renderCoinPile(force) {
   el.hidden = false;
   const size = Math.round(Math.min(88, Math.max(40, innerWidth * 0.044)));
   el.innerHTML = spriteHtml('coinpile', 'pile' + idx, '💰', { size, className: 'sprite-icon' });
+  requestAnimationFrame(layoutStageBackdropSprites);
 }
 
 /* ════════════════════════ UX 흐름: 점진 해금 · 재화 스트립 · 뱃지 ════════════════════════
@@ -5800,6 +5835,45 @@ function isMobileLayout() {
 /* 모바일: 종별 1마리, 바닥 한 줄 정렬로 난잡함 방지 */
 const MOBILE_GROUND_ORDER = ['chick', 'dog', 'cat', 'rabbit', 'unicorn', 'dragon', 'spirit', 'turtle'];
 
+const DESKTOP_STAGE_FRIEND_SLOTS = {
+  chick:   { x: -0.36, y: 0.58 },
+  cat:     { x: 0.30, y: 0.56 },
+  dog:     { x: 0.10, y: 0.70 },
+  rabbit:  { x: -0.46, y: 0.45 },
+  unicorn: { x: 0.48, y: 0.38 },
+  dragon:  { x: -0.54, y: 0.32 },
+  whale:   { x: 0.02, y: -0.18 },
+  planet:  { x: 0.64, y: -0.04 },
+  spirit:  { x: 0.34, y: 0.30 },
+  turtle:  { x: -0.08, y: 0.72 },
+};
+
+function desktopStageFriendPos(id, size, copyIndex) {
+  const area = $('game-area');
+  const slime = $('slime-canvas');
+  if (!area || !slime) return null;
+  const ar = area.getBoundingClientRect();
+  const sr = slime.getBoundingClientRect();
+  if (!ar.width || !sr.width) return null;
+
+  const slot = DESKTOP_STAGE_FRIEND_SLOTS[id];
+  if (!slot) return null;
+
+  const cx = sr.left - ar.left + sr.width / 2;
+  const top = sr.top - ar.top;
+  const stageW = clampNum(sr.width * 1.42, 410, 560);
+  const stageH = clampNum(sr.height * 0.88, 300, 430);
+  const fan = copyIndex * Math.min(34, size * 0.72);
+  const direction = slot.x < 0 ? -1 : 1;
+  const x = cx + stageW * slot.x + fan * direction - size / 2;
+  const y = top + stageH * slot.y - size / 2;
+
+  return {
+    left: Math.round(clampNum(x, 18, ar.width - size - 18)) + 'px',
+    top: Math.round(clampNum(y, 230, ar.height - size - 86)) + 'px',
+  };
+}
+
 function rebuildFriends() {
   friendsLayer.innerHTML = '';
   const mobile = isMobileLayout();
@@ -5826,16 +5900,18 @@ function rebuildFriends() {
       const el = document.createElement('div');
       el.className = 'friend';
       el.dataset.id = p.id;
+      const size = mobile ? 36 : (p.id === 'whale' || p.id === 'planet') ? 64 : 48;
+      const stagePos = !mobile ? desktopStageFriendPos(p.id, size, k) : null;
+      if (stagePos) pos = stagePos;
       for (const key of ['left', 'right', 'top', 'bottom']) {
         if (pos[key] === undefined) continue;
-        el.style[key] = (key === 'left' || key === 'right')
+        el.style[key] = (!stagePos && (key === 'left' || key === 'right'))
           ? `calc(${pos[key]} + ${k * 46}px)`
           : pos[key];
       }
       const mover = document.createElement('span');
       mover.className = 'fr-move bv-' + bhv.anim;
       mover.style.animationDelay = (Math.random() * 2.5).toFixed(2) + 's';
-      const size = mobile ? 36 : (p.id === 'whale' || p.id === 'planet') ? 64 : 48;
       mover.innerHTML = friendSpriteAnimHtml(p.id, size);
       el.appendChild(mover);
       friendsLayer.appendChild(el);
