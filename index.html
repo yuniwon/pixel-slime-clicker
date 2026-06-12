@@ -2562,12 +2562,16 @@ function initAnalytics() {
 }
 
 function gcEvent(path) {
-  if (!GC_ENABLED()) return;
+  // 전송이 실제로 이뤄졌을 때만 true — 스크립트가 아직(또는 차단으로) 없으면 false를 돌려
+  // 호출부가 "보냈음" 처리를 미루고 다음 틱에 재시도할 수 있게 한다
+  if (!GC_ENABLED()) return false;
   try {
     if (window.goatcounter && window.goatcounter.count) {
       window.goatcounter.count({ path, event: true });
+      return true;
     }
   } catch (e) { /* 통계 실패는 게임에 영향 없음 */ }
+  return false;
 }
 
 /* 진행 깔때기: 어디서 이탈하는지 보이는 최소 마일스톤 세트 */
@@ -2590,14 +2594,13 @@ const GC_MILESTONES = [
 function checkAnalyticsMilestones() {
   if (!GC_ENABLED()) return;
   S.gcSent = S.gcSent || {};
+  // v1 버그: 스크립트 로드 전에 플래그만 기록되어 이벤트가 소실됨 — 1회 리셋 후 재전송
+  if (S.gcSent._v !== 2) S.gcSent = { _v: 2 };
   for (const m of GC_MILESTONES) {
     if (S.gcSent[m.id]) continue;
     let hit = false;
     try { hit = m.cond(); } catch (e) {}
-    if (hit) {
-      S.gcSent[m.id] = true;
-      gcEvent('m/' + m.id);
-    }
+    if (hit && gcEvent('m/' + m.id)) S.gcSent[m.id] = true;  // 전송 성공시에만 확정
   }
 }
 
