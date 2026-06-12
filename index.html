@@ -1599,6 +1599,7 @@
     <h4>익명 통계</h4>
     <div style="font-size:10px;color:var(--text-dim);line-height:1.6;margin-bottom:6px;">
       방문 수와 진행 마일스톤(레벨 도달 등)만 익명으로 집계해요 (GoatCounter — 쿠키·계정·개인정보 없음). 세이브는 이 기기에만 저장됩니다.
+      <a href="https://github.com/yuniwon/pixel-slime-clicker/blob/master/PRIVACY.md" target="_blank" rel="noopener" style="color:var(--gold);">자세한 안내</a>
     </div>
     <div class="settings-row">
       <button class="settings-btn" id="toggle-analytics-btn">익명 통계 끄기</button>
@@ -1647,6 +1648,8 @@ const PRODUCERS = [
 
 const PRODUCER_SPRITE_ATLAS = 'assets/generated/sprites/slime-friends-ai/sprite-sheet-alpha.png';
 const PRODUCER_SPRITE_SHEET = { w: 1792, h: 7168 };
+// 주의: spirit(별의 정령)·turtle(시간 거북)은 시트 미생성 — 이모지 폴백이 현재 의도.
+// 코덱스가 friends 시트를 10종으로 재생성하면 여기에 두 행을 추가하면 된다 (ASSET-PIPELINE 큐 참고)
 const PRODUCER_SPRITE_LAYOUT = {
   chick:   [{ x: 0, y: 0,    w: 896, h: 896 }, { x: 896, y: 0,    w: 896, h: 896 }],
   cat:     [{ x: 0, y: 896,  w: 896, h: 896 }, { x: 896, y: 896,  w: 896, h: 896 }],
@@ -2836,15 +2839,21 @@ function bulkInfo(p) {
     for (let k = 0; k < 10; k++) total += producerCost(p, owned + k);
     return { count: 10, cost: total * disc };
   }
-  // 상한 1000: 비용이 1.15^n 지수 성장이라 실질적으로 도달 불가능한 안전망
+  // MAX: 고정 상한 대신 예산에서 해석적 상계를 유도한다.
+  // 비용이 기하급수(1.15^n)라 budget으로 살 수 있는 수량은
+  // log_r(budget·(r-1)/first + 1) 이하 — ceil 라운딩 여유 +4를 더해도 O(log budget)
+  const first = producerCost(p, owned) * disc;
+  if (first > budget) return { count: 0, cost: first };
+  const r = 1.15;
+  const bound = Math.ceil(Math.log((budget / first) * (r - 1) + 1) / Math.log(r)) + 4;
   let total = 0, count = 0;
-  for (let k = 0; k < 1000; k++) {
+  for (let k = 0; k < bound; k++) {
     const c = producerCost(p, owned + count) * disc;
     if (total + c > budget) break;
     total += c;
     count++;
   }
-  if (count === 0) return { count: 0, cost: producerCost(p, owned) * disc };
+  if (count === 0) return { count: 0, cost: first };
   return { count, cost: total };
 }
 
@@ -2913,6 +2922,12 @@ function soulMul() {
     + 0.05 * Math.min(n, 100)
     + 0.02 * Math.min(Math.max(n - 100, 0), 400)
     + 0.005 * Math.max(n - 500, 0);
+}
+
+/* 영혼 보너스 표기는 반드시 이 함수를 거친다 — 실제 soulMul()(소프트캡 적용)과
+   UI 숫자가 어긋나지 않게 단일 출처로 통일 */
+function soulBonusPct() {
+  return Math.round((soulMul() - 1) * 100);
 }
 
 function globalMul() {
@@ -5009,7 +5024,7 @@ function doPrestige(challengeId = null) {
   const ok = confirm(
     (ch ? `[도전 런: ${ch.name}] ${ch.desc}\n\n` : '') +
     `젤리 환생을 할까요?\n\n` +
-    `+ 젤리 영혼 ${gain}개 획득 (영혼 1개당 모든 수입 +5%)\n` +
+    `+ 젤리 영혼 ${gain}개 획득 (수입 보너스: 총 획득 영혼 기준 · 소프트캡 적용)\n` +
     `- 코인, 친구들, 강화가 초기화돼요\n` +
     `- 업적, 영혼, 특성, 방 장식은 유지돼요\n\n` +
     `이번 생의 플레이스타일: ${style.replace(/^\S+ /, '')}`
@@ -5624,7 +5639,7 @@ function buildPrestigeTab() {
   info.id = 'prestige-info';
   info.innerHTML =
     `🍮 보유 영혼 <b>${S.prestige.souls}</b>개 · 총 획득 <b>${S.prestige.totalSoulsEarned}</b>개<br>` +
-    `모든 수입 +${S.prestige.totalSoulsEarned * 5}% (총 획득 기준 — 특성을 사도 줄지 않아요)<br>` +
+    `모든 수입 +${soulBonusPct()}% (총 획득 영혼 기준 · 소프트캡 적용 — 특성을 사도 줄지 않아요)<br>` +
     `환생 ${S.prestige.totalResets}회 · 이번 생의 플레이스타일: ${playstyleName()}` +
     `<br>행운 ${luckTotal()}` +
     (S.runBlessings.length
@@ -6300,7 +6315,7 @@ function renderHud() {
   $('stat-ach').textContent = achCount();
   $('stat-souls').textContent = S.prestige.souls;
   $('stat-souls-total').textContent = S.prestige.totalSoulsEarned;
-  $('stat-soul-bonus').textContent = S.prestige.totalSoulsEarned * 5;
+  $('stat-soul-bonus').textContent = soulBonusPct();
   $('stat-resets').textContent = S.prestige.totalResets;
   // 도전 배지
   const badge = $('challenge-badge');

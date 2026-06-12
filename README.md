@@ -100,7 +100,7 @@
 - 경제 루프는 rAF + 1초 인터벌 이중 구동 — 백그라운드 탭에서도 진행
 - 모바일: 100dvh 고정 분할, safe-area, iOS 더블탭 줌 차단 (touch-action + touchend 가드), 해상도 비례 UI (vw clamp)
 - 메타데이터: OG/Twitter 카드, canonical — 링크 공유 시 카드 렌더
-- 익명 통계: GoatCounter (쿠키·개인정보 없음) — 방문 수 + 진행 마일스톤 깔때기 (first-friend → … → cosmic-seed). 배포 도메인에서만 동작하고, 설정에서 끌 수 있으며, 세이브는 로컬에만 저장
+- 익명 통계: GoatCounter (쿠키·개인정보 없음) — 방문 수 + 진행 마일스톤 깔때기 (first-friend → … → cosmic-seed). 배포 도메인에서만 동작하고, 설정에서 끌 수 있으며, 세이브는 로컬에만 저장 — 자세한 내용은 [PRIVACY.md](PRIVACY.md)
 
 ## 내장 개발 도구 (콘솔)
 
@@ -111,6 +111,7 @@
 ## 에셋
 
 게임이 사용하는 것은 각 스프라이트 폴더의 `sprite-sheet-alpha.png`입니다.
+친구 10종 중 별의 정령·시간 거북은 시트 미생성으로 **이모지 폴백이 의도된 현재 상태**입니다 (재생성 큐 대기).
 현재 본체·친구·아이템·업적·장식·축복·소원·꾸미기·손님 아틀라스를 사용하며,
 생성 대기 큐와 협업 규약은 [docs/ASSET-PIPELINE.md](docs/ASSET-PIPELINE.md)를 보세요.
 생성 중간 산출물(raw/qa/frames/prompts/references)은 gitignore 처리되어 있습니다.
