@@ -1825,13 +1825,17 @@
     body.stats-open #stats-bar { display: flex; }
     /* 토스트: 모바일에선 뉴스 스트립 아래 */
     #toast {
-      bottom: auto;
-      top: 34px;
+      top: auto;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
       font-size: 12px;
       padding: 10px 14px;
       width: max-content;
       max-width: calc(100vw - 24px);
-      transform: translateX(-50%) translateY(-140%);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.35;
+      transform: translateX(-50%) translateY(140%);
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
     #cosmic-ending-card { padding: 14px; }
@@ -2330,15 +2334,15 @@ const DECOR = [
   { id: 'cushion',  icon: '🍮', name: '젤리 쿠션', desc: '클릭 코인 +2%',            cost: 5e4,
     pos: { left: '50%', bottom: '13%' }, center: true, boost: { click: 0.02 } },
   { id: 'pond',     icon: '🪷', name: '작은 연못', desc: '친구 생산 +2%',            cost: 5e5,
-    pos: { left: '13%', bottom: '20%' }, boost: { cps: 0.02 } },
+    pos: { left: '13%', bottom: '20%' }, stagePos: { x: -0.58, y: 0.74 }, boost: { cps: 0.02 } },
   { id: 'lamp',     icon: '🪔', name: '별빛 램프', desc: '황금별이 3초 더 머물러요', cost: 5e6,
-    pos: { right: '15%', bottom: '24%' }, boost: { star: 3 } },
+    pos: { right: '15%', bottom: '24%' }, stagePos: { x: 0.62, y: 0.66 }, boost: { star: 3 } },
   { id: 'mat',      icon: '🧶', name: '낮잠 매트', desc: '친구 생산 +3%',            cost: 5e7,
-    pos: { left: '19%', bottom: '44%' }, boost: { cps: 0.03 } },
+    pos: { left: '19%', bottom: '44%' }, stagePos: { x: -0.63, y: 0.27 }, boost: { cps: 0.03 } },
   { id: 'fountain', icon: '⛲', name: '코인 분수', desc: '클릭 코인 +5%',            cost: 5e8,
-    pos: { right: '17%', bottom: '47%' }, boost: { click: 0.05 } },
+    pos: { right: '17%', bottom: '47%' }, stagePos: { x: 0.56, y: 0.31 }, boost: { click: 0.05 } },
   { id: 'window',   icon: '🪟', name: '우주 창문', desc: '친구 생산 +5%',            cost: 1e10,
-    pos: { right: '9%', top: '12%' }, mobilePos: { right: '11%', top: '22%' }, boost: { cps: 0.05 } },
+    pos: { right: '9%', top: '12%' }, mobilePos: { right: '11%', top: '22%' }, stagePos: { x: 0.62, y: -0.33 }, boost: { cps: 0.05 } },
 ];
 
 /* 별의 기록: 마일스톤마다 해금되는 짧은 이야기 */
@@ -5404,6 +5408,16 @@ function queueBlessing(count) {
   }
 }
 
+function transientGuestActive() {
+  const cloud = document.getElementById('raincloud');
+  const starlet = document.getElementById('starlet');
+  const star = document.getElementById('golden-star');
+  return (cloud && cloud.style.display === 'block')
+    || (starlet && starlet.style.display === 'block')
+    || (star && star.style.display === 'block')
+    || document.querySelector('.mini-star');
+}
+
 function scheduleBlessingModal(delayOverride = null) {
   clearTimeout(blessingOpenTimer);
   const calmFor = performance.now() - lastManualClickAt;
@@ -5415,6 +5429,7 @@ function scheduleBlessingModal(delayOverride = null) {
     const waitedLongEnough = blessingQueuedAt && performance.now() - blessingQueuedAt > 3200;
     const firstFriendGraceDone = blessingQueuedAt && performance.now() - blessingQueuedAt > 9000;
     if (shouldHoldFirstBlessingForFriend() && !firstFriendGraceDone) scheduleBlessingModal(1800);
+    else if (transientGuestActive()) scheduleBlessingModal(1200);
     else if (stillClicking && !waitedLongEnough) scheduleBlessingModal();
     else openBlessingModal();
   }, wait);
@@ -5613,6 +5628,27 @@ function cosmicSeedHtml() {
 
 /* ════════════════════════ 슬라임 방 (장식) ════════════════════════ */
 
+function desktopStageDecorPos(d, size) {
+  if (!d.stagePos) return null;
+  const area = $('game-area');
+  const slime = $('slime-canvas');
+  if (!area || !slime) return null;
+  const ar = area.getBoundingClientRect();
+  const sr = slime.getBoundingClientRect();
+  if (!ar.width || !sr.width) return null;
+
+  const cx = sr.left - ar.left + sr.width / 2;
+  const top = sr.top - ar.top;
+  const stageW = clampNum(sr.width * 1.42, 410, 560);
+  const stageH = clampNum(sr.height * 0.88, 300, 430);
+  const x = cx + stageW * d.stagePos.x - size / 2;
+  const y = top + stageH * d.stagePos.y - size / 2;
+  return {
+    left: Math.round(clampNum(x, 18, ar.width - size - 18)) + 'px',
+    top: Math.round(clampNum(y, 78, ar.height - size - 72)) + 'px',
+  };
+}
+
 function renderDecor() {
   const layer = $('decor-layer');
   layer.innerHTML = '';
@@ -5632,7 +5668,8 @@ function renderDecor() {
     // top 기준 배치 = 하늘 장식 (부유 허용), 나머지는 바닥 접지
     el.className = 'decor' + (d.center ? ' center' : '') + (d.pos.top !== undefined ? ' sky' : '');
     el.innerHTML = decorSpriteHtml(d.id, d.icon, 'room-decor-sprite');
-    const pos = isMobileLayout() && d.mobilePos ? d.mobilePos : d.pos;
+    const stagePos = !isMobileLayout() ? desktopStageDecorPos(d, 78) : null;
+    const pos = stagePos || (isMobileLayout() && d.mobilePos ? d.mobilePos : d.pos);
     for (const k of ['left', 'right', 'top', 'bottom']) {
       if (pos[k] !== undefined) el.style[k] = pos[k];
     }
@@ -7545,7 +7582,13 @@ function econTickBody() {
     // 오라: 코스메틱 장착 > 유니콘 100 성향 오라
     const cosAura = S.cosmetics.equipped.aura;
     let slimeGlow = '';
-    if (cosAura) slimeGlow = `drop-shadow(0 0 14px ${cosAura})`;
+    if (cosAura) {
+      // Samsara's tiny satellite pixels read as square handles when a strong aura
+      // glow is applied to the whole multi-layer canvas, especially on mobile.
+      slimeGlow = hasSamsaraAura()
+        ? `drop-shadow(0 0 7px ${cosAura})`
+        : `drop-shadow(0 0 14px ${cosAura})`;
+    }
     else if (currentTrait && hasSyn('unicorn', 100)) slimeGlow = `drop-shadow(0 0 14px ${currentTrait.pupil})`;
     else if (slimeAtlasOk && currentTrait && !traitAccessoryVisible()) slimeGlow = `drop-shadow(0 0 10px ${currentTrait.pupil}cc)`;
     // 윤회의 고리: 액세서리 아틀라스가 있으면 진짜 고리 스프라이트가 표시 — 글로우는 폴백
