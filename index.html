@@ -1797,6 +1797,19 @@ const TRAIT_ATLAS = {
 };
 let traitAtlasOk = false;
 
+/* 비핑크 성향 본체 아틀라스 (slime-main-traits-ai): ranch/star/dream만 QA 통과.
+   muscle은 magenta key 영향으로 머리띠가 검게 죽어 overlay 유지 */
+const MAIN_TRAIT_ATLAS = {
+  src: 'assets/generated/sprites/slime-main-traits-ai/sprite-sheet-alpha.png',
+  rows: {
+    baby_green: { ranch: 1, star: 2, dream: 3 },
+    sea:        { ranch: 5, star: 6, dream: 7 },
+    gold_king:  { ranch: 9, star: 10, dream: 11 },
+    god:        { ranch: 13, star: 14, dream: 15 },
+  },
+};
+let mainTraitAtlasOk = false;
+
 /* 딸기 성향 본체 아틀라스 (slime-strawberry-traits-ai): 핑크 단계는 오버레이 대신
    성향을 본체에 구워서 곡면 접촉감을 살린다. muscle은 1프레임 눈 판독 약화로 보류 */
 const STRAWBERRY_TRAIT_ATLAS = {
@@ -1837,10 +1850,15 @@ function traitBgLayer(key, frame) {
   return { img, size: `${(s * 100).toFixed(1)}% ${(s * 100).toFixed(1)}%`, pos: `50% ${py.toFixed(2)}%` };
 }
 
-function bakedStrawberryTraitKey() {
-  if (!strawberryTraitAtlasOk || !currentTrait) return '';
-  if (STAGES[stageIdx].spriteId !== 'strawberry') return '';
-  return STRAWBERRY_TRAIT_ATLAS.rows[currentTrait.key] !== undefined ? currentTrait.key : '';
+function bakedTraitLayer() {
+  if (!currentTrait) return null;
+  const stageId = STAGES[stageIdx].spriteId;
+  if (stageId === 'strawberry') {
+    const row = strawberryTraitAtlasOk ? STRAWBERRY_TRAIT_ATLAS.rows[currentTrait.key] : undefined;
+    return row === undefined ? null : { src: STRAWBERRY_TRAIT_ATLAS.src, row, rows: 4 };
+  }
+  const row = mainTraitAtlasOk ? MAIN_TRAIT_ATLAS.rows[stageId]?.[currentTrait.key] : undefined;
+  return row === undefined ? null : { src: MAIN_TRAIT_ATLAS.src, row, rows: 16 };
 }
 
 const MAX_LEVEL = 60;
@@ -2198,6 +2216,11 @@ const QUIPS = {
     '방이 조금 더 넓어진 것 같아.',
     '돌고 돌아도 여기는 우리 자리야.',
     '작은 별나무가 숨 쉬고 있어.',
+    '오늘은 별나무 잎을 세어봤어.',
+    '소원을 이룰 때마다 가지가 살짝 반짝여.',
+    '먹구름도 이제 이 나무 그늘을 좋아해.',
+    '별똥이들이 길을 잃지 않게 불을 켜둘게.',
+    '완성한 우주도 매일 조금씩 자라.',
   ],
   evolve: [
     '나… 변한 것 같아!',
@@ -2236,6 +2259,16 @@ const NEWS = [
   { cond: () => !!S.cosmicSeed, text: '우주 씨앗 발아 관측 — 학계 "말랑하다" 술렁.' },
   { cond: () => !!S.cosmicSeed, text: '작은 말랑 우주 완성 기념식, 참석자 전원 조용히 반짝임.' },
   { cond: () => !!S.cosmicSeed, text: '별나무 아래서 친구들이 다음 생 얘기를 나누는 중.' },
+  { cond: () => !!S.cosmicSeed, text: '별나무 관리부, 오늘의 업무: 조용히 바라보기.' },
+  { cond: () => !!S.cosmicSeed, text: '완성된 우주에서 첫 새싹 관측. 이름은 아직 말랑.' },
+  { cond: () => !!S.cosmicSeed, text: '친구들, 별나무 그늘을 공식 휴게소로 지정.' },
+  { cond: () => !!S.cosmicSeed, text: '작은 우주 완성 이후에도 클릭 소리는 계속 따뜻함.' },
+  { cond: () => S.cosmicSeed && cosmicTreeGrowth().level >= 1, text: '소원을 먹은 별나무, 잎 끝에 반짝임 하나 추가.' },
+  { cond: () => S.cosmicSeed && cosmicTreeGrowth().level >= 2, text: '황금 소원이 별나무 가지에 금빛 매듭을 남겼어요.' },
+  { cond: () => S.cosmicSeed && cosmicTreeGrowth().level >= 3, text: '먹구름 손님, 별나무에 물 주기 담당으로 자원.' },
+  { cond: () => S.cosmicSeed && cosmicTreeGrowth().level >= 4, text: '집 찾은 별똥이들이 별나무 주변에 작은 길표를 세웠어요.' },
+  { cond: () => S.cosmicSeed && cosmicTreeGrowth().level >= 5, text: '별나무가 오늘도 작은 우주를 천천히 넓히는 중.' },
+  { cond: () => S.cosmicSeed && S.prestige.totalResets >= 4, text: '다시 태어난 슬라임, 별나무에게 어제의 인사를 배웠다.' },
   { cond: () => (S.stats.lifetime.starletsHelped || 0) > 0, text: '집 찾은 별똥이, 하늘에서 감사 반짝임 보내와.' },
   { cond: () => (S.telemetry.starletsSeen || 0) > (S.stats.lifetime.starletsHelped || 0) + 2, text: '별똥이 가족, "데려다주는 분 어디 없나요" 호소.' },
   { cond: () => chActive() === 'silence', text: '침묵의 손 수행자 목격담: "손은 멈췄지만 마음은 말랑."' },
@@ -2381,7 +2414,7 @@ function defaultState() {
     achievements: {},
     stats: {
       // lifetime: 환생해도 유지 (업적 기준)
-      lifetime: { bestCombo: 0, starsClicked: 0, earned: 0, cloudsSoothed: 0 },
+      lifetime: { bestCombo: 0, starsClicked: 0, earned: 0, cloudsSoothed: 0, starletsHelped: 0 },
       // run: 이번 생 한정 (성향·플레이스타일 기준), 환생 시 초기화
       run: { clicks: 0, bestCombo: 0, starsClicked: 0, clickEarned: 0, idleEarned: 0, offlineEarned: 0 },
     },
@@ -2396,6 +2429,7 @@ function defaultState() {
     runBlessings: [],   // 이번 생의 축복 (환생 시 초기화)
     challenge: { active: null, startedAt: 0 },  // 도전 런 (이번 생 한정)
     cosmicSeed: false,  // 중간 엔딩: 우주 씨앗
+    cosmicSeedAt: null,
     telemetry: {        // 재미 측정용 로컬 텔레메트리 (외부 전송 없음)
       sessions: 0,
       sessionLengths: [],
@@ -2408,6 +2442,10 @@ function defaultState() {
       rerolls: 0,
       skips: 0,
       challengesStarted: 0,
+      firstFriendAt: null,
+      firstEvolutionAt: null,
+      firstBlessingAt: null,
+      goldenWishesCompleted: 0,
     },
     playTime: 0,        // 함께한 시간(초) — 앨범용
     createdAt: Date.now(),
@@ -3235,10 +3273,10 @@ function traitAccessoryVisible() {
 
 function applySlimeSprite(force) {
   if (!slimeAtlasOk || !STAGES[stageIdx].spriteId) return false;
-  const bakedTraitKey = bakedStrawberryTraitKey();
+  const bakedTrait = bakedTraitLayer();
   const traitKey = traitAccessoryVisible() ? currentTrait.key : '';
   const ring = traitAtlasOk && hasSamsaraAura();
-  const sig = `${stageIdx}|${slimeFrame}|${traitKey}|${bakedTraitKey}|${ring}`;
+  const sig = `${stageIdx}|${slimeFrame}|${traitKey}|${bakedTrait ? `${bakedTrait.src}:${bakedTrait.row}` : ''}|${ring}`;
   if (!force && sig === slimeSpriteSig) return true;
   slimeSpriteSig = sig;
   const imgs = [], sizes = [], poss = [];
@@ -3247,10 +3285,10 @@ function applySlimeSprite(force) {
     imgs.push(L.img); sizes.push(L.size); poss.push(L.pos);
   };
   if (ring) addTrait('samsara');  // 고리가 최상단 — 모자 위에 떠야 가려지지 않는다
-  if (bakedTraitKey) {
-    imgs.push(`url('${STRAWBERRY_TRAIT_ATLAS.src}')`);
-    sizes.push('200% 400%');  // 딸기 성향 본체 셀 = 시트의 1/2 × 1/4
-    poss.push(`${slimeFrame * 100}% ${(STRAWBERRY_TRAIT_ATLAS.rows[bakedTraitKey] * 100 / 3).toFixed(2)}%`);
+  if (bakedTrait) {
+    imgs.push(`url('${bakedTrait.src}')`);
+    sizes.push(`200% ${bakedTrait.rows * 100}%`);
+    poss.push(`${slimeFrame * 100}% ${(bakedTrait.row * 100 / (bakedTrait.rows - 1)).toFixed(2)}%`);
   } else {
     if (traitKey && traitKey !== 'samsara') addTrait(traitKey);
     imgs.push(`url('${SLIME_ATLAS.src}')`);
@@ -3712,6 +3750,7 @@ function checkEvolution() {
 
   if (newStage > stageIdx) {
     // 외형 진화 마일스톤: 큰 축제
+    if (stageIdx === 0 && S.telemetry.firstEvolutionAt == null) S.telemetry.firstEvolutionAt = Math.round(S.playTime);
     stageIdx = newStage;
     const flash = $('evo-flash');
     flash.classList.remove('go', 'rebirth');
@@ -3960,6 +3999,7 @@ function wishEvent(type, amount) {
       g.done = true;
       S.stardust += g.reward;
       S.wishes.completed++;
+      S.telemetry.goldenWishesCompleted = (S.telemetry.goldenWishesCompleted || 0) + 1;
       completedAny = true;
       toast(`🌟 <b>황금 소원 성취!</b> ${goldenWishText(g)}<br><small>별가루 +${g.reward}</small>`);
       sndStar();
@@ -4409,6 +4449,7 @@ function updateBlessingSub() {
 function pickBlessing(b) {
   if (performance.now() < blessGuardUntil) return;
   S.runBlessings.push(b.id);
+  if (S.telemetry.firstBlessingAt == null) S.telemetry.firstBlessingAt = Math.round(S.playTime);
   S.codex.blessings[b.id] = true;
   computeBlessCache();
   sndAch();
@@ -4520,6 +4561,32 @@ function cosmicSeedProgress() {
   };
 }
 
+function cosmicGoldenWishesCompleted() {
+  const saved = S.telemetry.goldenWishesCompleted || 0;
+  const currentDone = S.wishes && S.wishes.golden && S.wishes.golden.done ? 1 : 0;
+  return Math.max(saved, currentDone);
+}
+
+function cosmicTreeGrowth() {
+  const extraResets = Math.max(0, S.prestige.totalResets - 3);
+  const signals = [
+    { id: 'wishes', label: '소원 완료', value: S.wishes.completed || 0, need: 10, done: (S.wishes.completed || 0) >= 10 },
+    { id: 'golden', label: '황금 소원 완료', value: cosmicGoldenWishesCompleted(), need: 1, done: cosmicGoldenWishesCompleted() >= 1 },
+    { id: 'clouds', label: '먹구름 달래기', value: S.stats.lifetime.cloudsSoothed || 0, need: 3, done: (S.stats.lifetime.cloudsSoothed || 0) >= 3 },
+    { id: 'starlets', label: '별똥이 귀가', value: S.stats.lifetime.starletsHelped || 0, need: 3, done: (S.stats.lifetime.starletsHelped || 0) >= 3 },
+    { id: 'rebirths', label: '완성 후 추가 환생', value: extraResets, need: 1, done: extraResets >= 1 },
+  ];
+  const level = S.cosmicSeed ? signals.filter(s => s.done).length : 0;
+  const names = ['씨앗별', '새싹별', '어린 별나무', '별꽃 나무', '길잡이 별나무', '작은 우주나무'];
+  return { level, name: names[Math.min(level, names.length - 1)], signals, extraResets };
+}
+
+function cosmicSeedDateText() {
+  if (!S.cosmicSeed) return '아직 완성 전';
+  if (!S.cosmicSeedAt) return '완성일 기록 전';
+  return new Date(S.cosmicSeedAt).toLocaleDateString('ko-KR');
+}
+
 function openCosmicEnding() {
   const overlay = $('cosmic-ending-overlay');
   const seed = $('cosmic-ending-seed');
@@ -4530,7 +4597,11 @@ function openCosmicEnding() {
 
 function cosmicSeedStatusHtml() {
   if (S.cosmicSeed) {
-    return '<div class="story-title">🌌 우주 씨앗</div>작은 별나무가 방에 뿌리내렸어요. 이 우주는 한 번 완성되었고, 그래도 계속 말랑하게 자랄 수 있어요.';
+    const g = cosmicTreeGrowth();
+    const row = s => `<div class="syn-line${s.done ? ' on' : ''}">${s.done ? '✓' : '□'} ${s.label} — ${Math.min(s.value, s.need)}/${s.need}</div>`;
+    return `<div class="story-title">🌌 우주 씨앗 — ${g.name}</div>` +
+      `작은 별나무가 방에 뿌리내렸어요. 완성일: ${cosmicSeedDateText()}. 보상보다 돌봄의 흔적이 천천히 자랍니다.` +
+      g.signals.map(row).join('');
   }
   const p = cosmicSeedProgress();
   const row = (done, label, count) => `<div class="syn-line${done ? ' on' : ''}">${done ? '✓' : '□'} ${label}${count ? ` — ${count}` : ''}</div>`;
@@ -4544,6 +4615,7 @@ function cosmicSeedStatusHtml() {
 
 function grantCosmicSeed() {
   S.cosmicSeed = true;
+  if (!S.cosmicSeedAt) S.cosmicSeedAt = Date.now();
   S.story.cosmic = true;
   const flash = $('evo-flash');
   flash.classList.remove('go', 'rebirth');
@@ -4562,35 +4634,64 @@ function grantCosmicSeed() {
 }
 
 function cosmicSeedHtml() {
-  // 픽셀 별나무: 새 에셋 없이 중간 엔딩의 영구 증표를 그린다.
-  const map = [
-    '.......s.......',
-    '......sls......',
-    '....sslllss....',
-    '.....lpppl.....',
-    '...sllpppll....',
-    '.....lpppl..s..',
-    '......lpl......',
-    '......lpl......',
-    '.....glplg.....',
-    '....gglplgg....',
-    '......gpg......',
-    '.....ppppp.....',
-    '...ppllllpp....',
-    '..ppllssllpp...',
-    '...ppllllpp....',
-    '.....ooooo.....',
-  ];
-  const col = { g: '#7dff8a', l: '#d8c2ff', p: '#8d5ce8', s: '#fff8d6', o: '#3a2a5e' };
+  // 픽셀 별나무: 새 에셋 없이 기존 기록에 따라 같은 크기 안에서만 자란다.
+  const growth = cosmicTreeGrowth();
+  const level = growth.level;
+  const w = 17;
+  const h = 18;
+  const map = Array.from({ length: h }, () => Array(w).fill('.'));
+  const set = (x, y, ch) => {
+    if (x >= 0 && x < w && y >= 0 && y < h) map[y][x] = ch;
+  };
+  const line = (x1, y1, x2, y2, ch) => {
+    const steps = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
+    for (let i = 0; i <= steps; i++) {
+      set(Math.round(x1 + (x2 - x1) * i / steps), Math.round(y1 + (y2 - y1) * i / steps), ch);
+    }
+  };
+
+  for (let x = 6; x <= 10; x++) set(x, 16, 'o');
+  for (let x = 5; x <= 11; x++) set(x, 15, 'p');
+  line(8, 15, 8, 8, 'p');
+  line(7, 14, 8, 12, 'l');
+  line(9, 14, 8, 12, 'l');
+  set(8, 7, 's');
+
+  if (level >= 1) {
+    line(8, 11, 5, 10, 'g');
+    line(8, 11, 11, 10, 'g');
+    set(4, 10, 'g'); set(12, 10, 'g'); set(8, 6, 'l');
+  }
+  if (level >= 2) {
+    line(8, 9, 4, 7, 'l');
+    line(8, 9, 12, 7, 'l');
+    for (const [x, y] of [[3, 7], [4, 6], [12, 6], [13, 7], [7, 5], [9, 5]]) set(x, y, 'g');
+  }
+  if (level >= 3) {
+    for (const [x, y] of [[5, 6], [11, 6], [6, 4], [10, 4], [8, 3]]) set(x, y, 's');
+    set(8, 5, 'r');
+  }
+  if (level >= 4) {
+    for (const [x, y] of [[2, 8], [14, 8], [3, 5], [13, 5], [6, 2], [10, 2]]) set(x, y, 'b');
+    line(5, 12, 2, 14, 'p');
+    line(11, 12, 14, 14, 'p');
+  }
+  if (level >= 5) {
+    for (const [x, y] of [[1, 4], [15, 4], [4, 2], [12, 2], [8, 1], [1, 11], [15, 11]]) set(x, y, 's');
+    set(8, 0, 'b');
+  }
+
+  const rows = map.map(row => row.join(''));
+  const col = { g: '#7dff8a', l: '#d8c2ff', p: '#8d5ce8', s: '#fff8d6', o: '#3a2a5e', b: '#7fc4ff', r: '#ff8ac4' };
   const cv = document.createElement('canvas');
-  cv.width = Math.max(...map.map(row => row.length)); cv.height = map.length;
+  cv.width = w; cv.height = h;
   const ctx = cv.getContext('2d');
-  map.forEach((row, y) => [...row].forEach((ch, x) => {
+  rows.forEach((row, y) => [...row].forEach((ch, x) => {
     if (ch === '.') return;
     ctx.fillStyle = col[ch];
     ctx.fillRect(x, y, 1, 1);
   }));
-  return `<img src="${cv.toDataURL()}" alt="우주 씨앗">`;
+  return `<img src="${cv.toDataURL()}" alt="${growth.name}">`;
 }
 
 /* ════════════════════════ 슬라임 방 (장식) ════════════════════════ */
@@ -5254,7 +5355,9 @@ function buildRoomTab() {
     ['완수한 도전', S.prestige.totalResets >= CHALLENGE_UNLOCK_RESETS
       ? Object.keys(S.codex.challenges).length + '/' + CHALLENGES.length
       : '나중에 열려요'],
-    ['우주 씨앗', S.cosmicSeed ? '🌌 싹틈 — 우주를 한 번 완성함' : (S.prestige.totalResets ? '아직 잠들어 있음' : '아주 먼 별빛')],
+    ['우주 씨앗', S.cosmicSeed ? `🌌 ${cosmicTreeGrowth().name} — ${cosmicSeedDateText()}` : (S.prestige.totalResets ? '아직 잠들어 있음' : '아주 먼 별빛')],
+    ['황금 소원', cosmicGoldenWishesCompleted() + '개'],
+    ['별나무 돌봄', S.cosmicSeed ? `${cosmicTreeGrowth().level}/5단계` : '아직 별빛을 기다려요'],
     ['가장 아낀 친구', bestFriend ? `${bestFriend.name} (${bestFriend.max}마리)` : '아직 없어요'],
   ];
   const album = document.createElement('div');
@@ -5456,8 +5559,10 @@ function buyProducer(p) {
   }
   const info = bulkInfo(p);
   if (info.count === 0 || S.coins < info.cost) return;
+  const hadFriends = PRODUCERS.some(pr => (S.producers[pr.id] || 0) > 0);
   S.coins -= info.cost;
   S.producers[p.id] += info.count;
+  if (!hadFriends && S.telemetry.firstFriendAt == null) S.telemetry.firstFriendAt = Math.round(S.playTime);
   consumeDiscount();
   sndBuy();
   wishEvent('hire', info.count);
@@ -5636,10 +5741,24 @@ let cloudLife = 0;
 let cloudTime = 0;
 let cloudClicks = 0;
 let cloudNeed = 0;
+let cloudLeaveTimer = 0;
+
+function resetCloudVisual() {
+  const visual = $('cloud-visual');
+  if (!visual) return;
+  visual.innerHTML =
+    spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' });
+}
 
 function spawnCloud() {
+  if (cloudState !== 'hidden') return false;
   // 탭이 안 보일 때 떴다 사라지면 손님을 영영 못 봄 — 잠시 미룸
-  if (document.hidden) { cloudTimer = 30; return; }
+  if (document.hidden) { cloudTimer = 30; return false; }
+  if (cloudLeaveTimer) {
+    clearTimeout(cloudLeaveTimer);
+    cloudLeaveTimer = 0;
+  }
+  resetCloudVisual();
   cloudState = 'drift';
   cloudLife = 14;
   const pos = starSpawnRect();
@@ -5652,12 +5771,19 @@ function spawnCloud() {
   S.telemetry.cloudsSeen++;
   toast('☁️ <b>먹구름 손님</b>! 빠르게 두드려 비를 털면 <b>코인과 별가루</b>를 받아요');
   beep(294, 0.12, 'triangle', 0.07);
+  return true;
 }
 
 function hideCloud() {
+  if (cloudLeaveTimer) {
+    clearTimeout(cloudLeaveTimer);
+    cloudLeaveTimer = 0;
+  }
   cloudState = 'hidden';
   cloudEl.style.display = 'none';
+  cloudEl.classList.remove('drift', 'challenge');
   $('cloud-bar').style.width = '0%';
+  resetCloudVisual();
   cloudTimer = 150 + Math.random() * 150;
 }
 
@@ -5700,6 +5826,7 @@ function spawnRaindrops(x, y) {
 }
 
 function cloudSuccess() {
+  if (cloudState !== 'challenge') return false;
   const bonus = Math.max(totalCps() * 180, clickPower() * 250, 200);
   earnCoins(bonus, 'event');
   S.stardust += 2;
@@ -5715,23 +5842,28 @@ function cloudSuccess() {
   $('cloud-hint').textContent = '고마워! ☀️';
   $('cloud-visual').innerHTML =
     spriteHtml('guests', 'raincloud-happy', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' });
-  setTimeout(() => {
-    $('cloud-visual').innerHTML =
-      spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' });
+  cloudLeaveTimer = setTimeout(() => {
+    cloudLeaveTimer = 0;
     hideCloud();
   }, 1000);
   checkEvolution();
   renderHud();
   save();
+  return true;
 }
 
 function cloudFail() {
+  if (cloudState !== 'challenge') {
+    hideCloud();
+    return false;
+  }
   const consol = Math.max(totalCps() * 15, 30);
   earnCoins(consol, 'event');
   toast(`☁️ 먹구름이 떠나며 간식을 두고 갔어요 <b>+${fmt(consol)}</b>`);
   hideCloud();
   renderHud();
   save();
+  return true;
 }
 
 /* ════════════════════════ 길 잃은 별똥이 ════════════════════════
@@ -6003,6 +6135,8 @@ function migrateSave(data) {
       lifetime: {
         bestCombo: old.bestCombo || 0,
         starsClicked: old.starsClicked || 0,
+        cloudsSoothed: old.cloudsSoothed || 0,
+        starletsHelped: old.starletsHelped || 0,
         earned: data.totalEarned || 0,  // 과거 생애 누적은 복원 불가, 현재 누적으로 근사
       },
       run: {
@@ -6065,6 +6199,7 @@ function migrateSave(data) {
   // v9 이하: 우주 씨앗 + 텔레메트리 + 음악 설정
   out.musicOn = data.musicOn !== false;
   out.cosmicSeed = !!data.cosmicSeed;
+  out.cosmicSeedAt = data.cosmicSeedAt || null;
   out.telemetry = Object.assign(defaultState().telemetry, data.telemetry || {});
   if (!Array.isArray(out.telemetry.sessionLengths)) out.telemetry.sessionLengths = [];
   out.achievements = data.achievements || {};
@@ -6525,6 +6660,15 @@ for (const key in FX_ATLASES) {
 (() => {
   const im = new Image();
   im.onload = () => {
+    mainTraitAtlasOk = true;
+    slimeSpriteSig = '';
+  };
+  im.src = MAIN_TRAIT_ATLAS.src;
+})();
+
+(() => {
+  const im = new Image();
+  im.onload = () => {
     strawberryTraitAtlasOk = true;
     slimeSpriteSig = '';
   };
@@ -6568,17 +6712,62 @@ window.telemetryDump = function telemetryDump() {
   const t = S.telemetry;
   const avg = t.sessionLengths.length
     ? Math.round(t.sessionLengths.reduce((a, b) => a + b, 0) / t.sessionLengths.length) : 0;
+  const ratio = (value, total) => total ? Math.min(100, value / total * 100).toFixed(0) + '%' : '-';
+  const milestone = (sec, fallbackSeen) => {
+    if (sec != null) return fmtTime(sec);
+    return fallbackSeen ? '기록 전 달성' : '아직 미도달';
+  };
+  const totalFriends = PRODUCERS.reduce((sum, p) => sum + (S.producers[p.id] || 0), 0);
+  const cloudSuccess = S.stats.lifetime.cloudsSoothed || 0;
+  const seed = cosmicSeedProgress();
+  const seedProgress = {
+    해금: S.cosmicSeed ? '완성' : '진행 중',
+    갓슬라임: seed.god ? '완료' : '미완료',
+    환생: `${seed.resets}/3`,
+    성향: `${seed.traits}/3`,
+    별의기록: `${seed.stories}/8`,
+    장식: `${seed.decor}/4`,
+  };
   return {
-    세션수: t.sessions,
-    평균세션: fmtTime(avg),
-    최근세션들: t.sessionLengths.map(fmtTime),
-    황금별_응답률: t.starsSeen ? Math.min(100, t.starsClicked / t.starsSeen * 100).toFixed(0) + '%' : '-',
-    먹구름_참여율: t.cloudsSeen ? (t.cloudsEngaged / t.cloudsSeen * 100).toFixed(0) + '%' : '-',
-    별똥이_구조율: t.starletsSeen ? ((t.starletsHelped || 0) / t.starletsSeen * 100).toFixed(0) + '%' : '-',
-    리롤: t.rerolls, 스킵: t.skips,
-    도전시작: t.challengesStarted,
-    소원완료: S.wishes.completed,
-    플레이타임: fmtTime(S.playTime),
+    요약: {
+      세션수: t.sessions,
+      총플레이시간: fmtTime(S.playTime),
+      평균세션: fmtTime(avg),
+      최근세션들: t.sessionLengths.map(fmtTime),
+    },
+    첫20분_마일스톤: {
+      첫친구까지: milestone(t.firstFriendAt, totalFriends > 0),
+      첫진화까지: milestone(t.firstEvolutionAt, stageIdx > 0 || Object.keys(S.codex.stages || {}).length > 1),
+      첫축복선택까지: milestone(t.firstBlessingAt, S.runBlessings.length > 0 || Object.keys(S.codex.blessings || {}).length > 0),
+    },
+    이벤트_응답: {
+      황금별_응답률: ratio(t.starsClicked || 0, t.starsSeen || 0),
+      황금별_클릭_등장: `${t.starsClicked || 0}/${t.starsSeen || 0}`,
+      먹구름_참여율: ratio(t.cloudsEngaged || 0, t.cloudsSeen || 0),
+      먹구름_참여_등장: `${t.cloudsEngaged || 0}/${t.cloudsSeen || 0}`,
+      먹구름_성공률: ratio(cloudSuccess, t.cloudsEngaged || 0),
+      먹구름_성공_참여: `${cloudSuccess}/${t.cloudsEngaged || 0}`,
+      별똥이_구조율: ratio(t.starletsHelped || 0, t.starletsSeen || 0),
+      별똥이_구조_등장: `${t.starletsHelped || 0}/${t.starletsSeen || 0}`,
+    },
+    선택과_진행: {
+      소원완료: S.wishes.completed,
+      황금소원완료: cosmicGoldenWishesCompleted(),
+      도전런_시작: t.challengesStarted || 0,
+      축복선택: S.runBlessings.length,
+      리롤: t.rerolls || 0,
+      스킵: t.skips || 0,
+    },
+    우주씨앗_조건: seedProgress,
+    현재상태: {
+      레벨: slimeLevel,
+      단계: STAGES[stageIdx].name,
+      환생: S.prestige.totalResets,
+      보유영혼: S.prestige.souls,
+      총획득영혼: S.prestige.totalSoulsEarned,
+      별가루: S.stardust,
+    },
+    공유가이드: '설정(⚙️) > 세이브 코드 내보내기 > 복사 후 이 telemetryDump() 결과와 함께 전달',
   };
 };
 
@@ -6693,6 +6882,14 @@ window.launchCheck = async function launchCheck() {
   const WEIGHTS = { stability: 30, onboarding: 15, pacing: 25, performance: 15, compliance: 15 };
   const add = (cat, name, pass, detail) => cats[cat].push({ name, pass: !!pass, detail: detail || '' });
   const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const waitUntil = async (predicate, timeout = 1600) => {
+    const started = performance.now();
+    while (performance.now() - started < timeout) {
+      if (predicate()) return true;
+      await sleep(50);
+    }
+    return predicate();
+  };
   const noNaN = obj => !/NaN|Infinity/.test(JSON.stringify(obj));
   const smAt = n => 1 + 0.05 * Math.min(n, 100) + 0.02 * Math.min(Math.max(n - 100, 0), 400) + 0.005 * Math.max(n - 500, 0);
 
@@ -6726,16 +6923,40 @@ window.launchCheck = async function launchCheck() {
     frenzyTimer = 0; partyTimer = 0; S.buffs.discount = false;
     document.querySelectorAll('.mini-star').forEach(el => el.remove());
 
+    const cloudCoins0 = S.coins;
+    const cloudDust0 = S.stardust;
+    const cloudSoothed0 = S.stats.lifetime.cloudsSoothed || 0;
     spawnCloud();
     if (cloudState === 'drift') {
-      cloudEl.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      cloudEl.dispatchEvent(new PointerEvent('pointerdown', { clientX: 300, clientY: 300, bubbles: true }));
       cloudClicks = cloudNeed - 1;
-      cloudEl.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+      cloudEl.dispatchEvent(new PointerEvent('pointerdown', { clientX: 300, clientY: 300, bubbles: true }));
     }
-    add('stability', '먹구름 성공 경로', cloudState === 'hidden' && errCount === e0);
+    const cloudSuccessHidden = await waitUntil(() => cloudState === 'hidden');
+    add('stability', '먹구름 성공 경로',
+      cloudSuccessHidden && S.coins > cloudCoins0 && S.stardust === cloudDust0 + 2 &&
+      (S.stats.lifetime.cloudsSoothed || 0) === cloudSoothed0 + 1 && errCount === e0 && noNaN(S));
+    const dupCoins = S.coins;
+    const dupDust = S.stardust;
+    const dupSoothed = S.stats.lifetime.cloudsSoothed || 0;
+    cloudSuccess();
+    add('stability', '먹구름 중복 성공 방지',
+      S.coins === dupCoins && S.stardust === dupDust &&
+      (S.stats.lifetime.cloudsSoothed || 0) === dupSoothed && errCount === e0);
+
+    const failCoins0 = S.coins;
+    const failDust0 = S.stardust;
     spawnCloud();
-    if (cloudState === 'drift') { cloudEl.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); cloudFail(); }
-    add('stability', '먹구름 실패 경로', cloudState === 'hidden' && errCount === e0);
+    if (cloudState === 'drift') { cloudEl.dispatchEvent(new PointerEvent('pointerdown', { clientX: 300, clientY: 300, bubbles: true })); cloudFail(); }
+    add('stability', '먹구름 실패 경로',
+      cloudState === 'hidden' && S.coins > failCoins0 && S.stardust === failDust0 && errCount === e0 && noNaN(S));
+
+    const ignoreCoins0 = S.coins;
+    const ignoreDust0 = S.stardust;
+    spawnCloud();
+    if (cloudState === 'drift') hideCloud();
+    add('stability', '먹구름 무시 경로',
+      cloudState === 'hidden' && S.coins === ignoreCoins0 && S.stardust === ignoreDust0 && errCount === e0);
 
     S.totalEarned = levelNeed(5) + 1; checkEvolution();
     openBlessingModal(); blessGuardUntil = 0;

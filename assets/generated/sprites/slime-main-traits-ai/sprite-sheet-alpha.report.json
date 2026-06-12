@@ -1,0 +1,557 @@
+{
+  "ok": true,
+  "engine": "component-row",
+  "curation_applied": false,
+  "errors": [],
+  "atlas": "sprite-sheet-alpha.png",
+  "manifest": "manifest.json",
+  "cell": {
+    "shape": "square",
+    "width": 768,
+    "height": 768,
+    "safe_margin_x": 84,
+    "safe_margin_y": 84,
+    "size": 768,
+    "safe_margin": 84
+  },
+  "states": [
+    "baby_green_muscle",
+    "baby_green_ranch",
+    "baby_green_star",
+    "baby_green_dream",
+    "sea_muscle",
+    "sea_ranch",
+    "sea_star",
+    "sea_dream",
+    "gold_king_muscle",
+    "gold_king_ranch",
+    "gold_king_star",
+    "gold_king_dream",
+    "god_muscle",
+    "god_ranch",
+    "god_star",
+    "god_dream"
+  ],
+  "cells": [
+    {
+      "state": "baby_green_muscle",
+      "frame": 0,
+      "nontransparent_pixels": 174597,
+      "x": 0,
+      "y": 0,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "baby_green_muscle",
+      "frame": 1,
+      "nontransparent_pixels": 184532,
+      "x": 768,
+      "y": 0,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "baby_green_ranch",
+      "frame": 0,
+      "nontransparent_pixels": 208235,
+      "x": 0,
+      "y": 768,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "baby_green_ranch",
+      "frame": 1,
+      "nontransparent_pixels": 211847,
+      "x": 768,
+      "y": 768,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "baby_green_star",
+      "frame": 0,
+      "nontransparent_pixels": 143869,
+      "x": 0,
+      "y": 1536,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "baby_green_star",
+      "frame": 1,
+      "nontransparent_pixels": 152318,
+      "x": 768,
+      "y": 1536,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "baby_green_dream",
+      "frame": 0,
+      "nontransparent_pixels": 162437,
+      "x": 0,
+      "y": 2304,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "baby_green_dream",
+      "frame": 1,
+      "nontransparent_pixels": 164125,
+      "x": 768,
+      "y": 2304,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "sea_muscle",
+      "frame": 0,
+      "nontransparent_pixels": 194927,
+      "x": 0,
+      "y": 3072,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "sea_muscle",
+      "frame": 1,
+      "nontransparent_pixels": 188121,
+      "x": 768,
+      "y": 3072,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "sea_ranch",
+      "frame": 0,
+      "nontransparent_pixels": 210388,
+      "x": 0,
+      "y": 3840,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "sea_ranch",
+      "frame": 1,
+      "nontransparent_pixels": 186711,
+      "x": 768,
+      "y": 3840,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "sea_star",
+      "frame": 0,
+      "nontransparent_pixels": 166870,
+      "x": 0,
+      "y": 4608,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "sea_star",
+      "frame": 1,
+      "nontransparent_pixels": 173540,
+      "x": 768,
+      "y": 4608,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "sea_dream",
+      "frame": 0,
+      "nontransparent_pixels": 175164,
+      "x": 0,
+      "y": 5376,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "sea_dream",
+      "frame": 1,
+      "nontransparent_pixels": 183595,
+      "x": 768,
+      "y": 5376,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "gold_king_muscle",
+      "frame": 0,
+      "nontransparent_pixels": 210116,
+      "x": 0,
+      "y": 6144,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "gold_king_muscle",
+      "frame": 1,
+      "nontransparent_pixels": 204780,
+      "x": 768,
+      "y": 6144,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "gold_king_ranch",
+      "frame": 0,
+      "nontransparent_pixels": 187589,
+      "x": 0,
+      "y": 6912,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "gold_king_ranch",
+      "frame": 1,
+      "nontransparent_pixels": 175578,
+      "x": 768,
+      "y": 6912,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "gold_king_star",
+      "frame": 0,
+      "nontransparent_pixels": 192573,
+      "x": 0,
+      "y": 7680,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "gold_king_star",
+      "frame": 1,
+      "nontransparent_pixels": 156049,
+      "x": 768,
+      "y": 7680,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "gold_king_dream",
+      "frame": 0,
+      "nontransparent_pixels": 191658,
+      "x": 0,
+      "y": 8448,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "gold_king_dream",
+      "frame": 1,
+      "nontransparent_pixels": 164503,
+      "x": 768,
+      "y": 8448,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "god_muscle",
+      "frame": 0,
+      "nontransparent_pixels": 228397,
+      "x": 0,
+      "y": 9216,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "god_muscle",
+      "frame": 1,
+      "nontransparent_pixels": 223024,
+      "x": 768,
+      "y": 9216,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "god_ranch",
+      "frame": 0,
+      "nontransparent_pixels": 210543,
+      "x": 0,
+      "y": 9984,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "god_ranch",
+      "frame": 1,
+      "nontransparent_pixels": 172841,
+      "x": 768,
+      "y": 9984,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "god_star",
+      "frame": 0,
+      "nontransparent_pixels": 219508,
+      "x": 0,
+      "y": 10752,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "god_star",
+      "frame": 1,
+      "nontransparent_pixels": 205086,
+      "x": 768,
+      "y": 10752,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "god_dream",
+      "frame": 0,
+      "nontransparent_pixels": 208272,
+      "x": 0,
+      "y": 11520,
+      "w": 768,
+      "h": 768
+    },
+    {
+      "state": "god_dream",
+      "frame": 1,
+      "nontransparent_pixels": 204454,
+      "x": 768,
+      "y": 11520,
+      "w": 768,
+      "h": 768
+    }
+  ],
+  "frame_layout": {
+    "sheetWidth": 1536,
+    "sheetHeight": 12288,
+    "cellWidth": 768,
+    "cellHeight": 768,
+    "rows": {
+      "baby_green_muscle": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 0,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "baby_green_ranch": [
+        {
+          "x": 0,
+          "y": 768,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 768,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "baby_green_star": [
+        {
+          "x": 0,
+          "y": 1536,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 1536,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "baby_green_dream": [
+        {
+          "x": 0,
+          "y": 2304,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 2304,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "sea_muscle": [
+        {
+          "x": 0,
+          "y": 3072,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 3072,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "sea_ranch": [
+        {
+          "x": 0,
+          "y": 3840,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 3840,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "sea_star": [
+        {
+          "x": 0,
+          "y": 4608,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 4608,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "sea_dream": [
+        {
+          "x": 0,
+          "y": 5376,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 5376,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "gold_king_muscle": [
+        {
+          "x": 0,
+          "y": 6144,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 6144,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "gold_king_ranch": [
+        {
+          "x": 0,
+          "y": 6912,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 6912,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "gold_king_star": [
+        {
+          "x": 0,
+          "y": 7680,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 7680,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "gold_king_dream": [
+        {
+          "x": 0,
+          "y": 8448,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 8448,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "god_muscle": [
+        {
+          "x": 0,
+          "y": 9216,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 9216,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "god_ranch": [
+        {
+          "x": 0,
+          "y": 9984,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 9984,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "god_star": [
+        {
+          "x": 0,
+          "y": 10752,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 10752,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "god_dream": [
+        {
+          "x": 0,
+          "y": 11520,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 11520,
+          "w": 768,
+          "h": 768
+        }
+      ]
+    }
+  }
+}

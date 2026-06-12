@@ -81,7 +81,7 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | slime-guests-ai | 4 (먹구름·별똥이 + happy 표정) | ✅ 생성·연결 완료 |
 | slime-main-ai | 5단계 ×2프레임 (본체) | ✅ 연결됨 — strawberry 행 atlas 보정 적용, 런타임 `pinkifyGray()`는 잔여 폴백 |
 | slime-traits-ai | 5 (성향 액세서리: muscle/ranch/star 2f/dream/samsara 2f) | ⚠️ 시각 QA에서 제네릭 오버레이 한계 판정 (docs/VISUAL-QA.md) — 인터림: 모자류는 비왕관 단계만, star는 글로우 폴백, samsara 고리만 전 단계. 구운 변형으로 대체 예정 |
-| slime-main-traits-ai | 16 (비핑크 4단계 × 4성향, 각 2f) | 📝 요청서 작성됨 — 성향을 입혀 구운 본체 변형 (액세서리가 곡면을 따라 닿게, 왕관과 자연 통합). magenta |
+| slime-main-traits-ai | 16 (비핑크 4단계 × 4성향, 각 2f) | ⚠️ 생성·부분 연결 — ranch/star/dream은 baked 본체로 승격, muscle은 magenta key로 머리띠가 어두워 overlay 유지 |
 | slime-strawberry-traits-ai | 4 (딸기 × 4성향, 각 2f) | ⚠️ 생성·부분 연결 — ranch/star/dream은 baked 본체로 승격, muscle은 눈 판독 약화로 overlay 유지 |
 | slime-crystal-ai | 4 (젤리 결정 숙성: seed/sprout/bud/ripe 2프레임) | ✅ 생성·연결 완료 (green 크로마, 채도 정상 실측) |
 | slime-goldstar-ai | 2 (황금별 2f, 미니 별똥별 2f) | ✅ 생성·연결 완료 — 캔버스에 셀 배경 + CSS 2f 반짝임, 캔버스 픽셀 폴백 |
