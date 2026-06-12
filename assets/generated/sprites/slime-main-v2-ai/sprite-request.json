@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-main-v2-ai",
+    "description": "newer pixel-art default main slime atlas matching baked trait style",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 768,
+    "height": 768,
+    "safe_margin_x": 84,
+    "safe_margin_y": 84,
+    "size": 768,
+    "safe_margin": 84
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "baby_green": {
+      "row": 0,
+      "frames": 2,
+      "fps": 2,
+      "loop": true
+    },
+    "sea": {
+      "row": 1,
+      "frames": 2,
+      "fps": 2,
+      "loop": true
+    },
+    "strawberry": {
+      "row": 2,
+      "frames": 2,
+      "fps": 2,
+      "loop": true
+    },
+    "gold_king": {
+      "row": 3,
+      "frames": 2,
+      "fps": 2,
+      "loop": true
+    },
+    "god": {
+      "row": 4,
+      "frames": 2,
+      "fps": 2,
+      "loop": true
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution cute slime mascot, chunky whole-body silhouette, thick dark outline, visible stepped pixel edges, limited palette, flat cel shading, no detached effects, no accessories except crowns on gold_king and god"
+}
