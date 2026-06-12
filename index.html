@@ -546,8 +546,9 @@
   /* ── 말풍선 ── */
   #speech-bubble {
     position: absolute;
-    top: -56px; left: 50%;
-    transform: translateX(-50%) scale(0);
+    top: 18px; left: calc(100% + 10px);
+    transform: scale(0);
+    transform-origin: left center;
     background: var(--text);
     color: #2d1b4e;
     font-size: 11px;
@@ -562,14 +563,14 @@
     transition: transform .2s ease;
     pointer-events: none;
   }
-  #speech-bubble.show { transform: translateX(-50%) scale(1); }
+  #speech-bubble.show { transform: scale(1); }
   #speech-bubble::after {
     content: '';
     position: absolute;
-    bottom: -10px; left: 50%;
-    margin-left: -5px;
+    left: -10px; top: 50%;
+    margin-top: -5px;
     border: 5px solid transparent;
-    border-top-color: #2d1b4e;
+    border-right-color: #2d1b4e;
   }
 
   /* ── 친구 시각화: 행동 기반 주민 시스템 ── */
@@ -1375,9 +1376,9 @@
 
   /* ── 말풍선 테마 ── */
   #speech-bubble.bubble-pink { background: #ffd9ec; border-color: #a8336e; color: #5e1740; }
-  #speech-bubble.bubble-pink::after { border-top-color: #a8336e; }
+  #speech-bubble.bubble-pink::after { border-right-color: #a8336e; }
   #speech-bubble.bubble-gold { background: #ffeec4; border-color: #8a6d1f; color: #5c4312; }
-  #speech-bubble.bubble-gold::after { border-top-color: #8a6d1f; }
+  #speech-bubble.bubble-gold::after { border-right-color: #8a6d1f; }
 
   /* ── 주스: 코인 팝 / 구매 플래시 / 환생 플래시 ── */
   #coin-display.pop { animation: coinpop .15s ease-out; }
@@ -1764,6 +1765,9 @@
     #starlet { width: 44px; height: 44px; }
     #starlet-hint { font-size: 10px; top: -28px; }
     .mini-star { width: 24px; height: 24px; }
+    .spark { width: 5px; height: 5px; }
+    .float-num { font-size: 12px; }
+    .float-num.big { font-size: 15px; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis; }
     .decor { font-size: 24px; }
     .cosmic-seed-tree img { width: 42px; height: 48px; }
     #combo-box { height: 34px; margin-top: 4px; }
@@ -1771,7 +1775,7 @@
     #combo-bar-outer { width: 140px; height: 8px; }
     #challenge-badge { font-size: 10px; padding: 2px 8px; margin-bottom: 4px; }
     .friend { font-size: 20px; }
-    #speech-bubble { top: -42px; font-size: 10px; max-width: 160px; padding: 5px 8px; }
+    #speech-bubble { top: 18px; left: calc(100% + 6px); font-size: 10px; max-width: 128px; padding: 5px 8px; }
     /* 상점: 나머지 전부 + iOS 홈바 안전영역 */
     #shop {
       width: 100%;
@@ -1826,15 +1830,17 @@
     /* 토스트: 모바일에선 뉴스 스트립 아래 */
     #toast {
       top: auto;
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
-      font-size: 12px;
-      padding: 10px 14px;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+      font-size: 10px;
+      padding: 6px 10px;
       width: max-content;
-      max-width: calc(100vw - 24px);
+      max-width: min(72vw, 280px);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      line-height: 1.35;
+      line-height: 1.2;
+      border-width: 2px;
+      box-shadow: 3px 3px 0 #00000066;
       transform: translateX(-50%) translateY(140%);
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
@@ -3410,8 +3416,8 @@ function achievementSpriteHtml(id, fallback, done) {
   return spriteHtml('achievements', id, done ? fallback : '❓', { size: 54, className });
 }
 
-function decorSpriteHtml(id, fallback, className = 'shop-sprite') {
-  const size = className.includes('room-decor-sprite') ? 78 : 60;
+function decorSpriteHtml(id, fallback, className = 'shop-sprite', sizeOverride = null) {
+  const size = sizeOverride || (className.includes('room-decor-sprite') ? 78 : 60);
   return spriteHtml('decor', id, fallback, { size, className });
 }
 
@@ -4303,6 +4309,11 @@ let quipHideTimer = null;
 function showQuip(text) {
   if (silentTick) return;
   const el = $('speech-bubble');
+  if (transientGuestActive()) {
+    el.classList.remove('show');
+    clearTimeout(quipHideTimer);
+    return;
+  }
   el.textContent = text;
   el.classList.add('show');
   clearTimeout(quipHideTimer);
@@ -5667,8 +5678,9 @@ function renderDecor() {
     const el = document.createElement('div');
     // top 기준 배치 = 하늘 장식 (부유 허용), 나머지는 바닥 접지
     el.className = 'decor' + (d.center ? ' center' : '') + (d.pos.top !== undefined ? ' sky' : '');
-    el.innerHTML = decorSpriteHtml(d.id, d.icon, 'room-decor-sprite');
-    const stagePos = !isMobileLayout() ? desktopStageDecorPos(d, 78) : null;
+    const decorSize = isMobileLayout() ? 52 : 78;
+    el.innerHTML = decorSpriteHtml(d.id, d.icon, 'room-decor-sprite', decorSize);
+    const stagePos = !isMobileLayout() ? desktopStageDecorPos(d, decorSize) : null;
     const pos = stagePos || (isMobileLayout() && d.mobilePos ? d.mobilePos : d.pos);
     for (const k of ['left', 'right', 'top', 'bottom']) {
       if (pos[k] !== undefined) el.style[k] = pos[k];
@@ -6632,6 +6644,34 @@ function clampEventCoord(value, min, max) {
   return clampNum(value, lo, hi);
 }
 
+function avoidActiveGuestOverlap(kind, pos, size, bounds) {
+  const ownId = kind === 'cloud' ? 'raincloud' : kind === 'starlet' ? 'starlet' : kind === 'star' ? 'golden-star' : '';
+  const guests = ['golden-star', 'raincloud', 'starlet']
+    .filter(id => id !== ownId)
+    .map(id => $(id))
+    .filter(el => el && getComputedStyle(el).display !== 'none')
+    .map(el => el.getBoundingClientRect())
+    .filter(r => r.width && r.height);
+  if (bounds.slime) guests.push(bounds.slime);
+
+  const pad = bounds.mobile ? 14 : 22;
+  const overlaps = p => guests.some(r =>
+    p.x < r.right + pad && p.x + size > r.left - pad &&
+    p.y < r.bottom + pad && p.y + size > r.top - pad
+  );
+  const mirrorX = p => clampEventCoord(bounds.cx - (p.x + size / 2 - bounds.cx) - size / 2, bounds.minX, bounds.maxX);
+  const candidates = [
+    pos,
+    { x: mirrorX(pos), y: pos.y },
+    bounds.slime ? { x: clampEventCoord(bounds.slime.left - size - pad, bounds.minX, bounds.maxX), y: pos.y } : pos,
+    bounds.slime ? { x: clampEventCoord(bounds.slime.right + pad, bounds.minX, bounds.maxX), y: pos.y } : pos,
+    { x: clampEventCoord(pos.x + (pos.x + size / 2 < bounds.cx ? -size * 0.82 : size * 0.82), bounds.minX, bounds.maxX), y: pos.y },
+    { x: pos.x, y: clampEventCoord(pos.y + size * 0.72, bounds.minY, bounds.maxY) },
+    { x: mirrorX(pos), y: clampEventCoord(pos.y + size * 0.72, bounds.minY, bounds.maxY) },
+  ];
+  return candidates.find(p => !overlaps(p)) || candidates[candidates.length - 1];
+}
+
 function starSpawnRect(kind = 'star') {
   const area = $('game-area').getBoundingClientRect();
   const slime = $('slime-canvas').getBoundingClientRect();
@@ -6646,21 +6686,24 @@ function starSpawnRect(kind = 'star') {
   const maxX = Math.min(area.right - size - margin, cx + stageW * 0.58);
   const minY = area.top + (mobile ? 150 : 220);
   const maxY = area.bottom - size - (mobile ? 68 : 86);
+  const bounds = { minX, maxX, minY, maxY, cx, mobile, slime };
 
   if (kind === 'cloud') {
     const side = Math.random() < 0.5 ? -1 : 1;
-    return {
+    const pos = {
       x: clampEventCoord(cx + side * stageW * (0.22 + Math.random() * 0.23) - size / 2, minX, maxX),
       y: clampEventCoord(slime.top - size * 0.55 + Math.random() * stageH * 0.18, minY, slime.top + stageH * 0.08),
     };
+    return avoidActiveGuestOverlap(kind, pos, size, bounds);
   }
 
   if (kind === 'starlet') {
     const side = Math.random() < 0.5 ? -1 : 1;
-    return {
+    const pos = {
       x: clampEventCoord(cx + side * stageW * (0.34 + Math.random() * 0.12) - size / 2, minX, maxX),
       y: clampEventCoord(slime.top + slime.height * (0.46 + Math.random() * 0.15), minY, maxY),
     };
+    return avoidActiveGuestOverlap(kind, pos, size, bounds);
   }
 
   const arcStart = kind === 'mini' ? 205 : 220;
@@ -6668,10 +6711,11 @@ function starSpawnRect(kind = 'star') {
   const a = (arcStart + Math.random() * (arcEnd - arcStart)) * Math.PI / 180;
   const rx = stageW * (kind === 'mini' ? 0.46 + Math.random() * 0.1 : 0.36 + Math.random() * 0.12);
   const ry = stageH * (kind === 'mini' ? 0.34 + Math.random() * 0.08 : 0.32 + Math.random() * 0.08);
-  return {
+  const pos = {
     x: clampEventCoord(cx + Math.cos(a) * rx - size / 2, minX, maxX),
     y: clampEventCoord(cy + Math.sin(a) * ry - size / 2, minY, maxY),
   };
+  return kind === 'mini' ? pos : avoidActiveGuestOverlap(kind, pos, size, bounds);
 }
 
 function spawnStar() {
