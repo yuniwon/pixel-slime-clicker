@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-perks-extra-ai",
+    "description": "",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 256,
+    "height": 256,
+    "safe_margin_x": 28,
+    "safe_margin_y": 28,
+    "size": 256,
+    "safe_margin": 28
+  },
+  "chroma_key": {
+    "name": "green",
+    "hex": "#00FF00",
+    "rgb": [
+      0,
+      255,
+      0
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "soulfire": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "late prestige perk icon, pink-violet jelly soul flame with warm gold core, readable as income spirit fire"
+    },
+    "starborn": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "late prestige perk icon, bright gold birth star rising from a small purple jelly horizon, readable as star lineage"
+    },
+    "deeproot": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "late prestige perk icon, sturdy brown jelly root with two fresh green leaves, readable as deep offline-growth roots"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

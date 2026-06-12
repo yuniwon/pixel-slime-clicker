@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-challenges-ai",
+    "description": "",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 256,
+    "height": 256,
+    "safe_margin_x": 28,
+    "safe_margin_y": 28,
+    "size": 256,
+    "safe_margin": 28
+  },
+  "chroma_key": {
+    "name": "green",
+    "hex": "#00FF00",
+    "rgb": [
+      0,
+      255,
+      0
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "silence": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "silent hand challenge icon, cute soft padded hand held upright with a tiny hush stripe, readable as no-click challenge"
+    },
+    "mono": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "single path ranch challenge icon, one cozy purple stable stall with one paw print and a simple one-way path marker"
+    },
+    "starlit": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "starlit hunter challenge icon, bright gold shooting star crossing a small dark sky tile with one tiny jelly sparkle"
+    },
+    "sprint": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "sprint life challenge icon, compact lavender stopwatch with a pink diagonal speed mark and tiny clock hand"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}
