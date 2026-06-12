@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-stage-garden-ai",
+    "description": "",
+    "base_image": null
+  },
+  "cell": {
+    "shape": "square",
+    "width": 512,
+    "height": 512,
+    "safe_margin_x": 56,
+    "safe_margin_y": 56,
+    "size": 512,
+    "safe_margin": 56
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "space_constellation": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "one connected decorative constellation sprite for the deep space backdrop, tiny gold and blue pixel stars joined by very thin pale blue pixel lines, airy asymmetrical arc, no separate unconnected stars"
+    },
+    "orbit_ring": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "one connected tilted oval orbit ring sprite, soft lavender-blue metal-light trail, hollow center, clean pixel outline, no detached sparkles"
+    },
+    "planet_body": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "one connected small floating planet body sprite, wide flattened grassy green top, blue stone underside, soft round cute silhouette, a few embedded pixel rocks, no detached pieces"
+    },
+    "spaceship_deck": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "one connected low spaceship deck platform sprite embedded into a planet garden, rounded metal hull, dark blue-gray panels, cyan and gold tiny lights, flat underside, no detached effects"
+    },
+    "garden_patch": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "one connected shallow garden turf patch sprite for the front of a spaceship deck, bright grass strip with tiny pebble border and stardust soil, low wide silhouette, no detached leaves"
+    },
+    "greenhouse_dome": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "one connected tiny greenhouse dome sprite, clear cyan glass half-dome on a small blue-gray base, simple leaf silhouette safely inside the dome, cute pixel highlight, no detached shine"
+    },
+    "antenna": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "one connected small garden spaceship antenna sprite, short blue-gray mast with gold oval signal loop attached to the top, sturdy base, no detached radio waves"
+    },
+    "left_planter": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "one connected left-side planter sprite, warm brown rounded pot with mint leaves growing as one cluster, tiny gold pebble trim, no flowers, no detached leaves"
+    },
+    "right_planter": {
+      "frames": 1,
+      "fps": 1,
+      "loop": false,
+      "action": "one connected right-side planter sprite, deep blue rounded pot with lime sprout cluster, tiny cyan pebble trim, no flowers, no detached leaves"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite, compact chibi/mascot-friendly proportions when the base allows it, chunky whole-body silhouette, thick dark 1-2 px outline, visible stepped/pixel edges, limited palette, flat cel shading with at most one small highlight and one shadow step, simple readable face, clear limbs, and no detail that disappears at small runtime size. Avoid polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny accessories.",
+  "motion_phase_guides": false
+}

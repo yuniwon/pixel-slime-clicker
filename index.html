@@ -83,6 +83,325 @@
     min-width: 0;
     overflow: hidden;
   }
+  #game-area > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ── 작은 행성 + 우주선 정원: 친구와 장식이 놓일 무대 ── */
+  #stage-backdrop {
+    --pg-center-y: calc(50% + clamp(74px, 10vh, 124px));
+    --pg-w: clamp(320px, 30vw, 540px);
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: .96;
+  }
+  #stage-backdrop::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: calc(var(--pg-center-y) + clamp(38px, 3vw, 58px));
+    width: clamp(300px, 28vw, 508px);
+    height: clamp(34px, 3vw, 52px);
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(ellipse, #00000050 0%, #00000028 45%, transparent 72%);
+    filter: blur(2px);
+  }
+  #stage-backdrop::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: calc(var(--pg-center-y) - clamp(150px, 14vw, 230px));
+    width: clamp(180px, 18vw, 320px);
+    height: clamp(90px, 9vw, 160px);
+    transform: translateX(-50%) rotate(-8deg);
+    border-radius: 50%;
+    border: clamp(2px, .22vw, 4px) solid #b48aff20;
+    border-left-color: transparent;
+    border-right-color: transparent;
+    box-shadow: 0 0 22px #8d5ce822;
+  }
+  .pg-orbit {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--pg-center-y) - clamp(4px, .5vw, 9px));
+    width: clamp(360px, 35vw, 620px);
+    height: clamp(94px, 8vw, 142px);
+    transform: translateX(-50%) rotate(-7deg);
+    border: clamp(3px, .27vw, 5px) solid #d8c2ff26;
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-radius: 50%;
+    filter: drop-shadow(0 0 8px #b48aff33);
+    animation: pg-orbit-breathe 8s ease-in-out infinite alternate;
+  }
+  @keyframes pg-orbit-breathe {
+    from { opacity: .55; transform: translateX(-50%) rotate(-8deg) scale(.98); }
+    to { opacity: .82; transform: translateX(-50%) rotate(-5deg) scale(1.01); }
+  }
+  .pg-planet {
+    position: absolute;
+    left: 50%;
+    top: var(--pg-center-y);
+    width: var(--pg-w);
+    height: clamp(112px, 9vw, 164px);
+    transform: translate(-50%, -8%);
+    border-radius: 50% 50% 42% 42%;
+    background:
+      linear-gradient(180deg, #75ba6e 0 31%, #4f885c 32% 50%, #385f66 51% 78%, #253544 79% 100%);
+    box-shadow:
+      inset 0 6px 0 #b7f17d55,
+      inset 0 -16px 0 #18283766,
+      0 9px 0 #142533,
+      0 24px 32px #00000070;
+  }
+  .pg-planet::before {
+    content: '';
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    top: 10%;
+    height: 28%;
+    border-radius: 50%;
+    background:
+      radial-gradient(ellipse at 22% 55%, #b4f07d 0 16%, transparent 17%),
+      radial-gradient(ellipse at 48% 34%, #8ad96f 0 12%, transparent 13%),
+      radial-gradient(ellipse at 75% 58%, #9fe774 0 15%, transparent 16%);
+    opacity: .94;
+  }
+  .pg-planet::after {
+    content: '';
+    position: absolute;
+    left: 17%;
+    right: 17%;
+    bottom: 14%;
+    height: 22%;
+    border-radius: 50%;
+    background:
+      repeating-linear-gradient(90deg, #7fc4ff24 0 10px, transparent 10px 24px),
+      linear-gradient(180deg, #ffffff10, transparent);
+  }
+  .pg-grass {
+    position: absolute;
+    top: 18%;
+    width: 22%;
+    height: 22%;
+    border-radius: 50%;
+    background:
+      repeating-linear-gradient(90deg, #c8ff8a 0 4px, #91d76a 4px 8px);
+    opacity: .92;
+    z-index: 1;
+  }
+  .pg-grass-left { left: 18%; transform: rotate(-7deg); }
+  .pg-grass-right { right: 18%; transform: rotate(8deg); }
+  .pg-deck {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--pg-center-y) - clamp(30px, 2.8vw, 48px));
+    width: clamp(220px, 21vw, 380px);
+    height: clamp(40px, 3.4vw, 62px);
+    transform: translateX(-50%);
+    border-radius: 8px 8px 3px 3px;
+    background:
+      repeating-linear-gradient(90deg, #ffffff12 0 2px, transparent 2px clamp(22px, 2vw, 34px)),
+      linear-gradient(180deg, #8798a4 0%, #536474 50%, #2f3c4e 100%);
+    box-shadow:
+      inset 0 4px 0 #d8ecff2e,
+      inset 0 -7px 0 #17233366,
+      0 6px 0 #172333,
+      0 14px 18px #00000055;
+    z-index: 3;
+  }
+  .pg-deck::before {
+    content: '';
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    top: -8px;
+    height: 8px;
+    border-radius: 2px 2px 0 0;
+    background:
+      repeating-linear-gradient(90deg, #ffd75e 0 8px, transparent 8px 30px);
+    opacity: .9;
+  }
+  .pg-deck::after {
+    content: '';
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: 6px;
+    height: 9px;
+    border-radius: 4px;
+    background:
+      repeating-linear-gradient(90deg, #6ecb6d 0 14px, #9be36b 14px 24px);
+    box-shadow: 0 3px 0 #1d3a2e;
+  }
+  .pg-deck-light {
+    position: absolute;
+    top: 12px;
+    width: clamp(8px, .75vw, 13px);
+    height: clamp(8px, .75vw, 13px);
+    border-radius: 2px;
+    background: #ffd75e;
+    box-shadow: 0 0 8px #ffd75e88, 0 3px 0 #8a5d1a;
+  }
+  .pg-deck-light:nth-child(1) { left: 16%; }
+  .pg-deck-light:nth-child(2) { left: 50%; transform: translateX(-50%); background: #7fc4ff; box-shadow: 0 0 8px #7fc4ff88, 0 3px 0 #24577a; }
+  .pg-deck-light:nth-child(3) { right: 16%; background: #ff8ac4; box-shadow: 0 0 8px #ff8ac488, 0 3px 0 #8f3f68; }
+  .pg-dome {
+    position: absolute;
+    left: calc(50% + clamp(116px, 10vw, 188px));
+    top: calc(var(--pg-center-y) - clamp(88px, 8vw, 132px));
+    width: clamp(48px, 4.2vw, 76px);
+    height: clamp(36px, 3.2vw, 58px);
+    border-radius: 50% 50% 8px 8px;
+    background:
+      linear-gradient(130deg, #ffffff66 0 18%, transparent 19%),
+      linear-gradient(180deg, #b9f7ff88, #7fc4ff30);
+    box-shadow:
+      0 0 0 clamp(3px, .28vw, 5px) #2a465d,
+      0 7px 0 #142533,
+      0 0 14px #7fc4ff33;
+    z-index: 4;
+  }
+  .pg-antenna {
+    position: absolute;
+    left: calc(50% - clamp(154px, 14vw, 244px));
+    top: calc(var(--pg-center-y) - clamp(96px, 8.4vw, 142px));
+    width: clamp(5px, .45vw, 8px);
+    height: clamp(44px, 4vw, 70px);
+    background: #8798a4;
+    box-shadow: 3px 0 0 #263445;
+    z-index: 4;
+  }
+  .pg-antenna::before {
+    content: '';
+    position: absolute;
+    left: clamp(-14px, -1vw, -9px);
+    top: clamp(-18px, -1.2vw, -12px);
+    width: clamp(28px, 2.4vw, 44px);
+    height: clamp(18px, 1.5vw, 28px);
+    border-radius: 50%;
+    border: clamp(3px, .28vw, 5px) solid #ffd75e;
+    border-left-color: transparent;
+    box-shadow: 0 0 10px #ffd75e44;
+  }
+  .pg-planter {
+    position: absolute;
+    top: calc(var(--pg-center-y) - clamp(50px, 4.4vw, 76px));
+    width: clamp(30px, 2.8vw, 48px);
+    height: clamp(24px, 2.1vw, 36px);
+    border-radius: 7px;
+    background: #8f5a43;
+    box-shadow: 0 5px 0 #40291f, 0 12px 14px #00000044;
+    z-index: 4;
+  }
+  .pg-planter::before {
+    content: '';
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    top: -34%;
+    height: 58%;
+    border-radius: 50% 50% 20% 20%;
+    background: #9be36b;
+    box-shadow: -6px 4px 0 #5bb85e, 7px 5px 0 #6ecb6d;
+  }
+  .pg-planter-left { left: calc(50% - clamp(132px, 11vw, 202px)); }
+  .pg-planter-right { left: calc(50% + clamp(90px, 8vw, 156px)); background: #6b4a7d; box-shadow: 0 5px 0 #34243e, 0 12px 14px #00000044; }
+
+  .pg-stage-sprite {
+    position: absolute;
+    background-image: var(--pg-bg-image);
+    background-size: var(--pg-bg-size, 100% 100%);
+    background-position: var(--pg-bg-position, 0 0);
+    background-repeat: no-repeat;
+    background-color: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    pointer-events: none;
+    image-rendering: auto;
+  }
+  .pg-stage-sprite::before,
+  .pg-stage-sprite::after {
+    content: none;
+    display: none;
+  }
+  .pg-grass,
+  .pg-deck-light {
+    display: none;
+  }
+  .pg-space-constellation {
+    left: calc(50% - clamp(248px, 20vw, 350px));
+    top: calc(var(--pg-center-y) - clamp(196px, 16vw, 274px));
+    width: clamp(180px, 15vw, 260px);
+    height: clamp(120px, 10vw, 180px);
+    opacity: .6;
+    z-index: 0;
+    filter: drop-shadow(0 0 7px #7fc4ff33);
+  }
+  .pg-orbit {
+    top: calc(var(--pg-center-y) - clamp(70px, 6vw, 102px));
+    width: clamp(360px, 35vw, 620px);
+    height: clamp(150px, 12vw, 220px);
+    transform: translateX(-50%) rotate(-7deg);
+    opacity: .5;
+    z-index: 1;
+    filter: drop-shadow(0 0 8px #b48aff22);
+  }
+  .pg-planet {
+    top: calc(var(--pg-center-y) - clamp(64px, 5.6vw, 92px));
+    width: var(--pg-w);
+    height: clamp(220px, 18vw, 330px);
+    transform: translateX(-50%);
+    z-index: 2;
+    filter: drop-shadow(0 20px 18px #00000060);
+  }
+  .pg-deck {
+    top: calc(var(--pg-center-y) - clamp(92px, 9vw, 126px));
+    width: clamp(230px, 22vw, 390px);
+    height: clamp(130px, 12vw, 220px);
+    transform: translateX(-50%);
+    z-index: 3;
+    filter: drop-shadow(0 12px 10px #00000050);
+  }
+  .pg-garden-patch {
+    left: 50%;
+    top: calc(var(--pg-center-y) - clamp(50px, 4.8vw, 72px));
+    width: clamp(220px, 20vw, 360px);
+    height: clamp(86px, 7vw, 130px);
+    transform: translateX(-50%);
+    z-index: 4;
+    filter: drop-shadow(0 8px 7px #00000035);
+  }
+  .pg-dome {
+    left: calc(50% + clamp(112px, 10vw, 180px));
+    top: calc(var(--pg-center-y) - clamp(118px, 9.5vw, 154px));
+    width: clamp(54px, 5vw, 86px);
+    height: clamp(54px, 5vw, 86px);
+    z-index: 5;
+    filter: drop-shadow(0 7px 7px #00000045);
+  }
+  .pg-antenna {
+    left: calc(50% - clamp(166px, 14vw, 244px));
+    top: calc(var(--pg-center-y) - clamp(120px, 9.6vw, 152px));
+    width: clamp(50px, 4.8vw, 78px);
+    height: clamp(64px, 6.2vw, 104px);
+    z-index: 5;
+    filter: drop-shadow(0 7px 6px #00000045);
+  }
+  .pg-planter {
+    top: calc(var(--pg-center-y) - clamp(50px, 4.4vw, 76px));
+    width: clamp(40px, 3.5vw, 58px);
+    height: clamp(44px, 4vw, 66px);
+    z-index: 5;
+    filter: drop-shadow(0 7px 7px #00000040);
+  }
 
   /* 무대 중앙: 해상도 비례 (QHD에서도 의도한 체감 크기 — 모바일 블록이 고정값으로 덮음) */
   #title {
@@ -258,7 +577,7 @@
     inset: 0;
     pointer-events: none;
     overflow: visible;
-    z-index: 0;
+    z-index: 1;
   }
   .friend {
     position: absolute;
@@ -855,7 +1174,7 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
   }
   .decor {
     position: absolute;
@@ -1362,6 +1681,63 @@
       padding-top: 30px;  /* 말랑뉴스 스트립 전용 공간 — 제목과 겹침 방지 */
       justify-content: flex-start;
     }
+    #stage-backdrop {
+      --pg-center-y: calc(50% + 58px);
+      --pg-w: min(76vw, 300px);
+      opacity: .82;
+    }
+    #stage-backdrop::before {
+      width: min(72vw, 286px);
+      height: 28px;
+    }
+    #stage-backdrop::after { display: none; }
+    .pg-space-constellation {
+      left: 8%;
+      top: calc(var(--pg-center-y) - 132px);
+      width: 150px;
+      height: 96px;
+      opacity: .42;
+    }
+    .pg-orbit {
+      width: min(88vw, 340px);
+      height: 118px;
+      top: calc(var(--pg-center-y) - 54px);
+      opacity: .38;
+    }
+    .pg-planet {
+      top: calc(var(--pg-center-y) - 52px);
+      height: 176px;
+      transform: translateX(-50%);
+    }
+    .pg-deck {
+      top: calc(var(--pg-center-y) - 84px);
+      width: min(58vw, 230px);
+      height: 122px;
+    }
+    .pg-garden-patch {
+      top: calc(var(--pg-center-y) - 46px);
+      width: min(56vw, 218px);
+      height: 76px;
+    }
+    .pg-dome {
+      left: calc(50% + 96px);
+      top: calc(var(--pg-center-y) - 82px);
+      width: 46px;
+      height: 46px;
+    }
+    .pg-antenna {
+      left: calc(50% - 124px);
+      top: calc(var(--pg-center-y) - 88px);
+      width: 44px;
+      height: 64px;
+    }
+    .pg-planter {
+      top: calc(var(--pg-center-y) - 46px);
+      width: 34px;
+      height: 42px;
+    }
+    .pg-planter-left { left: calc(50% - 112px); }
+    .pg-planter-right { left: calc(50% + 84px); }
     #title { font-size: 13px; margin-top: 2px; }
     #stage-name { font-size: 10px; margin-bottom: 4px; }
     #cosmic-mark { font-size: 9px; margin: -1px 0 3px; padding: 2px 7px; }
@@ -1475,6 +1851,24 @@
 <body>
 
 <div id="game-area">
+  <div id="stage-backdrop" aria-hidden="true">
+    <div class="pg-space-constellation pg-stage-sprite" data-stage-sprite="space_constellation"></div>
+    <div class="pg-orbit pg-stage-sprite" data-stage-sprite="orbit_ring"></div>
+    <div class="pg-planet pg-stage-sprite" data-stage-sprite="planet_body">
+      <i class="pg-grass pg-grass-left"></i>
+      <i class="pg-grass pg-grass-right"></i>
+    </div>
+    <div class="pg-deck pg-stage-sprite" data-stage-sprite="spaceship_deck">
+      <i class="pg-deck-light"></i>
+      <i class="pg-deck-light"></i>
+      <i class="pg-deck-light"></i>
+    </div>
+    <div class="pg-garden-patch pg-stage-sprite" data-stage-sprite="garden_patch"></div>
+    <div class="pg-dome pg-stage-sprite" data-stage-sprite="greenhouse_dome"></div>
+    <div class="pg-antenna pg-stage-sprite" data-stage-sprite="antenna"></div>
+    <div class="pg-planter pg-planter-left pg-stage-sprite" data-stage-sprite="left_planter"></div>
+    <div class="pg-planter pg-planter-right pg-stage-sprite" data-stage-sprite="right_planter"></div>
+  </div>
   <div id="decor-layer"></div>
   <div id="buff-banner"></div>
   <div id="title">픽셀 슬라임 클리커</div>
@@ -1762,6 +2156,20 @@ const DECOR_SPRITE_LAYOUT = {
   window:   [{ x: 0, y: 1920, w: 384, h: 384 }],
 };
 
+const STAGE_SPRITE_ATLAS = 'assets/generated/sprites/slime-stage-garden-ai/sprite-sheet-alpha.png';
+const STAGE_SPRITE_SHEET = { w: 512, h: 4608 };
+const STAGE_SPRITE_LAYOUT = {
+  space_constellation: [{ x: 0, y: 0,    w: 512, h: 512 }],
+  orbit_ring:          [{ x: 0, y: 512,  w: 512, h: 512 }],
+  planet_body:         [{ x: 0, y: 1024, w: 512, h: 512 }],
+  spaceship_deck:      [{ x: 0, y: 1536, w: 512, h: 512 }],
+  garden_patch:        [{ x: 0, y: 2048, w: 512, h: 512 }],
+  greenhouse_dome:     [{ x: 0, y: 2560, w: 512, h: 512 }],
+  antenna:             [{ x: 0, y: 3072, w: 512, h: 512 }],
+  left_planter:        [{ x: 0, y: 3584, w: 512, h: 512 }],
+  right_planter:       [{ x: 0, y: 4096, w: 512, h: 512 }],
+};
+
 const UPGRADES = [
   { id: 'glove1',  icon: '🧤', name: '말랑 장갑',     desc: '클릭당 +1 코인',            cost: 50,      type: 'clickAdd', value: 1 },
   { id: 'glove2',  icon: '🧤', name: '폭신 장갑',     desc: '클릭당 +5 코인',            cost: 600,     type: 'clickAdd', value: 5 },
@@ -1818,10 +2226,10 @@ const STAGES = [
     pal: null, crown: true, rainbow: true },
 ];
 
-/* 슬라임 본체 아틀라스 (slime-main-ai): 단계당 2프레임 idle.
+/* 슬라임 본체 아틀라스 (slime-main-v2-ai): baked 성향 슬라임과 맞춘 픽셀풍 2프레임 idle.
    로드 실패 시 기존 캔버스 픽셀 렌더로 자동 폴백 */
 const SLIME_ATLAS = {
-  src: 'assets/generated/sprites/slime-main-ai/sprite-sheet-alpha.png',
+  src: 'assets/generated/sprites/slime-main-v2-ai/sprite-sheet-alpha.png',
   sheet: { w: 1536, h: 3840 },
   cell: 768,
 };
@@ -1836,24 +2244,24 @@ const TRAIT_ATLAS = {
 };
 let traitAtlasOk = false;
 
-/* 비핑크 성향 본체 아틀라스 (slime-main-traits-ai): ranch/star/dream만 QA 통과.
-   muscle은 magenta key 영향으로 머리띠가 검게 죽어 overlay 유지 */
+/* 비핑크 성향 본체 아틀라스 (slime-main-traits-ai): 기본 v2와 같은 결의 baked 변형.
+   muscle은 일부 어두운 머리띠 픽셀이 있지만 스타일 일관성을 위해 baked row를 우선한다. */
 const MAIN_TRAIT_ATLAS = {
   src: 'assets/generated/sprites/slime-main-traits-ai/sprite-sheet-alpha.png',
   rows: {
-    baby_green: { ranch: 1, star: 2, dream: 3 },
-    sea:        { ranch: 5, star: 6, dream: 7 },
-    gold_king:  { ranch: 9, star: 10, dream: 11 },
-    god:        { ranch: 13, star: 14, dream: 15 },
+    baby_green: { muscle: 0, ranch: 1, star: 2, dream: 3 },
+    sea:        { muscle: 4, ranch: 5, star: 6, dream: 7 },
+    gold_king:  { muscle: 8, ranch: 9, star: 10, dream: 11 },
+    god:        { muscle: 12, ranch: 13, star: 14, dream: 15 },
   },
 };
 let mainTraitAtlasOk = false;
 
 /* 딸기 성향 본체 아틀라스 (slime-strawberry-traits-ai): 핑크 단계는 오버레이 대신
-   성향을 본체에 구워서 곡면 접촉감을 살린다. muscle은 1프레임 눈 판독 약화로 보류 */
+   성향을 본체에 구워서 곡면 접촉감을 살린다. muscle도 전체 스타일 통일을 우선해 baked row 사용 */
 const STRAWBERRY_TRAIT_ATLAS = {
   src: 'assets/generated/sprites/slime-strawberry-traits-ai/sprite-sheet-alpha.png',
-  rows: { ranch: 1, star: 2, dream: 3 },
+  rows: { muscle: 0, ranch: 1, star: 2, dream: 3 },
 };
 let strawberryTraitAtlasOk = false;
 
@@ -2682,6 +3090,11 @@ const SPRITE_ATLASES = {
     sheet: DECOR_SPRITE_SHEET,
     layout: DECOR_SPRITE_LAYOUT,
   },
+  stage: {
+    src: STAGE_SPRITE_ATLAS,
+    sheet: STAGE_SPRITE_SHEET,
+    layout: STAGE_SPRITE_LAYOUT,
+  },
   blessings: {
     src: 'assets/generated/sprites/slime-blessings-ai/sprite-sheet-alpha.png',
     sheet: { w: 384, h: 6144 },
@@ -2778,6 +3191,31 @@ const SPRITE_TINTS = {
   // 2026-06-12 코덱스가 cosmetics·blessings 시트를 원천 색보정 — 해당 틴트 제거 (이중 보정 방지)
   'items:prestige': 'violet',  // 재생성 대기 중인 마지막 회색 셀
 };
+
+function stageBgPosition(sheet, rect) {
+  const maxX = Math.max(0, sheet.w - rect.w);
+  const maxY = Math.max(0, sheet.h - rect.h);
+  const px = maxX ? (rect.x / maxX) * 100 : 0;
+  const py = maxY ? (rect.y / maxY) * 100 : 0;
+  return `${px}% ${py}%`;
+}
+
+function applyStageBackdropSprites() {
+  const atlas = SPRITE_ATLASES.stage;
+  const root = $('stage-backdrop');
+  if (!root || !atlas || !atlas.sheet) return;
+  for (const el of root.querySelectorAll('[data-stage-sprite]')) {
+    const id = el.dataset.stageSprite;
+    const rect = atlas.layout[id]?.[0];
+    if (!rect) continue;
+    el.style.setProperty('--pg-bg-image', `url('${atlas.src}')`);
+    el.style.setProperty('--pg-bg-size', `${(atlas.sheet.w / rect.w) * 100}% ${(atlas.sheet.h / rect.h) * 100}%`);
+    el.style.setProperty('--pg-bg-position', stageBgPosition(atlas.sheet, rect));
+  }
+  root.classList.add('sprite-ready');
+}
+
+applyStageBackdropSprites();
 
 /* 범용 스프라이트 렌더러.
    opts: { size, className, frame } — layout 미존재 시 fallback(이모지) 반환 */
@@ -6941,24 +7379,6 @@ cloudEl.insertAdjacentHTML('beforeend',
   `<span id="cloud-visual">${spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' })}</span>`);
 
 // 슬라임 본체 아틀라스 프리로드 — 성공 시 스프라이트 모드로 전환
-// 딸기 행은 마젠타 크로마 핑크 충돌로 회색 생성됨(ASSET-PIPELINE 규약) → 명암 보존 colorize로 복원
-function pinkifyGray(d) {
-  // 핑크 램프 (기존 딸기 팔레트): 외곽 #591238 → 어두움 #c2538e → 본색 #f78fc0 → 하이라이트 #ffc8e2
-  const stops = [
-    [0.00, 0x30, 0x08, 0x1d], [0.16, 0x59, 0x12, 0x38], [0.45, 0xc2, 0x53, 0x8e],
-    [0.69, 0xf7, 0x8f, 0xc0], [0.85, 0xff, 0xc8, 0xe2], [1.00, 0xff, 0xf0, 0xf8],
-  ];
-  for (let p = 0; p < d.length; p += 4) {
-    if (d[p + 3] === 0) continue;
-    const mx = Math.max(d[p], d[p + 1], d[p + 2]), mn = Math.min(d[p], d[p + 1], d[p + 2]);
-    if (mx && (mx - mn) / mx > 0.45) continue;  // 이미 유채색인 디테일(볼터치 등)은 보존
-    const l = (0.299 * d[p] + 0.587 * d[p + 1] + 0.114 * d[p + 2]) / 255;
-    let i = 1; while (i < stops.length - 1 && stops[i][0] < l) i++;
-    const [l0, r0, g0, b0] = stops[i - 1], [l1, r1, g1, b1] = stops[i];
-    const t = Math.min(1, Math.max(0, (l - l0) / (l1 - l0)));
-    d[p] = r0 + (r1 - r0) * t; d[p + 1] = g0 + (g1 - g0) * t; d[p + 2] = b0 + (b1 - b0) * t;
-  }
-}
 
 // 이벤트·연출 아틀라스 프리로드 — 성공한 것만 스프라이트 모드로 전환
 for (const key in FX_ATLASES) {
@@ -7026,19 +7446,7 @@ for (const key in FX_ATLASES) {
 (() => {
   const im = new Image();
   const ready = () => { slimeAtlasOk = true; slimeSpriteSig = ''; silhouetteStage = -1; };
-  im.onload = () => {
-    try {
-      const c = document.createElement('canvas');
-      c.width = SLIME_ATLAS.sheet.w; c.height = SLIME_ATLAS.sheet.h;
-      const x = c.getContext('2d');
-      x.drawImage(im, 0, 0);
-      const row = STAGES.findIndex(s => s.spriteId === 'strawberry');
-      const id = x.getImageData(0, row * SLIME_ATLAS.cell, SLIME_ATLAS.sheet.w, SLIME_ATLAS.cell);
-      pinkifyGray(id.data);
-      x.putImageData(id, 0, row * SLIME_ATLAS.cell);
-      c.toBlob(b => { if (b) SLIME_ATLAS.src = URL.createObjectURL(b); ready(); });
-    } catch (e) { ready(); }  // 보정 실패 시 원본 시트 그대로 사용
-  };
+  im.onload = ready;
   im.src = SLIME_ATLAS.src;
 })();
 
@@ -7448,7 +7856,12 @@ window.launchCheck = async function launchCheck() {
       } catch (e) { add('compliance', 'PWA manifest 유효', false, String(e)); }
       try {
         const swText = await (await fetch('sw.js')).text();
-        const atlasSrcs = Object.values(SPRITE_ATLASES).filter(a => a.sheet).map(a => a.src);
+        const atlasSrcs = [
+          ...Object.values(SPRITE_ATLASES).filter(a => a.sheet).map(a => a.src),
+          SLIME_ATLAS.src,
+          MAIN_TRAIT_ATLAS.src,
+          STRAWBERRY_TRAIT_ATLAS.src,
+        ];
         const missing = atlasSrcs.filter(src => !swText.includes(src));
         add('compliance', 'SW 캐시-아틀라스 정합', missing.length === 0, missing.join(','));
       } catch (e) { add('compliance', 'SW 캐시-아틀라스 정합', false, String(e)); }

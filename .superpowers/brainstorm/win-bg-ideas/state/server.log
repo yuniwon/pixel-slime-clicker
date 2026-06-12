@@ -1,0 +1,6 @@
+{"type":"server-started","port":51233,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:51233","screen_dir":"C:\\dev\\game2\\.superpowers\\brainstorm\\win-bg-ideas\\content","state_dir":"C:\\dev\\game2\\.superpowers\\brainstorm\\win-bg-ideas\\state"}
+{"source":"user-event","type":"click","text":"A. 말랑 천문 정원\n      우주감은 남기되, 중앙에 정원형 받침과 좌우 선반을 둬서 친구와 장식이 “자리 잡고 사는” 느낌을 줍니다.\n      추천: 현재 정체성을 가장 잘 보존하면서 빈 공간을 줄임.","choice":"garden-observatory","id":null,"timestamp":1781265701043}
+{"source":"user-event","type":"click","text":"A. 말랑 천문 정원\n      우주감은 남기되, 중앙에 정원형 받침과 좌우 선반을 둬서 친구와 장식이 “자리 잡고 사는” 느낌을 줍니다.\n      추천: 현재 정체성을 가장 잘 보존하면서 빈 공간을 줄임.","choice":"garden-observatory","id":null,"timestamp":1781265703202}
+{"type":"screen-added","file":"C:\\dev\\game2\\.superpowers\\brainstorm\\win-bg-ideas\\content\\planet-garden-v2.html"}
+{"type":"screen-added","file":"C:\\dev\\game2\\.superpowers\\brainstorm\\win-bg-ideas\\content\\waiting-planet-garden-approved.html"}
+{"type":"server-stopped","reason":"idle timeout"}

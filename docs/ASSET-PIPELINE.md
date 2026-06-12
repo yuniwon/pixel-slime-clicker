@@ -26,7 +26,7 @@ const SPRITE_ATLASES = {
 };
 
 spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
-// 슬라임 본체는 별도: SLIME_ATLAS (slime-main-ai) — 캔버스 CSS 배경 + 성향 오버레이 캔버스
+// 슬라임 본체는 별도: SLIME_ATLAS (slime-main-v2-ai) — 캔버스 CSS 배경 + 성향 오버레이 캔버스
 ```
 
 - `sheet: null` 또는 layout에 id 없음 → `fallbackEmoji` 반환 (안전)
@@ -79,10 +79,11 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | slime-cosmetics-ai | 11 (꾸미기) | ✅ 생성·연결 완료 — 핑크 3종(aura/bubble/heart) atlas 보정 적용 |
 | slime-items-ai | 18 (강화/특성) | ⚠️ prestige 회색화 → 보라 묘사로 재생성 대기 |
 | slime-guests-ai | 4 (먹구름·별똥이 + happy 표정) | ✅ 생성·연결 완료 |
-| slime-main-ai | 5단계 ×2프레임 (본체) | ✅ 연결됨 — strawberry 행 atlas 보정 적용, 런타임 `pinkifyGray()`는 잔여 폴백 |
+| slime-main-v2-ai | 5단계 ×2프레임 (본체) | ✅ 연결됨 — baked 성향 슬라임과 맞춘 픽셀풍 본체, strawberry 런타임 보정 제거 |
+| slime-main-ai | 5단계 ×2프레임 (구 본체) | ⏸️ 대체됨 — v2 본체가 기본값 |
 | slime-traits-ai | 5 (성향 액세서리: muscle/ranch/star 2f/dream/samsara 2f) | ⚠️ 시각 QA에서 제네릭 오버레이 한계 판정 (docs/VISUAL-QA.md) — 인터림: 모자류는 비왕관 단계만, star는 글로우 폴백, samsara 고리만 전 단계. 구운 변형으로 대체 예정 |
-| slime-main-traits-ai | 16 (비핑크 4단계 × 4성향, 각 2f) | ⚠️ 생성·부분 연결 — ranch/star/dream은 baked 본체로 승격, muscle은 magenta key로 머리띠가 어두워 overlay 유지 |
-| slime-strawberry-traits-ai | 4 (딸기 × 4성향, 각 2f) | ⚠️ 생성·부분 연결 — ranch/star/dream은 baked 본체로 승격, muscle은 눈 판독 약화로 overlay 유지 |
+| slime-main-traits-ai | 16 (비핑크 4단계 × 4성향, 각 2f) | ✅ 연결됨 — muscle 포함 baked 본체로 승격, 어두운 머리띠는 스타일 일관성 우선으로 수용 |
+| slime-strawberry-traits-ai | 4 (딸기 × 4성향, 각 2f) | ✅ 연결됨 — muscle 포함 baked 본체로 승격, 눈 판독 약화보다 통일감 우선 |
 | slime-crystal-ai | 4 (젤리 결정 숙성: seed/sprout/bud/ripe 2프레임) | ✅ 생성·연결 완료 (green 크로마, 채도 정상 실측) |
 | slime-goldstar-ai | 2 (황금별 2f, 미니 별똥별 2f) | ✅ 생성·연결 완료 — 캔버스에 셀 배경 + CSS 2f 반짝임, 캔버스 픽셀 폴백 |
 | slime-comboaura-ai | 4 (콤보 열기 tier0~3, 각 2f) | ✅ 생성·연결 완료 — 반투명 마법진 (슬라임 1.45배, JS 프레임 스왑), 그라디언트 폴백 |
@@ -108,12 +109,12 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 
 ## 캔버스 직접 렌더
 
-- **슬라임 본체** — ✅ `slime-main-ai` 아틀라스 연결됨 (하이브리드 방식):
+- **슬라임 본체** — ✅ `slime-main-v2-ai` 아틀라스 연결됨 (하이브리드 방식):
   본체는 `#slime-canvas`의 CSS background로 아틀라스 셀을 깔고(`applySlimeSprite`, 200%×500% + %-position),
   캔버스 픽셀은 **성향 오버레이 전용**(`drawTraitOverlay` — 머리띠/모자/별가루/윤회 고리).
   실루엣 게이지도 같은 시트를 mask로 사용. 아틀라스 로드 실패 시 기존 16×17 픽셀 렌더로 자동 폴백.
-  딸기 행은 마젠타 크로마 회색화(실측 3건째) → 프리로드에서 `pinkifyGray()`로 명암 보존 colorize 후
-  blob URL로 교체. 시트를 green 크로마로 재생성하면 보정 코드는 no-op처럼 동작(유채색 픽셀은 건드리지 않음).
+  예전 `slime-main-ai` 딸기 행은 마젠타 크로마 회색화로 런타임 보정이 필요했으나,
+  v2 본체는 투명 시트를 직접 로드하므로 `pinkifyGray()` 보정 루틴을 제거했다.
 - **코인 아이콘, 황금별** — 8×8/16×16 수제 픽셀. 교체 원하면 동일 패턴으로 요청서 작성
 
 ## 친구 행동 애니메이션 프레임 확장

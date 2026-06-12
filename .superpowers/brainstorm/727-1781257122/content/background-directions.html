@@ -1,0 +1,222 @@
+<style>
+  .bg-direction-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 22px;
+  }
+  .bg-card {
+    overflow: hidden;
+  }
+  .stage-preview {
+    position: relative;
+    height: 300px;
+    border-radius: 10px;
+    overflow: hidden;
+    image-rendering: pixelated;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.12), inset 0 -80px 70px rgba(0,0,0,.25);
+  }
+  .stage-preview:before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: .23;
+  }
+  .slime {
+    position: absolute;
+    left: 50%;
+    bottom: 60px;
+    width: 92px;
+    height: 64px;
+    transform: translateX(-50%);
+    border-radius: 48% 48% 38% 38%;
+    background: linear-gradient(#a9ff39, #46be25);
+    box-shadow: 0 8px 0 #1b651f, 0 18px 20px rgba(0,0,0,.42);
+  }
+  .slime:before, .slime:after {
+    content: "";
+    position: absolute;
+    top: 25px;
+    width: 10px;
+    height: 14px;
+    border-radius: 50%;
+    background: #111;
+    box-shadow: 3px 2px 0 #fff inset;
+  }
+  .slime:before { left: 30px; }
+  .slime:after { right: 30px; }
+  .smile {
+    position: absolute;
+    left: 50%;
+    top: 39px;
+    width: 18px;
+    height: 9px;
+    transform: translateX(-50%);
+    border-bottom: 4px solid #111;
+    border-radius: 0 0 12px 12px;
+  }
+  .friend-dot {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #ffd75e;
+    box-shadow: 0 4px 0 #9a6b1e, 0 10px 12px rgba(0,0,0,.36);
+  }
+  .decor-bit {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #f78fc0;
+    box-shadow: 0 4px 0 #8f3f68, 0 10px 12px rgba(0,0,0,.3);
+  }
+  .shelf {
+    position: absolute;
+    height: 12px;
+    border-radius: 2px;
+    background: #7d5a38;
+    box-shadow: 0 5px 0 #3b2418;
+  }
+  .ground {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 72px;
+  }
+  .a-garden {
+    background:
+      radial-gradient(circle at 18% 18%, rgba(255,215,94,.16) 0 12%, transparent 13%),
+      linear-gradient(#142648, #253256 55%, #2d4a49);
+  }
+  .a-garden .ground {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.1) 25%, transparent 25%) 0 0 / 32px 32px,
+      linear-gradient(#416a54, #203e35);
+  }
+  .a-garden .platform {
+    position: absolute;
+    left: 26%;
+    right: 26%;
+    bottom: 45px;
+    height: 26px;
+    border-radius: 8px 8px 2px 2px;
+    background: #6d8a53;
+    box-shadow: 0 8px 0 #33442d;
+  }
+  .b-room {
+    background:
+      linear-gradient(90deg, transparent 0 48%, rgba(255,255,255,.08) 49% 51%, transparent 52%),
+      linear-gradient(#211836, #30224a 58%, #442b45);
+  }
+  .b-room .ground {
+    height: 86px;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px) 0 0 / 34px 100%,
+      linear-gradient(#6b3d52, #321e30);
+  }
+  .b-room .window {
+    position: absolute;
+    top: 36px;
+    left: 50%;
+    width: 78px;
+    height: 54px;
+    transform: translateX(-50%);
+    border-radius: 6px;
+    background: linear-gradient(#182448, #3d4e7a);
+    box-shadow: 0 0 0 6px #6c4b5a, 0 10px 0 #302032;
+  }
+  .c-park {
+    background:
+      radial-gradient(circle at 74% 18%, rgba(255,247,214,.24) 0 8%, transparent 9%),
+      linear-gradient(#0d1833, #182f48 50%, #315a64);
+  }
+  .c-park .ground {
+    height: 82px;
+    background:
+      radial-gradient(ellipse at 20% 0%, #547450 0 30%, transparent 31%),
+      radial-gradient(ellipse at 80% 0%, #5c6f58 0 32%, transparent 33%),
+      linear-gradient(#3d6153, #1f3936);
+  }
+  .c-park .path {
+    position: absolute;
+    left: 35%;
+    right: 35%;
+    bottom: 0;
+    height: 90px;
+    border-radius: 50% 50% 0 0;
+    background: linear-gradient(#8b7551, #4a352a);
+    opacity: .9;
+  }
+  .note-line {
+    margin-top: 9px;
+    font-size: 13px;
+    color: rgba(255,255,255,.68);
+    line-height: 1.45;
+  }
+  @media (max-width: 1000px) {
+    .bg-direction-grid { grid-template-columns: 1fr; }
+    .stage-preview { height: 260px; }
+  }
+</style>
+
+<h2>새 배경 방향 고르기</h2>
+<p class="subtitle">목표는 휑한 우주 배경을 줄이고, 친구·장식·손님이 자연스럽게 놓일 수 있는 “무대”를 만드는 것입니다. 마음에 드는 방향을 클릭해 골라주세요.</p>
+
+<div class="cards bg-direction-grid">
+  <div class="card bg-card" data-choice="garden-observatory" onclick="toggleSelect(this)">
+    <div class="stage-preview a-garden">
+      <div class="shelf" style="left:20px; top:92px; width:88px"></div>
+      <div class="decor-bit" style="left:44px; top:52px; background:#7fc4ff"></div>
+      <div class="friend-dot" style="right:42px; top:110px"></div>
+      <div class="friend-dot" style="left:62px; bottom:82px; background:#f78fc0"></div>
+      <div class="platform"></div>
+      <div class="ground"></div>
+      <div class="slime"><span class="smile"></span></div>
+    </div>
+    <div class="card-body">
+      <h3>A. 말랑 천문 정원</h3>
+      <p>우주감은 남기되, 중앙에 정원형 받침과 좌우 선반을 둬서 친구와 장식이 “자리 잡고 사는” 느낌을 줍니다.</p>
+      <div class="note-line">추천: 현재 정체성을 가장 잘 보존하면서 빈 공간을 줄임.</div>
+    </div>
+  </div>
+
+  <div class="card bg-card" data-choice="cozy-slime-room" onclick="toggleSelect(this)">
+    <div class="stage-preview b-room">
+      <div class="window"></div>
+      <div class="shelf" style="left:24px; top:116px; width:92px"></div>
+      <div class="shelf" style="right:24px; top:138px; width:84px"></div>
+      <div class="decor-bit" style="left:54px; top:76px; background:#ffd75e"></div>
+      <div class="friend-dot" style="right:58px; top:94px; background:#7fc4ff"></div>
+      <div class="ground"></div>
+      <div class="slime"><span class="smile"></span></div>
+    </div>
+    <div class="card-body">
+      <h3>B. 코지 슬라임 방</h3>
+      <p>장식 탭과 가장 잘 맞는 방향입니다. 창문, 선반, 바닥을 두면 구매한 장식들이 방 꾸미기처럼 읽힙니다.</p>
+      <div class="note-line">장점: 꾸미기 보상 선명. 단점: 우주 클리커 느낌은 조금 줄어듦.</div>
+    </div>
+  </div>
+
+  <div class="card bg-card" data-choice="starlit-picnic-field" onclick="toggleSelect(this)">
+    <div class="stage-preview c-park">
+      <div class="path"></div>
+      <div class="decor-bit" style="left:34px; bottom:84px; background:#b48aff"></div>
+      <div class="decor-bit" style="right:42px; bottom:88px; background:#ffd75e"></div>
+      <div class="friend-dot" style="left:72px; top:120px; background:#7fc4ff"></div>
+      <div class="friend-dot" style="right:76px; top:104px; background:#f78fc0"></div>
+      <div class="ground"></div>
+      <div class="slime"><span class="smile"></span></div>
+    </div>
+    <div class="card-body">
+      <h3>C. 별빛 소풍마당</h3>
+      <p>중앙 길과 언덕을 만들어 손님이 들어오고 친구들이 양옆에 모이는 구조입니다. 이벤트 연출이 가장 잘 보입니다.</p>
+      <div class="note-line">장점: 손님/친구 배치 좋음. 단점: 방 장식과의 연결은 약함.</div>
+    </div>
+  </div>
+</div>

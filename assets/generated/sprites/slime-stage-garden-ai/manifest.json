@@ -1,0 +1,170 @@
+{
+  "characterId": "slime-stage-garden-ai",
+  "engine": "component-row",
+  "game_input": "sprite-sheet-alpha.png",
+  "degraded_static_fallback": false,
+  "curation_applied": false,
+  "sprite_sheet_alpha": "sprite-sheet-alpha.png",
+  "sprite_sheet_alpha_report": "sprite-sheet-alpha.report.json",
+  "base_image": null,
+  "cell": {
+    "shape": "square",
+    "width": 512,
+    "height": 512,
+    "safe_margin_x": 56,
+    "safe_margin_y": 56,
+    "size": 512,
+    "safe_margin": 56
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "animation": {
+    "cellWidth": 512,
+    "cellHeight": 512,
+    "columns": 1,
+    "rows": {
+      "space_constellation": {
+        "row": 0,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "orbit_ring": {
+        "row": 1,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "planet_body": {
+        "row": 2,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "spaceship_deck": {
+        "row": 3,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "garden_patch": {
+        "row": 4,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "greenhouse_dome": {
+        "row": 5,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "antenna": {
+        "row": 6,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "left_planter": {
+        "row": 7,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "right_planter": {
+        "row": 8,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      }
+    }
+  },
+  "frame_layout": {
+    "sheetWidth": 512,
+    "sheetHeight": 4608,
+    "cellWidth": 512,
+    "cellHeight": 512,
+    "rows": {
+      "space_constellation": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "orbit_ring": [
+        {
+          "x": 0,
+          "y": 512,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "planet_body": [
+        {
+          "x": 0,
+          "y": 1024,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "spaceship_deck": [
+        {
+          "x": 0,
+          "y": 1536,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "garden_patch": [
+        {
+          "x": 0,
+          "y": 2048,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "greenhouse_dome": [
+        {
+          "x": 0,
+          "y": 2560,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "antenna": [
+        {
+          "x": 0,
+          "y": 3072,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "left_planter": [
+        {
+          "x": 0,
+          "y": 3584,
+          "w": 512,
+          "h": 512
+        }
+      ],
+      "right_planter": [
+        {
+          "x": 0,
+          "y": 4096,
+          "w": 512,
+          "h": 512
+        }
+      ]
+    }
+  }
+}
