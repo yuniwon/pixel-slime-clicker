@@ -131,7 +131,13 @@
     background: #ffffff22;
     image-rendering: pixelated;
   }
-  #evo-progress-label { font-size: clamp(10px, 0.7vw, 20px); color: var(--text-dim); }
+  #evo-progress-label { display: inline-block; font-size: clamp(10px, 0.7vw, 20px); color: var(--text-dim); }
+  #evo-progress-label.level-pop { animation: level-pop .9s ease-out; }
+  @keyframes level-pop {
+    0% { transform: scale(1); color: var(--gold); }
+    35% { transform: scale(1.3); color: var(--gold); }
+    100% { transform: scale(1); }
+  }
 
   #challenge-badge {
     display: none;
@@ -933,34 +939,44 @@
   .story-entry.locked { opacity: .4; border-left-color: var(--border); }
   .story-entry.cosmic-status.locked { opacity: .78; }
 
-  /* ── 기록의 선반: 업적 트로피가 물리적으로 켜지는 공간 ── */
-  #trophy-shelf {
+  /* ── 소원 스트립: 지금 목표와 진행률이 항상 무대에 보인다 (선반 대체) ── */
+  #wish-strip {
     position: absolute;
     bottom: 0; left: 0; right: 0;
     z-index: 3;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: clamp(10px, 0.9vw, 24px);
-    padding: clamp(5px, 0.45vw, 14px) 14px;
+    gap: clamp(8px, 0.7vw, 18px);
+    padding: clamp(6px, 0.5vw, 13px) 14px;
     background: #00000033;
     border-top: 2px solid #ffffff0d;
     cursor: pointer;
-  }
-  #trophy-shelf .shelf-label {
-    font-size: clamp(11px, 0.72vw, 28px);
+    font-size: clamp(11px, 0.78vw, 22px);
     color: var(--text-dim);
+  }
+  #wish-strip .ws-text {
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 48%;
+    color: var(--text);
   }
-  /* QHD에서 ≈44px — 구버전 22px의 200% 체감 기준 */
-  #trophy-shelf .trophy { width: clamp(28px, 1.7vw, 66px); height: clamp(28px, 1.7vw, 66px); display: inline-block; }
-  #trophy-shelf .trophy.dim { filter: grayscale(1) brightness(.35); }
-  #trophy-shelf .trophy.fresh { animation: trophy-pop .5s ease-out; }
-  @keyframes trophy-pop {
-    0% { transform: scale(.2); }
-    60% { transform: scale(1.35); }
-    100% { transform: scale(1); }
+  #wish-strip .ws-bar-outer {
+    width: clamp(70px, 7vw, 180px);
+    height: clamp(7px, 0.55vw, 13px);
+    background: #00000066;
+    border: 2px solid var(--border);
+    display: inline-block;
   }
+  #wish-strip .ws-bar {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--pink), var(--gold));
+    transition: width .25s ease;
+  }
+  #wish-strip .ws-count { color: var(--gold); white-space: nowrap; }
+  #wish-strip.golden { border-top-color: #ffd75e44; }
 
   /* ── 슬라임 앨범 ── */
   .album-box {
@@ -1436,9 +1452,10 @@
     /* 광란/파티 배너: 모바일에선 게임영역 하단, 선반 위 */
     #buff-banner { top: auto; bottom: 34px; font-size: 11px; padding: 5px 10px; }
     #news-ticker { font-size: 11px; padding: 5px 12px; }
-    #trophy-shelf { padding: 2px 8px; gap: 6px; }
-    #trophy-shelf .shelf-label { font-size: 9px; }
-    #trophy-shelf .trophy { width: 18px; height: 18px; }
+    #wish-strip { padding: 4px 8px; gap: 6px; font-size: 10px; }
+    #wish-strip .ws-bar-outer { width: 56px; height: 6px; }
+    /* 일일 요약은 모바일 무대에선 수직 공간이 없어 잘려 보임 — 숨김 (소원 스트립이 목표 역할) */
+    #daily-summary { display: none; }
     #combo-box { margin-top: 2px; }
   }
 </style>
@@ -1478,7 +1495,7 @@
     <div id="combo-chip">🔥 말랑 x1.0</div>
     <div id="combo-bar-outer"><div id="combo-bar"></div></div>
   </div>
-  <div id="trophy-shelf" role="button" aria-label="기록의 선반 — 업적 보기"></div>
+  <div id="wish-strip" role="button" aria-label="지금 소원 — 소원 탭으로" hidden></div>
   <div id="crystal-bed" role="button" aria-label="젤리 결정 화단" hidden>
     <span id="crystal-visual">🌱</span>
     <span id="crystal-label"></span>
@@ -3616,7 +3633,7 @@ function doClick(x, y) {
 /* 무대 어디를 눌러도 말랑 — 정중앙 저격 불필요.
    별·먹구름·별똥이·선반 등 인터랙티브 요소는 자기 핸들러가 우선 */
 $('game-area').addEventListener('pointerdown', e => {
-  if (e.target.closest('#golden-star, #raincloud, #starlet, #trophy-shelf, #crystal-bed, .mini-star')) return;
+  if (e.target.closest('#golden-star, #raincloud, #starlet, #wish-strip, #crystal-bed, .mini-star')) return;
   doClick(e.clientX, e.clientY);
 });
 
@@ -3722,6 +3739,19 @@ function spawnSparks(x, y) {
 /* ════════════════════════ 진화 / 성향 ════════════════════════ */
 
 
+/* 레벨업 시각 피드백: 골드 링 + 슬라임 펀치 + 큰 레벨 플로트 + 게이지 펄스.
+   소리를 꺼둔 유저도 레벨업을 놓치지 않게 — 모션만으로 충분히 읽히게 한다 */
+function levelUpFx() {
+  const ring = $('tier-ring');
+  ring.style.borderColor = 'var(--gold)';
+  ring.classList.remove('go'); void ring.offsetWidth; ring.classList.add('go');
+  slimeWrap.classList.remove('tier-up'); void slimeWrap.offsetWidth; slimeWrap.classList.add('tier-up');
+  const r = slimeCv.getBoundingClientRect();
+  spawnFloat(r.left + r.width / 2, r.top + 6, `⬆️ Lv.${slimeLevel}!`, true);
+  const lbl = $('evo-progress-label');
+  lbl.classList.remove('level-pop'); void lbl.offsetWidth; lbl.classList.add('level-pop');
+}
+
 function confettiBurst() {
   const r = slimeCv.getBoundingClientRect();
   const cx = r.left + r.width / 2;
@@ -3761,9 +3791,11 @@ function checkEvolution() {
     toast(`🎉 Lv.${slimeLevel} 진화! <b>${STAGES[newStage].name}</b> 등장!`);
     showQuip(QUIPS.evolve[Math.floor(Math.random() * QUIPS.evolve.length)]);
   } else {
-    // 일반 레벨업: 가벼운 축하
+    // 일반 레벨업: 무음에도 보이는 시각 피드백 (3레벨 주기엔 축복 모달도 안 뜨므로)
+    levelUpFx();
     sndAch();
-    toast(`⬆️ <b>레벨 ${slimeLevel}!</b> 수입 +2% · 축복을 골라보세요`);
+    toast(`⬆️ <b>레벨 ${slimeLevel}!</b> 수입 +2%`
+      + (blessingSteps.length ? ' · 축복을 골라보세요' : ''));
   }
   renderStageName();
   save();
@@ -3865,30 +3897,35 @@ function checkAchievements() {
     }
   }
   if (newUnlock) {
-    renderTrophyShelf(lastUnlocked);  // 기록의 선반에 트로피가 켜진다
     save();
     if (currentTab === 'achievements') buildShop();
   }
 }
 
-/* 기록의 선반: 최근 달성 5개(컬러) + 다음 목표 1개(회색) */
-function renderTrophyShelf(freshId) {
-  const shelf = $('trophy-shelf');
-  if (!shelf) return;
-  const recent = Object.keys(S.achievements).slice(-5);
-  const nextA = ACHIEVEMENTS.find(a => !S.achievements[a.id]);
-  let html = '<span class="shelf-label">기록의 선반</span>';
-  for (const id of recent) {
-    const a = ACHIEVEMENTS.find(x => x.id === id);
-    if (!a) continue;
-    html += `<span class="trophy${id === freshId ? ' fresh' : ''}" title="${a.name}">`
-      + spriteHtml('achievements', a.id, a.icon, { size: 22 }) + '</span>';
+/* 소원 스트립: 황금 소원(미완) 우선, 아니면 진행률 최고 소원 — 무대에 목표가 항상 보인다 */
+let wishStripCache = '';
+function renderWishStrip() {
+  const el = $('wish-strip');
+  if (!el) return;
+  if (!TAB_UNLOCKS.wishes()) { el.hidden = true; return; }  // 소원 시스템 해금 전엔 비노출
+  let w = null, golden = false;
+  const g = S.wishes.golden;
+  if (g && !g.done && g.date === todayKey()) { w = g; golden = true; }
+  if (!w) {
+    w = S.wishes.active.slice().sort((a, b) => b.progress / b.target - a.progress / a.target)[0];
   }
-  if (nextA) {
-    html += `<span class="trophy dim" title="다음 목표: ${nextA.name} — ${nextA.desc}">`
-      + spriteHtml('achievements', nextA.id, nextA.icon, { size: 22 }) + '</span>';
-  }
-  shelf.innerHTML = html;
+  if (!w) { el.hidden = true; return; }
+  const sig = `${golden}|${w.type}|${w.progress}|${w.target}`;
+  if (sig === wishStripCache && !el.hidden) return;
+  wishStripCache = sig;
+  el.hidden = false;
+  el.classList.toggle('golden', golden);
+  const txt = golden ? goldenWishText(w) : wishText(w);
+  const pct = Math.min(100, w.progress / w.target * 100);
+  el.innerHTML = `<span>${golden ? '🌟' : '💫'}</span>`
+    + `<span class="ws-text">${txt}</span>`
+    + `<span class="ws-bar-outer"><span class="ws-bar" style="width:${pct.toFixed(0)}%"></span></span>`
+    + `<span class="ws-count">${fmt(Math.min(w.progress, w.target))}/${fmt(w.target)}</span>`;
 }
 
 /* ════════════════════════ 도감 / 별의 기록 ════════════════════════ */
@@ -6032,6 +6069,7 @@ function renderHud() {
   updateTabVisibility();
   updateResStrip();
   updateTabBadges();
+  renderWishStrip();
   $('coin-num').textContent = fmt(S.coins);
   const effMul = frenzyMul() * partyMul();
   const effCps = totalCps() * effMul;
@@ -6801,10 +6839,8 @@ applyCosmetics();
 buildShop();
 rebuildFriends();
 renderDecor();
-renderTrophyShelf();
-$('trophy-shelf').addEventListener('click', () => {
-  document.querySelector('[data-tab="achievements"]').click();
-});
+renderWishStrip();
+$('wish-strip').addEventListener('click', () => gotoTab('wishes'));
 renderHud();
 checkStory();
 // 온보딩: 완전 새 게임이면 첫 클릭 안내
@@ -6907,6 +6943,8 @@ window.launchCheck = async function launchCheck() {
   try {
     /* ═══ 1. 안정성 ═══ */
     window.confirm = () => true;
+    // 숨김 탭(헤드리스/프리뷰)에서도 손님 스폰 경로가 실제로 실행되게 — 검사 동안만 visible 위장
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
     S = migrateSave({}); computeBlessCache(); slimeLevel = 1; stageIdx = 0;
     combo = 0; frenzyTimer = 0; partyTimer = 0; pendingBlessings = 0;
 
@@ -7120,6 +7158,7 @@ window.launchCheck = async function launchCheck() {
     console.error = origErr;
     window.removeEventListener('error', onWinErr);
     window.confirm = origConfirm;
+    delete document.hidden;  // visible 위장 해제 — 네이티브 getter로 복귀
     if (snapLS === null) localStorage.removeItem(SAVE_KEY);
     else localStorage.setItem(SAVE_KEY, snapLS);
     S = migrateSave(JSON.parse(snapS)); computeBlessCache();
