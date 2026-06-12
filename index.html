@@ -503,6 +503,15 @@
     animation: starwobble .6s ease-in-out infinite alternate;
     filter: drop-shadow(0 0 12px #ffd75ecc);
   }
+  #golden-star, #raincloud, #starlet, .mini-star,
+  #golden-star *, #raincloud *, #starlet *, .mini-star * {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #raincloud *, #starlet * { pointer-events: none; }
   @keyframes starwobble { from { transform: rotate(-12deg) scale(1);} to { transform: rotate(12deg) scale(1.12);} }
 
   /* 황금별·미니별 스프라이트 모드: 캔버스 픽셀 대신 아틀라스 셀 + 2프레임 반짝임 */
@@ -3944,6 +3953,11 @@ function spawnClickFx(x, y) {
   setTimeout(() => el.remove(), 320);
 }
 
+function stopSpriteGesture(e) {
+  if (e.cancelable) e.preventDefault();
+  e.stopPropagation();
+}
+
 function spawnSparks(x, y) {
   if (particleCount() > PARTICLE_CAP) return;
   const emoji = S.cosmetics.equipped.particle;  // 장착한 파티클 스킨
@@ -6024,7 +6038,7 @@ function pickStarEvent() {
 }
 
 starEl.addEventListener('pointerdown', e => {
-  e.stopPropagation();
+  stopSpriteGesture(e);
   sndStar();
   gcSession('s/star-clicked');
   S.stats.run.starsClicked++;
@@ -6103,7 +6117,7 @@ function hideCloud() {
 }
 
 cloudEl.addEventListener('pointerdown', e => {
-  e.stopPropagation();
+  stopSpriteGesture(e);
   if (cloudState === 'drift') {
     cloudState = 'challenge';
     cloudClicks = 0;
@@ -6228,7 +6242,7 @@ function hideStarlet() {
 }
 
 starletEl.addEventListener('pointerdown', e => {
-  e.stopPropagation();
+  stopSpriteGesture(e);
   if (starletState !== 'waiting') return;
   const now = performance.now();
   if (now - starletLastHop < 450) return;  // 서두르면 겁먹어서 안 움직임
@@ -6296,7 +6310,7 @@ function spawnMiniStars() {
     img.style.left = pos.x + 'px';
     img.style.top = pos.y + 'px';
     img.addEventListener('pointerdown', ev => {
-      ev.stopPropagation();
+      stopSpriteGesture(ev);
       let bonus = Math.max(totalCps() * 8, clickPower() * 15, 25);
       if (hasSyn('rabbit', 25)) bonus *= 1.3;
       if (hasSyn('dog', 50)) bonus *= 1.2;
@@ -7261,6 +7275,22 @@ window.launchCheck = async function launchCheck() {
     add('stability', '별 이벤트 5종 실행', errCount === e0);
     frenzyTimer = 0; partyTimer = 0; S.buffs.discount = false;
     document.querySelectorAll('.mini-star').forEach(el => el.remove());
+    spawnMiniStars();
+    const miniStarForTouch = document.querySelector('.mini-star');
+    const touchNone = el => !!el && getComputedStyle(el).touchAction === 'none';
+    const guestSafe = el => !!el
+      && getComputedStyle(el).touchAction === 'none'
+      && getComputedStyle(el).pointerEvents === 'none';
+    $('cloud-visual').innerHTML =
+      spriteHtml('guests', 'raincloud-happy', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' });
+    if (!starletEl.querySelector('#starlet-visual')) starletEl.insertAdjacentHTML('beforeend', '<span id="starlet-visual"></span>');
+    starletEl.querySelector('#starlet-visual').innerHTML = spriteHtml('guests', 'starlet-happy',
+      `<img src="${STARLET_URLS.happy}" alt="">`, { size: 56, className: 'guest-sprite' });
+    add('stability', '이벤트 스프라이트 모바일 줌 방어',
+      touchNone(starEl) && touchNone(cloudEl) && touchNone(starletEl) && touchNone(miniStarForTouch) &&
+      guestSafe(cloudEl.querySelector('.guest-sprite')) && guestSafe(starletEl.querySelector('.guest-sprite')));
+    document.querySelectorAll('.mini-star').forEach(el => el.remove());
+    resetCloudVisual();
 
     const cloudCoins0 = S.coins;
     const cloudDust0 = S.stardust;
