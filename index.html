@@ -851,8 +851,8 @@
   /* 클릭 버스트: 장갑 팝 3프레임 원샷 */
   .clickfx {
     position: fixed;
-    width: 76px; height: 76px;
-    margin: -38px 0 0 -38px;
+    width: 58px; height: 58px;
+    margin: -29px 0 0 -29px;
     pointer-events: none;
     z-index: 51;
     background-image: url('assets/generated/sprites/slime-clickfx-ai/sprite-sheet-alpha.png');
@@ -860,12 +860,13 @@
     background-repeat: no-repeat;
     filter: saturate(1.18) contrast(1.06) drop-shadow(0 3px 0 #00000066);
     animation: clickfx-pop .44s linear forwards;
+    --fx-y: 18px;
   }
   @keyframes clickfx-pop {
-    0%, 61.9% { background-position-x: 0%; opacity: 1; transform: scale(.96) rotate(var(--fx-rot, 0deg)); }
-    62%, 81.9% { background-position-x: 50%; opacity: .95; transform: scale(1.04) rotate(var(--fx-rot, 0deg)); }
-    82%, 94% { background-position-x: 100%; opacity: .72; transform: scale(1.12) rotate(var(--fx-rot, 0deg)); }
-    100% { background-position-x: 100%; opacity: 0; transform: scale(1.16) rotate(var(--fx-rot, 0deg)); }
+    0%, 27.9% { background-position-x: 0%; opacity: .92; transform: translateY(var(--fx-y)) scale(.92) rotate(var(--fx-rot, 0deg)); }
+    28%, 47.9% { background-position-x: 50%; opacity: .88; transform: translateY(var(--fx-y)) scale(1.00) rotate(var(--fx-rot, 0deg)); }
+    48%, 88% { background-position-x: 100%; opacity: .78; transform: translateY(var(--fx-y)) scale(1.10) rotate(var(--fx-rot, 0deg)); }
+    100% { background-position-x: 100%; opacity: 0; transform: translateY(var(--fx-y)) scale(1.16) rotate(var(--fx-rot, 0deg)); }
   }
 
   /* 코인 더미: 누적 재산의 풍경 — 무대 우하단, 접지 그림자 */
@@ -1766,8 +1767,16 @@
     #starlet-hint { font-size: 10px; top: -28px; }
     .mini-star { width: 24px; height: 24px; }
     .spark { width: 5px; height: 5px; }
+    .clickfx { width: 42px; height: 42px; margin: -21px 0 0 -21px; --fx-y: 14px; }
     .float-num { font-size: 12px; }
     .float-num.big { font-size: 15px; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis; }
+    .float-num.perfect {
+      font-size: 18px;
+      max-width: calc(100vw - 32px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-shadow: 2px 2px 0 #6e1849, 3px 3px 0 #00000066;
+    }
     .decor { font-size: 24px; }
     .cosmic-seed-tree img { width: 42px; height: 48px; }
     #combo-box { height: 34px; margin-top: 4px; }
@@ -2236,10 +2245,10 @@ const STAGES = [
     pal: null, crown: true, rainbow: true },
 ];
 
-/* 슬라임 본체 아틀라스 (slime-main-v2-ai): baked 성향 슬라임과 맞춘 픽셀풍 2프레임 idle.
+/* 슬라임 본체 아틀라스 (slime-main-v3-ai): baked 성향 슬라임과 실루엣을 맞춘 2프레임 idle.
    로드 실패 시 기존 캔버스 픽셀 렌더로 자동 폴백 */
 const SLIME_ATLAS = {
-  src: 'assets/generated/sprites/slime-main-v2-ai/sprite-sheet-alpha.png',
+  src: 'assets/generated/sprites/slime-main-v3-ai/sprite-sheet-alpha.png',
   sheet: { w: 1536, h: 3840 },
   cell: 768,
 };
@@ -2254,7 +2263,7 @@ const TRAIT_ATLAS = {
 };
 let traitAtlasOk = false;
 
-/* 비핑크 성향 본체 아틀라스 (slime-main-traits-ai): 기본 v2와 같은 결의 baked 변형.
+/* 비핑크 성향 본체 아틀라스 (slime-main-traits-ai): 기본 v3와 같은 결의 baked 변형.
    muscle은 일부 어두운 머리띠 픽셀이 있지만 스타일 일관성을 위해 baked row를 우선한다. */
 const MAIN_TRAIT_ATLAS = {
   src: 'assets/generated/sprites/slime-main-traits-ai/sprite-sheet-alpha.png',
@@ -3278,8 +3287,8 @@ function layoutStageUtilityAnchors(areaRect, slimeRect) {
   );
   placeStageUtility(
     'coin-pile',
-    cx + stageW * (mobile ? 0.35 : 0.40),
-    slimeTop + stageH * (mobile ? 0.70 : 0.76),
+    cx + stageW * (mobile ? 0.22 : 0.25),
+    slimeTop + stageH * (mobile ? 0.58 : 0.62),
   );
 }
 
@@ -4306,12 +4315,18 @@ const STARLET_URLS = (() => {
 /* ════════════════════════ 말풍선 ════════════════════════ */
 
 let quipHideTimer = null;
+function hideQuip() {
+  const el = $('speech-bubble');
+  if (!el) return;
+  el.classList.remove('show');
+  clearTimeout(quipHideTimer);
+}
+
 function showQuip(text) {
   if (silentTick) return;
   const el = $('speech-bubble');
   if (transientGuestActive()) {
-    el.classList.remove('show');
-    clearTimeout(quipHideTimer);
+    hideQuip();
     return;
   }
   el.textContent = text;
@@ -4506,7 +4521,10 @@ function floatPosition(x, y, big, perfect, text = '') {
     };
   }
   const lane = floatLane++ % 4;
-  const estimatedWidth = Math.min(260, Math.max(70, text.length * (big || perfect ? 13 : 9)));
+  const mobile = isMobileLayout();
+  const estimatedWidth = mobile && (big || perfect)
+    ? Math.min(innerWidth - 32, Math.max(90, text.length * 12))
+    : Math.min(260, Math.max(70, text.length * (big || perfect ? 13 : 9)));
   const sideTop = r.top + r.height * ((big || perfect) ? 0.12 : 0.26) + lane * ((big || perfect) ? 18 : 16);
   const right = r.right + 12;
   if (right + estimatedWidth <= innerWidth - 8) {
@@ -4517,6 +4535,12 @@ function floatPosition(x, y, big, perfect, text = '') {
     return { left, top: sideTop };
   }
   if (big || perfect) {
+    if (mobile) {
+      return {
+        left: 16,
+        top: r.bottom + 8 + lane * 14,
+      };
+    }
     return {
       left: Math.max(8, Math.min(innerWidth - estimatedWidth - 8, r.left + r.width * 0.24)),
       top: Math.max(8, r.top - 22 - lane * 14),
@@ -6721,6 +6745,7 @@ function starSpawnRect(kind = 'star') {
 function spawnStar() {
   starVisible = starLinger();
   starEl.style.display = 'block';
+  hideQuip();
   S.telemetry.starsSeen++;
   // 첫 황금별 안내
   if (S.stats.lifetime.starsClicked === 0) {
@@ -6849,6 +6874,7 @@ function spawnCloud() {
     cloudLeaveTimer = 0;
   }
   resetCloudVisual();
+  hideQuip();
   cloudState = 'drift';
   cloudLife = 14;
   const pos = starSpawnRect('cloud');
@@ -6975,6 +7001,7 @@ function spawnStarlet() {
   if (slimeLevel < 5) { starletTimer = 120; return; }          // 초반 과밀 방지
   if (cloudState !== 'hidden') { starletTimer = 45; return; }  // 먹구름과 동시 등장 방지
   starletState = 'waiting';
+  hideQuip();
   starletLife = 30;
   const pos = starSpawnRect('starlet');
   starletX = pos.x; starletY = pos.y;

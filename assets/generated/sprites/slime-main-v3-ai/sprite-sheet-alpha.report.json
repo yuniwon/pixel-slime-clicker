@@ -1,0 +1,48 @@
+{
+  "ok": true,
+  "game_input": "sprite-sheet-alpha.png",
+  "derived_from": "../slime-main-v2-ai/sprite-sheet-alpha.png",
+  "method": "transparent bbox nearest-neighbor compacting; no chroma pixels introduced",
+  "sheetWidth": 1536,
+  "sheetHeight": 3840,
+  "declared_frames_ok": true,
+  "bboxes_frame0": {
+    "baby_green": [
+      84,
+      234,
+      683,
+      623
+    ],
+    "sea": [
+      87,
+      231,
+      681,
+      626
+    ],
+    "strawberry": [
+      87,
+      233,
+      681,
+      625
+    ],
+    "gold_king": [
+      87,
+      130,
+      681,
+      650
+    ],
+    "god": [
+      72,
+      107,
+      696,
+      648
+    ]
+  },
+  "states": {
+    "baby_green": 2,
+    "sea": 2,
+    "strawberry": 2,
+    "gold_king": 2,
+    "god": 2
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "characterId": "slime-main-v3-ai",
+  "engine": "component-row",
+  "game_input": "sprite-sheet-alpha.png",
+  "degraded_static_fallback": false,
+  "cell": {
+    "shape": "square",
+    "width": 768,
+    "height": 768,
+    "safe_margin_x": 84,
+    "safe_margin_y": 84,
+    "size": 768,
+    "safe_margin": 84
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "sprite_sheet_alpha": "sprite-sheet-alpha.png",
+  "sprite_sheet_alpha_report": "sprite-sheet-alpha.report.json",
+  "animation": {
+    "rows": {
+      "baby_green": {
+        "frames": 2,
+        "fps": 2,
+        "loop": true
+      },
+      "sea": {
+        "frames": 2,
+        "fps": 2,
+        "loop": true
+      },
+      "strawberry": {
+        "frames": 2,
+        "fps": 2,
+        "loop": true
+      },
+      "gold_king": {
+        "frames": 2,
+        "fps": 2,
+        "loop": true
+      },
+      "god": {
+        "frames": 2,
+        "fps": 2,
+        "loop": true
+      }
+    }
+  },
+  "frame_layout": {
+    "rows": {
+      "baby_green": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 0,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "sea": [
+        {
+          "x": 0,
+          "y": 768,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 768,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "strawberry": [
+        {
+          "x": 0,
+          "y": 1536,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 1536,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "gold_king": [
+        {
+          "x": 0,
+          "y": 2304,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 2304,
+          "w": 768,
+          "h": 768
+        }
+      ],
+      "god": [
+        {
+          "x": 0,
+          "y": 3072,
+          "w": 768,
+          "h": 768
+        },
+        {
+          "x": 768,
+          "y": 3072,
+          "w": 768,
+          "h": 768
+        }
+      ]
+    }
+  },
+  "provenance": {
+    "type": "procedural_compact_pass",
+    "source": "../slime-main-v2-ai/sprite-sheet-alpha.png",
+    "reason": "align default stage silhouettes with baked trait atlases while pending full sprite-gen regeneration",
+    "note": "gold_king and god are scaled larger than the first v3 draft so late evolutions keep reward presence"
+  }
+}
