@@ -226,16 +226,16 @@
   /* ── 말풍선 ── */
   #speech-bubble {
     position: absolute;
-    top: -14px; left: 50%;
+    top: -56px; left: 50%;
     transform: translateX(-50%) scale(0);
     background: var(--text);
     color: #2d1b4e;
-    font-size: 12px;
-    line-height: 1.5;
-    padding: 8px 14px;
-    border: 3px solid #2d1b4e;
-    box-shadow: 3px 3px 0 #00000055;
-    max-width: 240px;
+    font-size: 11px;
+    line-height: 1.35;
+    padding: 6px 10px;
+    border: 2px solid #2d1b4e;
+    box-shadow: 2px 2px 0 #00000055;
+    max-width: 220px;
     width: max-content;
     text-align: center;
     z-index: 10;
@@ -468,18 +468,21 @@
   /* ── 떠오르는 숫자 ── */
   .float-num {
     position: fixed;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     color: var(--gold);
     text-shadow: 2px 2px 0 #00000088;
     pointer-events: none;
-    z-index: 50;
-    animation: floatup .9s ease-out forwards;
+    white-space: nowrap;
+    z-index: 46;
+    animation: floatup .72s ease-out forwards;
+    will-change: transform, opacity;
   }
-  .float-num.big { font-size: 28px; color: var(--pink); }
+  .float-num.big { font-size: 22px; color: var(--pink); z-index: 47; }
+  .float-num.perfect { color: #ffeec4; text-shadow: 2px 2px 0 #6e1849, 4px 4px 0 #00000066; }
   @keyframes floatup {
     0% { opacity: 1; transform: translateY(0) scale(1); }
-    100% { opacity: 0; transform: translateY(-90px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-58px) scale(1.08); }
   }
 
   .spark {
@@ -1383,7 +1386,7 @@
     #combo-bar-outer { width: 140px; height: 8px; }
     #challenge-badge { font-size: 10px; padding: 2px 8px; margin-bottom: 4px; }
     .friend { font-size: 20px; }
-    #speech-bubble { font-size: 10px; max-width: 160px; padding: 6px 10px; }
+    #speech-bubble { top: -42px; font-size: 10px; max-width: 160px; padding: 5px 8px; }
     /* 상점: 나머지 전부 + iOS 홈바 안전영역 */
     #shop {
       width: 100%;
@@ -3039,6 +3042,12 @@ function comboTier() {
   return { t: 0, label: '말랑', color: '#9d8ac4', r };
 }
 
+function earlyFxCalm() {
+  return S.prestige.totalResets === 0
+    && S.totalClicks < 160
+    && S.telemetry.firstBlessingAt == null;
+}
+
 /* 콤보 칩·오라·열기 파티클 갱신 — 클릭 즉시 + 매 프레임.
    매 프레임은 composite 속성(opacity/transform)만 — 페인트 비용(그라디언트·클래스)은
    단계가 바뀔 때만 갱신 (fixing-motion-performance) */
@@ -3060,14 +3069,16 @@ function updateComboVisual() {
     cbox.classList.remove('on');
   }
   const auraSpr = FX_ATLASES.comboaura.ok;
+  const calm = earlyFxCalm();
+  const tone = calm ? 0.48 : 1;
   if (auraSpr) {
     // 스프라이트 마법진: 반투명 + 슬라임의 ~1.45배 — 액자처럼 갇혀 보이지 않게
-    aura.style.opacity = Math.min(0.85, 0.22 + tier.r * 0.63);
+    aura.style.opacity = Math.min(0.85, 0.22 + tier.r * 0.63) * tone;
     const target = slimeCv.offsetWidth * 1.45 / (aura.offsetWidth || 320);
-    aura.style.transform = `translate(-50%,-50%) scale(${(target * (0.94 + tier.r * 0.12)).toFixed(3)})`;
+    aura.style.transform = `translate(-50%,-50%) scale(${(target * (0.94 + tier.r * 0.12) * (calm ? 0.86 : 1)).toFixed(3)})`;
   } else {
-    aura.style.opacity = tier.r;
-    aura.style.transform = `translate(-50%,-50%) scale(${1 + tier.r * 0.45})`;
+    aura.style.opacity = tier.r * tone;
+    aura.style.transform = `translate(-50%,-50%) scale(${(1 + tier.r * 0.45) * (calm ? 0.86 : 1)})`;
   }
   const f = auraSpr ? Math.floor(performance.now() / 550) % 2 : 0;
   if (tier.t !== auraTierShown || f !== auraFrameShown) {
@@ -3083,8 +3094,8 @@ function updateComboVisual() {
       aura.style.backgroundImage = '';
       aura.style.background = `radial-gradient(circle, ${tier.t >= 3 ? '#ffd75e66' : '#ff8ac455'} 0%, ${tier.t >= 3 ? '#ff8ac433' : '#ff8ac422'} 38%, transparent 65%)`;
     }
-    aura.classList.toggle('pulse', tier.t >= 2);
-    slimeWrap.classList.toggle('heat', tier.t >= 2);
+    aura.classList.toggle('pulse', tier.t >= 2 && !calm);
+    slimeWrap.classList.toggle('heat', tier.t >= 2 && !calm);
     document.querySelectorAll('.heat-particle').forEach(p => {
       p.style.background = tier.t >= 3 ? 'var(--gold)' : 'var(--pink)';
     });
@@ -3094,6 +3105,7 @@ function updateComboVisual() {
 const TIER_ARPS = [null, [523, 659], [659, 784, 988], [784, 988, 1319, 1568]];
 function comboTierUp(t) {
   const tier = comboTier();
+  const calm = earlyFxCalm();
   slimeWrap.classList.remove('tier-up');
   void slimeWrap.offsetWidth;
   slimeWrap.classList.add('tier-up');           // 히트스톱 펀치
@@ -3101,8 +3113,10 @@ function comboTierUp(t) {
   ring.style.borderColor = tier.color;
   ring.classList.remove('go'); void ring.offsetWidth; ring.classList.add('go');
   const flash = $('tier-flash');
-  flash.style.background = tier.color;          // 흰색 아닌 단계색 틴트 — 코지 톤
-  flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+  if (!calm) {
+    flash.style.background = tier.color;        // 흰색 아닌 단계색 틴트 — 코지 톤
+    flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go');
+  }
   (TIER_ARPS[t] || []).forEach((f, i) => setTimeout(() => beep(f, 0.09, 'triangle', 0.07), i * 50));
   haptic([10, 30, 10, 30, 20]);
 }
@@ -3117,9 +3131,50 @@ function comboLost() {
 function frenzyMul() { return frenzyTimer > 0 ? (hasSyn('dragon', 25) ? 8 : 7) + BC.frenzyMulAdd : 1; }
 function partyMul() { return partyTimer > 0 ? 5 : 1; }
 
-/* ════════════════════════ 사운드 (WebAudio) ════════════════════════ */
+/* ════════════════════════ 사운드 (Kenney SFX + WebAudio fallback) ════════════════════════ */
 
 let audioCtx = null;
+const KENNEY_SFX = {
+  click:   { src: 'assets/audio/kenney-ui/click.ogg', volume: 0.18 },
+  toggle:  { src: 'assets/audio/kenney-ui/toggle.ogg', volume: 0.28 },
+  buy:     { src: 'assets/audio/kenney-ui/buy.ogg', volume: 0.34 },
+  evolve:  { src: 'assets/audio/kenney-ui/evolve.ogg', volume: 0.32 },
+  star:    { src: 'assets/audio/kenney-ui/star.ogg', volume: 0.34 },
+  ach:     { src: 'assets/audio/kenney-ui/achievement.ogg', volume: 0.36 },
+  perfect: { src: 'assets/audio/kenney-ui/perfect.ogg', volume: 0.30 },
+  rebirth: { src: 'assets/audio/kenney-ui/rebirth.ogg', volume: 0.36 },
+  drop:    { src: 'assets/audio/kenney-ui/drop.ogg', volume: 0.26 },
+};
+const sfxCache = {};
+
+function kenneyAudio(key) {
+  const def = KENNEY_SFX[key];
+  if (!def) return null;
+  if (!sfxCache[key]) {
+    const a = new Audio(def.src);
+    a.preload = 'auto';
+    a.volume = def.volume;
+    sfxCache[key] = a;
+  }
+  return sfxCache[key];
+}
+
+function playKenneySfx(key, fallback) {
+  if (!S.soundOn) return true;
+  try {
+    const base = kenneyAudio(key);
+    if (!base) throw new Error('missing sfx: ' + key);
+    const a = base.cloneNode();
+    a.volume = base.volume;
+    const p = a.play();
+    if (p && p.catch) p.catch(() => { if (fallback) fallback(); });
+    return true;
+  } catch (e) {
+    if (fallback) fallback();
+    return false;
+  }
+}
+
 function beep(freq, dur = 0.07, type = 'square', vol = 0.08) {
   if (!S.soundOn) return;
   try {
@@ -3157,6 +3212,11 @@ function sndClick() {
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     clickNoise(0.05);
+    const now = performance.now();
+    if (now - lastClickSfxAt > 45) {
+      lastClickSfxAt = now;
+      playKenneySfx('click');
+    }
   } catch (e) { return; }
   // 바디: 콤보 10마다 펜타토닉 한 칸 위, 50+는 한 옥타브 위 — 항상 BGM과 협화
   const idx = Math.min(MUSIC.scale.length - 1, Math.floor(combo / 10));
@@ -3165,22 +3225,36 @@ function sndClick() {
   // 스파클: 10의 배수 콤보를 밟는 클릭만 반짝
   if (combo > 0 && combo % 10 === 0) beep(MUSIC.scale[idx] * oct * 2, 0.09, 'triangle', 0.04);
 }
+let lastClickSfxAt = 0;
 
 /* 햅틱: 안드로이드 즉발, iOS는 자동 no-op. 단발이 패턴 재생을 중간에 끊지 않게 가드 */
 let hapticPatternUntil = 0;
 function haptic(pattern) {
   if (!S.hapticOn || !navigator.vibrate) return;
+  if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
   const now = Date.now();
   if (!Array.isArray(pattern) && now < hapticPatternUntil) return;
   if (Array.isArray(pattern)) hapticPatternUntil = now + pattern.reduce((a, b) => a + b, 0) + 150;
   try { navigator.vibrate(pattern); } catch (e) { /* 권한/지원 문제 무시 */ }
 }
-function sndBuy()   { beep(523, 0.08); setTimeout(() => beep(784, 0.1), 70); }
-function sndEvo()   { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.15, 'triangle', 0.1), i * 110)); }
-function sndStar()  { [880, 1175, 1568].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.1), i * 80)); }
-function sndAch()   { [659, 880, 1319].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.09), i * 90)); }
-function sndPerfect() { [784, 1047, 1568, 2093].forEach((f, i) => setTimeout(() => beep(f, 0.1, 'triangle', 0.1), i * 55)); }
-function sndRebirth() { [1047, 784, 523, 392, 523, 784, 1047, 1568].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'triangle', 0.1), i * 130)); }
+function sndBuy() {
+  playKenneySfx('buy', () => { beep(523, 0.08); setTimeout(() => beep(784, 0.1), 70); });
+}
+function sndEvo() {
+  playKenneySfx('evolve', () => [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.15, 'triangle', 0.1), i * 110)));
+}
+function sndStar() {
+  playKenneySfx('star', () => [880, 1175, 1568].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.1), i * 80)));
+}
+function sndAch() {
+  playKenneySfx('ach', () => [659, 880, 1319].forEach((f, i) => setTimeout(() => beep(f, 0.12, 'triangle', 0.09), i * 90)));
+}
+function sndPerfect() {
+  playKenneySfx('perfect', () => [784, 1047, 1568, 2093].forEach((f, i) => setTimeout(() => beep(f, 0.1, 'triangle', 0.1), i * 55)));
+}
+function sndRebirth() {
+  playKenneySfx('rebirth', () => [1047, 784, 523, 392, 523, 784, 1047, 1568].forEach((f, i) => setTimeout(() => beep(f, 0.18, 'triangle', 0.1), i * 130)));
+}
 
 /* ── BGM: 프로시저럴 칩튠 자장가 (에셋 없음) ──
    C장조 펜타토닉 8분음표 패턴 4종 순환, 광란 중엔 한 옥타브 위 + 가벼운 박자 */
@@ -3606,6 +3680,7 @@ function showNews() {
 /* ════════════════════════ 클릭 처리 ════════════════════════ */
 
 const slimeWrap = $('slime-wrap');
+let lastManualClickAt = 0;
 
 /* ── 오늘의 첫 말랑: 하루의 첫 클릭이 그날 가장 기분 좋은 클릭 ── */
 function todayKey() {
@@ -3644,6 +3719,7 @@ function firstSquishOfDay(x, y) {
 }
 
 function doClick(x, y) {
+  lastManualClickAt = performance.now();
   // 퍼펙트 말랑: 3% 확률로 x5 — 손맛용 잭팟 (작은 행운 축복 +2%p)
   const perfect = Math.random() < (0.03 + BC.perfectAdd + upSum('perfAdd')) * (BC.perfectX2 ? 2 : 1);
   let gain = clickPower() * comboMul() * frenzyMul();
@@ -3753,14 +3829,50 @@ window.addEventListener('keydown', e => {
   doClick(r.left + r.width / 2 + (Math.random() * 60 - 30), r.top + r.height * 0.55);
 });
 
+let floatLane = 0;
+function floatPosition(x, y, big, perfect, text = '') {
+  const r = slimeCv.getBoundingClientRect();
+  const insideSlimeZone =
+    x >= r.left - r.width * 0.18 && x <= r.right + r.width * 0.18 &&
+    y >= r.top - r.height * 0.12 && y <= r.bottom + r.height * 0.12;
+  if (!insideSlimeZone) {
+    return {
+      left: x - 20 + (Math.random() * 40 - 20),
+      top: y - 30,
+    };
+  }
+  const lane = floatLane++ % 4;
+  const estimatedWidth = Math.min(260, Math.max(70, text.length * (big || perfect ? 13 : 9)));
+  const sideTop = r.top + r.height * ((big || perfect) ? 0.12 : 0.26) + lane * ((big || perfect) ? 18 : 16);
+  const right = r.right + 12;
+  if (right + estimatedWidth <= innerWidth - 8) {
+    return { left: right, top: sideTop };
+  }
+  const left = r.left - estimatedWidth - 12;
+  if (left >= 8) {
+    return { left, top: sideTop };
+  }
+  if (big || perfect) {
+    return {
+      left: Math.max(8, Math.min(innerWidth - estimatedWidth - 8, r.left + r.width * 0.24)),
+      top: Math.max(8, r.top - 22 - lane * 14),
+    };
+  }
+  return {
+    left: Math.max(8, Math.min(innerWidth - estimatedWidth - 8, r.left + r.width * (0.68 + lane * 0.035))),
+    top: r.top + r.height * (0.24 + lane * 0.10),
+  };
+}
+
 function spawnFloat(x, y, text, big, perfect) {
   const el = document.createElement('div');
   el.className = 'float-num' + (big ? ' big' : '') + (perfect ? ' perfect' : '');
   el.textContent = text;
-  el.style.left = (x - 20 + (Math.random() * 40 - 20)) + 'px';
-  el.style.top = (y - 30) + 'px';
+  const p = floatPosition(x, y, big, perfect, text);
+  el.style.left = p.left + 'px';
+  el.style.top = p.top + 'px';
   document.body.appendChild(el);
-  setTimeout(() => el.remove(), 900);
+  setTimeout(() => el.remove(), 760);
 }
 
 const SPARK_COLORS = ['#ffd75e', '#ff8ac4', '#7dff8a', '#56b8f2', '#ffffff'];
@@ -4521,8 +4633,24 @@ function renderBlessingCards() {
 }
 
 let blessGuardUntil = 0;
+let blessingOpenTimer = null;
+let blessingQueuedAt = 0;
+
+function hasAnyFriend() {
+  return PRODUCERS.some(p => (S.producers[p.id] || 0) > 0);
+}
+
+function shouldHoldFirstBlessingForFriend() {
+  return S.prestige.totalResets === 0
+    && S.telemetry.firstBlessingAt == null
+    && !hasAnyFriend()
+    && pendingBlessings > 0;
+}
 
 function openBlessingModal() {
+  clearTimeout(blessingOpenTimer);
+  blessingOpenTimer = null;
+  blessingQueuedAt = 0;
   rerollCost = rerollBase();
   if (!renderBlessingCards()) return;
   updateBlessingSub();
@@ -4604,11 +4732,28 @@ function closeBlessingModal() {
 
 function queueBlessing(count) {
   pendingBlessings += count;
+  if (!blessingQueuedAt) blessingQueuedAt = performance.now();
   if ($('blessing-overlay').classList.contains('open')) {
     updateBlessingSub();  // 이미 고르는 중이면 남은 개수만 갱신
   } else {
-    setTimeout(openBlessingModal, 900);  // 레벨업 연출 먼저
+    scheduleBlessingModal();  // 레벨업·클릭 연출 먼저
   }
+}
+
+function scheduleBlessingModal(delayOverride = null) {
+  clearTimeout(blessingOpenTimer);
+  const calmFor = performance.now() - lastManualClickAt;
+  const wait = delayOverride ?? Math.max(900, 1250 - calmFor);
+  blessingOpenTimer = setTimeout(() => {
+    blessingOpenTimer = null;
+    if (pendingBlessings <= 0 || $('blessing-overlay').classList.contains('open')) return;
+    const stillClicking = performance.now() - lastManualClickAt < 900;
+    const waitedLongEnough = blessingQueuedAt && performance.now() - blessingQueuedAt > 3200;
+    const firstFriendGraceDone = blessingQueuedAt && performance.now() - blessingQueuedAt > 9000;
+    if (shouldHoldFirstBlessingForFriend() && !firstFriendGraceDone) scheduleBlessingModal(1800);
+    else if (stillClicking && !waitedLongEnough) scheduleBlessingModal();
+    else openBlessingModal();
+  }, wait);
 }
 
 /* ── 코스메틱 ── */
@@ -5670,6 +5815,9 @@ function buyProducer(p) {
   S.coins -= info.cost;
   S.producers[p.id] += info.count;
   if (!hadFriends && S.telemetry.firstFriendAt == null) S.telemetry.firstFriendAt = Math.round(S.playTime);
+  if (!hadFriends && pendingBlessings > 0 && !$('blessing-overlay').classList.contains('open')) {
+    scheduleBlessingModal(700);
+  }
   consumeDiscount();
   sndBuy();
   wishEvent('hire', info.count);
@@ -6353,7 +6501,7 @@ $('reset-btn').addEventListener('click', () => {
 $('sound-btn').addEventListener('click', () => {
   S.soundOn = !S.soundOn;
   $('sound-btn').textContent = S.soundOn ? '🔊' : '🔇';
-  if (S.soundOn) beep(660, 0.08);
+  if (S.soundOn) playKenneySfx('toggle', () => beep(660, 0.08));
   save();
 });
 
