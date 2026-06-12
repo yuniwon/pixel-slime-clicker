@@ -1593,6 +1593,13 @@
     <div class="settings-row">
       <button class="settings-btn" id="toggle-stats-btn">고급 통계 보기</button>
     </div>
+    <h4>익명 통계</h4>
+    <div style="font-size:10px;color:var(--text-dim);line-height:1.6;margin-bottom:6px;">
+      방문 수와 진행 마일스톤(레벨 도달 등)만 익명으로 집계해요 (GoatCounter — 쿠키·계정·개인정보 없음). 세이브는 이 기기에만 저장됩니다.
+    </div>
+    <div class="settings-row">
+      <button class="settings-btn" id="toggle-analytics-btn">익명 통계 끄기</button>
+    </div>
     <h4>위험 구역</h4>
     <div class="settings-row">
       <button class="settings-btn danger" id="reset-btn">🗑️ 처음부터 다시 시작 (전체 초기화)</button>
@@ -2465,6 +2472,8 @@ function defaultState() {
       goldenWishesCompleted: 0,
     },
     playTime: 0,        // 함께한 시간(초) — 앨범용
+    analyticsOn: true,  // 익명 통계 (GoatCounter — 쿠키·개인정보 없음), 설정에서 끔
+    gcSent: {},         // 전송한 마일스톤 (세이브당 1회)
     createdAt: Date.now(),
     soundOn: true,
     musicOn: true,
@@ -2532,6 +2541,64 @@ function showOnceHint(id, delay = 0) {
   if (delay) setTimeout(run, delay);
   else run();
   save();
+}
+
+/* ════════════════════════ 익명 통계 (GoatCounter) ════════════════════════
+   쿠키·개인정보 없는 방문 카운트 + 진행 마일스톤 깔때기 (병목 분석용).
+   - 배포 도메인에서만 동작 (localhost 개발 노이즈 차단)
+   - 설정에서 끌 수 있음 (S.analyticsOn)
+   - 마일스톤은 세이브당 1회만 전송 (S.gcSent) */
+
+const GC_ENABLED = () => S.analyticsOn !== false
+  && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1' && location.protocol !== 'file:';
+
+function initAnalytics() {
+  if (!GC_ENABLED() || document.querySelector('script[data-goatcounter]')) return;
+  const s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://gc.zgo.at/count.js';
+  s.dataset.goatcounter = 'https://yuniwon.goatcounter.com/count';
+  document.head.appendChild(s);
+}
+
+function gcEvent(path) {
+  if (!GC_ENABLED()) return;
+  try {
+    if (window.goatcounter && window.goatcounter.count) {
+      window.goatcounter.count({ path, event: true });
+    }
+  } catch (e) { /* 통계 실패는 게임에 영향 없음 */ }
+}
+
+/* 진행 깔때기: 어디서 이탈하는지 보이는 최소 마일스톤 세트 */
+const GC_MILESTONES = [
+  { id: 'first-friend',    cond: () => PRODUCERS.some(p => (S.producers[p.id] || 0) > 0) },
+  { id: 'first-upgrade',   cond: () => Object.keys(S.upgrades).length > 0 },
+  { id: 'first-blessing',  cond: () => S.runBlessings.length > 0 || Object.keys(S.codex.blessings).length > 0 },
+  { id: 'evo-sea-lv5',     cond: () => slimeLevel >= 5 },
+  { id: 'lv10',            cond: () => slimeLevel >= 10 },
+  { id: 'lv15',            cond: () => slimeLevel >= 15 },
+  { id: 'god-lv20',        cond: () => slimeLevel >= 20 || stageIdx >= 4 },
+  { id: 'crystal-harvest', cond: () => S.crystal.count > 0 || Object.keys(S.crystal.friendLv).length > 0 },
+  { id: 'wish-10',         cond: () => S.wishes.completed >= 10 },
+  { id: 'rebirth-1',       cond: () => S.prestige.totalResets >= 1 },
+  { id: 'rebirth-3',       cond: () => S.prestige.totalResets >= 3 },
+  { id: 'day2-return',     cond: () => (S.telemetry.firstSquishes || 0) >= 2 },
+  { id: 'cosmic-seed',     cond: () => !!S.cosmicSeed },
+];
+
+function checkAnalyticsMilestones() {
+  if (!GC_ENABLED()) return;
+  S.gcSent = S.gcSent || {};
+  for (const m of GC_MILESTONES) {
+    if (S.gcSent[m.id]) continue;
+    let hit = false;
+    try { hit = m.cond(); } catch (e) {}
+    if (hit) {
+      S.gcSent[m.id] = true;
+      gcEvent('m/' + m.id);
+    }
+  }
 }
 
 /* ════════════════════════ 스프라이트 레지스트리 ════════════════════════
@@ -6366,6 +6433,17 @@ $('toggle-stats-btn').addEventListener('click', () => {
     : '고급 통계 보기';
 });
 
+function syncAnalyticsBtn() {
+  $('toggle-analytics-btn').textContent = S.analyticsOn !== false ? '익명 통계 끄기' : '익명 통계 켜기';
+}
+$('toggle-analytics-btn').addEventListener('click', () => {
+  S.analyticsOn = S.analyticsOn === false;
+  syncAnalyticsBtn();
+  if (S.analyticsOn) initAnalytics();
+  toast(S.analyticsOn ? '📊 익명 통계를 다시 켰어요' : '📊 익명 통계를 껐어요 — 아무것도 전송하지 않아요');
+  save();
+});
+
 /* 닫기/숨김 직전 마지막 경과분까지 정산 후 저장 (토스트 없이) */
 function finalSave() {
   econTick(true);
@@ -6478,11 +6556,12 @@ function econTickBody() {
     quipTimer = 40 + Math.random() * 40;
   }
 
-  // 젤리 결정 숙성 + 황금 소원 자정 교체
+  // 젤리 결정 숙성 + 황금 소원 자정 교체 + 통계 마일스톤
   crystalCheckTimer -= dt;
   if (crystalCheckTimer <= 0) {
     crystalCheckTimer = 20;
     crystalTick();
+    checkAnalyticsMilestones();
     if (S.wishes.golden && S.wishes.golden.date !== todayKey()) {
       refreshGoldenWish();
       if (currentTab === 'wishes') buildShop();
@@ -6841,6 +6920,9 @@ rebuildFriends();
 renderDecor();
 renderWishStrip();
 $('wish-strip').addEventListener('click', () => gotoTab('wishes'));
+initAnalytics();
+syncAnalyticsBtn();
+checkAnalyticsMilestones();
 renderHud();
 checkStory();
 // 온보딩: 완전 새 게임이면 첫 클릭 안내

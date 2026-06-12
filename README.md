@@ -100,6 +100,7 @@
 - 경제 루프는 rAF + 1초 인터벌 이중 구동 — 백그라운드 탭에서도 진행
 - 모바일: 100dvh 고정 분할, safe-area, iOS 더블탭 줌 차단 (touch-action + touchend 가드), 해상도 비례 UI (vw clamp)
 - 메타데이터: OG/Twitter 카드, canonical — 링크 공유 시 카드 렌더
+- 익명 통계: GoatCounter (쿠키·개인정보 없음) — 방문 수 + 진행 마일스톤 깔때기 (first-friend → … → cosmic-seed). 배포 도메인에서만 동작하고, 설정에서 끌 수 있으며, 세이브는 로컬에만 저장
 
 ## 내장 개발 도구 (콘솔)
 
