@@ -858,13 +858,13 @@
     background-size: 300% 100%;
     background-repeat: no-repeat;
     filter: saturate(1.18) contrast(1.06) drop-shadow(0 3px 0 #00000066);
-    animation: clickfx-pop .52s linear forwards;
+    animation: clickfx-pop .44s linear forwards;
   }
   @keyframes clickfx-pop {
-    0%, 74.9% { background-position-x: 0%; opacity: 1; transform: scale(.96); }
-    75%, 88.9% { background-position-x: 50%; opacity: 1; transform: scale(1.04); }
-    89%, 96% { background-position-x: 100%; opacity: .82; transform: scale(1.12); }
-    100% { background-position-x: 100%; opacity: 0; transform: scale(1.16); }
+    0%, 61.9% { background-position-x: 0%; opacity: 1; transform: scale(.96) rotate(var(--fx-rot, 0deg)); }
+    62%, 81.9% { background-position-x: 50%; opacity: .95; transform: scale(1.04) rotate(var(--fx-rot, 0deg)); }
+    82%, 94% { background-position-x: 100%; opacity: .72; transform: scale(1.12) rotate(var(--fx-rot, 0deg)); }
+    100% { background-position-x: 100%; opacity: 0; transform: scale(1.16) rotate(var(--fx-rot, 0deg)); }
   }
 
   /* 코인 더미: 누적 재산의 풍경 — 무대 우하단, 접지 그림자 */
@@ -1760,7 +1760,7 @@
     /* 이벤트 손님들: 무대 크기에 맞는 비율로 */
     #golden-star { width: 44px; height: 44px; }
     #raincloud { width: 76px; height: 51px; }
-    #cloud-hint { font-size: 10px; top: -30px; }
+    #cloud-hint { font-size: 10px; top: -28px; padding: 2px 6px; }
     #starlet { width: 44px; height: 44px; }
     #starlet-hint { font-size: 10px; top: -28px; }
     .mini-star { width: 24px; height: 24px; }
@@ -2338,7 +2338,7 @@ const DECOR = [
   { id: 'fountain', icon: '⛲', name: '코인 분수', desc: '클릭 코인 +5%',            cost: 5e8,
     pos: { right: '17%', bottom: '47%' }, boost: { click: 0.05 } },
   { id: 'window',   icon: '🪟', name: '우주 창문', desc: '친구 생산 +5%',            cost: 1e10,
-    pos: { right: '9%', top: '12%' }, boost: { cps: 0.05 } },
+    pos: { right: '9%', top: '12%' }, mobilePos: { right: '11%', top: '22%' }, boost: { cps: 0.05 } },
 ];
 
 /* 별의 기록: 마일스톤마다 해금되는 짧은 이야기 */
@@ -4534,12 +4534,15 @@ function particleCount() {
 /* 클릭 버스트: 장갑 팝 3프레임 원샷 — 클릭 지점에 작게 */
 function spawnClickFx(x, y) {
   if (!FX_ATLASES.clickfx.ok || particleCount() > PARTICLE_CAP) return;
+  const active = document.querySelectorAll('.clickfx');
+  if (active.length >= 1) active[0].remove();
   const el = document.createElement('div');
   el.className = 'clickfx';
   el.style.left = x + 'px';
   el.style.top = y + 'px';
+  el.style.setProperty('--fx-rot', ((Math.random() * 16) - 8).toFixed(1) + 'deg');
   document.body.appendChild(el);
-  setTimeout(() => el.remove(), 580);
+  setTimeout(() => el.remove(), 480);
 }
 
 function stopSpriteGesture(e) {
@@ -5629,8 +5632,9 @@ function renderDecor() {
     // top 기준 배치 = 하늘 장식 (부유 허용), 나머지는 바닥 접지
     el.className = 'decor' + (d.center ? ' center' : '') + (d.pos.top !== undefined ? ' sky' : '');
     el.innerHTML = decorSpriteHtml(d.id, d.icon, 'room-decor-sprite');
+    const pos = isMobileLayout() && d.mobilePos ? d.mobilePos : d.pos;
     for (const k of ['left', 'right', 'top', 'bottom']) {
-      if (d.pos[k] !== undefined) el.style[k] = d.pos[k];
+      if (pos[k] !== undefined) el.style[k] = pos[k];
     }
     layer.appendChild(el);
   }
@@ -5887,8 +5891,8 @@ function rebuildFriends() {
 
     let pos = bhv.pos();
     if (mobile) {
-      if (p.id === 'whale') pos = { left: '50%', top: '16%' };
-      else if (p.id === 'planet') pos = { right: '6%', top: '20%' };
+      if (p.id === 'whale') pos = { left: '4%', top: '24%' };
+      else if (p.id === 'planet') pos = { right: '7%', top: '29%' };
       else {
         const slot = MOBILE_GROUND_ORDER.indexOf(p.id);
         pos = { left: (5 + (slot < 0 ? groundIdx : slot) * 11) + '%', bottom: '7%' };
@@ -6585,13 +6589,51 @@ function starInterval() {
     * (hasSyn('spirit', 10) ? 0.95 : 1);
 }
 
-function starSpawnRect() {
+function clampEventCoord(value, min, max) {
+  const lo = Math.min(min, max);
+  const hi = Math.max(min, max);
+  return clampNum(value, lo, hi);
+}
+
+function starSpawnRect(kind = 'star') {
   const area = $('game-area').getBoundingClientRect();
-  const maxX = Math.max(0, area.width - 140);
-  const maxY = Math.max(0, area.height - 240);
+  const slime = $('slime-canvas').getBoundingClientRect();
+  const mobile = area.width < 760;
+  const size = kind === 'cloud' ? (mobile ? 76 : 108) : kind === 'star' ? (mobile ? 44 : 72) : kind === 'starlet' ? (mobile ? 44 : 56) : (mobile ? 24 : 32);
+  const margin = mobile ? 18 : 36;
+  const cx = slime.left + slime.width / 2;
+  const cy = slime.top + slime.height * 0.48;
+  const stageW = clampNum(slime.width * 1.42, mobile ? 300 : 410, mobile ? area.width * 0.92 : 560);
+  const stageH = clampNum(slime.height * 0.88, mobile ? 180 : 300, mobile ? 310 : 430);
+  const minX = Math.max(area.left + margin, cx - stageW * 0.58);
+  const maxX = Math.min(area.right - size - margin, cx + stageW * 0.58);
+  const minY = area.top + (mobile ? 150 : 220);
+  const maxY = area.bottom - size - (mobile ? 68 : 86);
+
+  if (kind === 'cloud') {
+    const side = Math.random() < 0.5 ? -1 : 1;
+    return {
+      x: clampEventCoord(cx + side * stageW * (0.22 + Math.random() * 0.23) - size / 2, minX, maxX),
+      y: clampEventCoord(slime.top - size * 0.55 + Math.random() * stageH * 0.18, minY, slime.top + stageH * 0.08),
+    };
+  }
+
+  if (kind === 'starlet') {
+    const side = Math.random() < 0.5 ? -1 : 1;
+    return {
+      x: clampEventCoord(cx + side * stageW * (0.34 + Math.random() * 0.12) - size / 2, minX, maxX),
+      y: clampEventCoord(slime.top + slime.height * (0.46 + Math.random() * 0.15), minY, maxY),
+    };
+  }
+
+  const arcStart = kind === 'mini' ? 205 : 220;
+  const arcEnd = kind === 'mini' ? 335 : 320;
+  const a = (arcStart + Math.random() * (arcEnd - arcStart)) * Math.PI / 180;
+  const rx = stageW * (kind === 'mini' ? 0.46 + Math.random() * 0.1 : 0.36 + Math.random() * 0.12);
+  const ry = stageH * (kind === 'mini' ? 0.34 + Math.random() * 0.08 : 0.32 + Math.random() * 0.08);
   return {
-    x: area.left + 40 + Math.random() * maxX,
-    y: area.top + 70 + Math.random() * maxY,
+    x: clampEventCoord(cx + Math.cos(a) * rx - size / 2, minX, maxX),
+    y: clampEventCoord(cy + Math.sin(a) * ry - size / 2, minY, maxY),
   };
 }
 
@@ -6603,7 +6645,7 @@ function spawnStar() {
   if (S.stats.lifetime.starsClicked === 0) {
     toast('⭐ <b>황금별</b>이 떴어요! 누르면 광란·코인 보너스 같은 <b>행운 이벤트</b>가 터져요');
   }
-  const pos = starSpawnRect();
+  const pos = starSpawnRect('star');
   starEl.style.left = pos.x + 'px';
   starEl.style.top = pos.y + 'px';
   // 강아지 100: 별 등장을 놓치지 않게 반짝임 + 알림음
@@ -6704,11 +6746,17 @@ let cloudClicks = 0;
 let cloudNeed = 0;
 let cloudLeaveTimer = 0;
 
+function guestSpriteSize(kind) {
+  if (kind === 'cloud') return isMobileLayout() ? 76 : 108;
+  if (kind === 'starlet') return isMobileLayout() ? 44 : 56;
+  return 56;
+}
+
 function resetCloudVisual() {
   const visual = $('cloud-visual');
   if (!visual) return;
   visual.innerHTML =
-    spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' });
+    spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: guestSpriteSize('cloud'), className: 'guest-sprite' });
 }
 
 function spawnCloud() {
@@ -6722,13 +6770,13 @@ function spawnCloud() {
   resetCloudVisual();
   cloudState = 'drift';
   cloudLife = 14;
-  const pos = starSpawnRect();
+  const pos = starSpawnRect('cloud');
   cloudEl.style.left = pos.x + 'px';
   cloudEl.style.top = pos.y + 'px';
   cloudEl.classList.add('drift');
   cloudEl.classList.remove('challenge');
   cloudEl.style.display = 'block';
-  $('cloud-hint').textContent = '👆 두드리면 코인+별가루!';
+  $('cloud-hint').textContent = isMobileLayout() ? '👆 두드려!' : '👆 두드리면 코인+별가루!';
   S.telemetry.cloudsSeen++;
   toast('☁️ <b>먹구름 손님</b>! 빠르게 두드려 비를 털면 <b>코인과 별가루</b>를 받아요');
   beep(294, 0.12, 'triangle', 0.07);
@@ -6759,7 +6807,7 @@ cloudEl.addEventListener('pointerdown', e => {
     cloudEl.classList.add('challenge');
     gcSession('s/cloud-engaged');
     S.telemetry.cloudsEngaged++;
-    $('cloud-hint').textContent = `⚡ 연타! ${cloudNeed}번 두드리기!`;
+    $('cloud-hint').textContent = isMobileLayout() ? `⚡ ${cloudNeed}번!` : `⚡ 연타! ${cloudNeed}번 두드리기!`;
     toast(`☁️ 10초 안에 <b>${cloudNeed}번</b> 연타해서 비를 털어내자!`);
     beep(330, 0.1);
   } else if (cloudState === 'challenge') {
@@ -6767,7 +6815,8 @@ cloudEl.addEventListener('pointerdown', e => {
     spawnRaindrops(e.clientX, e.clientY);
     beep(392 + cloudClicks * 8, 0.05);
     $('cloud-bar').style.width = Math.min(100, cloudClicks / cloudNeed * 100) + '%';
-    $('cloud-hint').textContent = `⚡ ${Math.max(0, cloudNeed - cloudClicks)}번 남았어!`;
+    const left = Math.max(0, cloudNeed - cloudClicks);
+    $('cloud-hint').textContent = isMobileLayout() ? `⚡ ${left}번` : `⚡ ${left}번 남았어!`;
     if (cloudClicks >= cloudNeed) cloudSuccess();
   }
 });
@@ -6804,7 +6853,7 @@ function cloudSuccess() {
   cloudEl.classList.remove('challenge');
   $('cloud-hint').textContent = '고마워! ☀️';
   $('cloud-visual').innerHTML =
-    spriteHtml('guests', 'raincloud-happy', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' });
+    spriteHtml('guests', 'raincloud-happy', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: guestSpriteSize('cloud'), className: 'guest-sprite' });
   cloudLeaveTimer = setTimeout(() => {
     cloudLeaveTimer = 0;
     hideCloud();
@@ -6846,7 +6895,7 @@ function spawnStarlet() {
   if (cloudState !== 'hidden') { starletTimer = 45; return; }  // 먹구름과 동시 등장 방지
   starletState = 'waiting';
   starletLife = 30;
-  const pos = starSpawnRect();
+  const pos = starSpawnRect('starlet');
   starletX = pos.x; starletY = pos.y;
   starletEl.style.left = starletX + 'px';
   starletEl.style.top = starletY + 'px';
@@ -6858,8 +6907,8 @@ function spawnStarlet() {
     vis = starletEl.querySelector('#starlet-visual');
   }
   vis.innerHTML = spriteHtml('guests', 'starlet',
-    `<img src="${STARLET_URLS.sad}" alt="">`, { size: 56, className: 'guest-sprite' });
-  $('starlet-hint').textContent = '👆 눌러서 집에 데려다주자!';
+    `<img src="${STARLET_URLS.sad}" alt="">`, { size: guestSpriteSize('starlet'), className: 'guest-sprite' });
+  $('starlet-hint').textContent = isMobileLayout() ? '👆 데려가자!' : '👆 눌러서 집에 데려다주자!';
   starletEl.style.display = 'block';
   S.telemetry.starletsSeen = (S.telemetry.starletsSeen || 0) + 1;
   toast('💫 <b>길 잃은 별똥이</b>가 떨어졌어요! 천천히 눌러서 슬라임에게 데려다주세요');
@@ -6881,8 +6930,9 @@ starletEl.addEventListener('pointerdown', e => {
   starletLastHop = now;
 
   const r = slimeCv.getBoundingClientRect();
-  const tx = r.left + r.width / 2 - 28;
-  const ty = r.top + r.height / 2 - 28;
+  const starletHalf = guestSpriteSize('starlet') / 2;
+  const tx = r.left + r.width / 2 - starletHalf;
+  const ty = r.top + r.height / 2 - starletHalf;
   starletX += (tx - starletX) * 0.32;
   starletY += (ty - starletY) * 0.32;
   starletEl.style.left = starletX + 'px';
@@ -6898,7 +6948,7 @@ starletEl.addEventListener('pointerdown', e => {
 function starletArrive() {
   starletState = 'leaving';
   starletEl.querySelector('#starlet-visual').innerHTML = spriteHtml('guests', 'starlet-happy',
-    `<img src="${STARLET_URLS.happy}" alt="">`, { size: 56, className: 'guest-sprite' });
+    `<img src="${STARLET_URLS.happy}" alt="">`, { size: guestSpriteSize('starlet'), className: 'guest-sprite' });
   $('starlet-hint').textContent = '고마워! 또 올게!';
   starletEl.classList.remove('waiting');
   starletEl.classList.add('happy');
@@ -6911,7 +6961,8 @@ function starletArrive() {
   gcSession('s/starlet-helped');
   wishEvent('starlet', 1);
 
-  spawnSparks(starletX + 28, starletY + 28);
+  const starletHalf = guestSpriteSize('starlet') / 2;
+  spawnSparks(starletX + starletHalf, starletY + starletHalf);
   sndStar();
   showQuip('잘 가, 별똥아! 또 놀러 와.');
   toast(`💫 별똥이가 집으로 돌아갔어요! <b>+${fmt(bonus)}</b> 코인과 별가루 1개`);
@@ -6938,7 +6989,7 @@ function spawnMiniStars() {
       img.className = 'mini-star';
       img.alt = '미니 별똥별';
     }
-    const pos = starSpawnRect();
+    const pos = starSpawnRect('mini');
     img.style.left = pos.x + 'px';
     img.style.top = pos.y + 'px';
     img.addEventListener('pointerdown', ev => {
@@ -7570,7 +7621,7 @@ for (let i = 0; i < 40; i++) {
 
 // 먹구름 비주얼: guests 아틀라스 (없으면 캔버스 픽셀 폴백)
 cloudEl.insertAdjacentHTML('beforeend',
-  `<span id="cloud-visual">${spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' })}</span>`);
+  `<span id="cloud-visual">${spriteHtml('guests', 'raincloud', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: guestSpriteSize('cloud'), className: 'guest-sprite' })}</span>`);
 
 // 슬라임 본체 아틀라스 프리로드 — 성공 시 스프라이트 모드로 전환
 
@@ -7884,10 +7935,10 @@ window.launchCheck = async function launchCheck() {
       && getComputedStyle(el).touchAction === 'none'
       && getComputedStyle(el).pointerEvents === 'none';
     $('cloud-visual').innerHTML =
-      spriteHtml('guests', 'raincloud-happy', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: 108, className: 'guest-sprite' });
+      spriteHtml('guests', 'raincloud-happy', `<img src="${CLOUD_DATA_URL}" alt="">`, { size: guestSpriteSize('cloud'), className: 'guest-sprite' });
     if (!starletEl.querySelector('#starlet-visual')) starletEl.insertAdjacentHTML('beforeend', '<span id="starlet-visual"></span>');
     starletEl.querySelector('#starlet-visual').innerHTML = spriteHtml('guests', 'starlet-happy',
-      `<img src="${STARLET_URLS.happy}" alt="">`, { size: 56, className: 'guest-sprite' });
+      `<img src="${STARLET_URLS.happy}" alt="">`, { size: guestSpriteSize('starlet'), className: 'guest-sprite' });
     add('stability', '이벤트 스프라이트 모바일 줌 방어',
       touchNone(starEl) && touchNone(cloudEl) && touchNone(starletEl) && touchNone(miniStarForTouch) &&
       guestSafe(cloudEl.querySelector('.guest-sprite')) && guestSafe(starletEl.querySelector('.guest-sprite')));

@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "kind": "sprite-gen-request",
+  "engine": "component-row",
+  "character": {
+    "id": "slime-main-v3-ai",
+    "description": "default main slime atlas regenerated to match slime-main-traits-ai compact rounded body proportions"
+  },
+  "cell": {
+    "shape": "square",
+    "width": 768,
+    "height": 768,
+    "safe_margin_x": 84,
+    "safe_margin_y": 84,
+    "size": 768,
+    "safe_margin": 84
+  },
+  "chroma_key": {
+    "name": "magenta",
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "selection": "manual"
+  },
+  "states": {
+    "baby_green": {
+      "row": 0,
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "plain baby green slime, no accessories, compact rounded body matching the baked trait atlas proportions, friendly face, frame 2 soft idle bounce"
+    },
+    "sea": {
+      "row": 1,
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "plain sea blue slime, no accessories, compact rounded body matching the baked trait atlas proportions, watery highlight and bubbles, frame 2 gentle watery bob"
+    },
+    "strawberry": {
+      "row": 2,
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "plain strawberry pink slime, no accessories, compact rounded body matching the baked strawberry trait atlas proportions, frame 2 soft bounce"
+    },
+    "gold_king": {
+      "row": 3,
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "gold king slime with only its small crown, compact rounded body matching gold baked trait rows, no headband or hat, frame 2 royal bounce"
+    },
+    "god": {
+      "row": 4,
+      "frames": 2,
+      "fps": 2,
+      "loop": true,
+      "action": "legendary rainbow god slime with only its small crown, compact rounded body matching god baked trait rows, no headband or hat, frame 2 cosmic bounce"
+    }
+  },
+  "style": "pixel-art-adjacent low-resolution game sprite matching slime-main-traits-ai: compact rounded chibi slime body, thick dark 1-2 px outline, visible stepped pixel edges, limited palette, flat cel shading with one clear highlight and one shadow step, simple readable face, no detached effects, no text, no UI, no scenery, no accessories except crowns on gold_king and god. Avoid tall teardrop silhouette, polished illustration, painterly rendering, anime key art, 3D render, vector app-icon polish, glossy lighting, soft gradients, anti-aliased high-detail edges, and complex tiny details."
+}

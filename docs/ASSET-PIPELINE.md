@@ -80,6 +80,7 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | slime-items-ai | 18 (강화/특성) | ⚠️ prestige 회색화 → 보라 묘사로 재생성 대기 |
 | slime-guests-ai | 4 (먹구름·별똥이 + happy 표정) | ✅ 생성·연결 완료 |
 | slime-main-v2-ai | 5단계 ×2프레임 (본체) | ✅ 연결됨 — baked 성향 슬라임과 맞춘 픽셀풍 본체, strawberry 런타임 보정 제거 |
+| slime-main-v3-ai | 5단계 ×2프레임 (본체 v3) | 📝 요청서 — `slime-main-traits-ai`의 둥근 baked 체형과 기본 본체 체형 차이를 줄이는 재생성 후보 |
 | slime-main-ai | 5단계 ×2프레임 (구 본체) | ⏸️ 대체됨 — v2 본체가 기본값 |
 | slime-traits-ai | 5 (성향 액세서리: muscle/ranch/star 2f/dream/samsara 2f) | ⚠️ 시각 QA에서 제네릭 오버레이 한계 판정 (docs/VISUAL-QA.md) — 인터림: 모자류는 비왕관 단계만, star는 글로우 폴백, samsara 고리만 전 단계. 구운 변형으로 대체 예정 |
 | slime-main-traits-ai | 16 (비핑크 4단계 × 4성향, 각 2f) | ✅ 연결됨 — muscle 포함 baked 본체로 승격, 어두운 머리띠는 스타일 일관성 우선으로 수용 |
