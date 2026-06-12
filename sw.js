@@ -2,7 +2,7 @@
    버전을 올리면 구 캐시가 정리된다. */
 'use strict';
 
-const CACHE = 'slime-clicker-v9';
+const CACHE = 'slime-clicker-v10';
 
 const CORE = [
   './',
@@ -19,7 +19,7 @@ const CORE = [
   './assets/generated/sprites/slime-cosmetics-ai/sprite-sheet-alpha.png',
   './assets/generated/sprites/slime-guests-ai/sprite-sheet-alpha.png',
   './assets/generated/sprites/slime-stage-garden-ai/sprite-sheet-alpha.png',
-  './assets/generated/sprites/slime-main-v2-ai/sprite-sheet-alpha.png',
+  './assets/generated/sprites/slime-main-v3-ai/sprite-sheet-alpha.png',
   './assets/generated/sprites/slime-main-traits-ai/sprite-sheet-alpha.png',
   './assets/generated/sprites/slime-strawberry-traits-ai/sprite-sheet-alpha.png',
   './assets/generated/sprites/slime-crystal-ai/sprite-sheet-alpha.png',

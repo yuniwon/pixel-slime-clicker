@@ -1643,8 +1643,8 @@
   /* ── 토스트 ── */
   #toast {
     position: fixed;
-    bottom: 28px; left: 50%;
-    transform: translateX(-50%) translateY(80px);
+    bottom: 56px; left: 50%;
+    transform: translateX(-50%) translateY(14px);
     background: var(--panel-light);
     border: 3px solid var(--gold);
     color: var(--text);
@@ -1850,7 +1850,7 @@
       line-height: 1.2;
       border-width: 2px;
       box-shadow: 3px 3px 0 #00000066;
-      transform: translateX(-50%) translateY(140%);
+      transform: translateX(-50%) translateY(12px);
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
     #cosmic-ending-card { padding: 14px; }
@@ -2070,8 +2070,8 @@ const PRODUCERS = [
 
 const PRODUCER_SPRITE_ATLAS = 'assets/generated/sprites/slime-friends-ai/sprite-sheet-alpha.png';
 const PRODUCER_SPRITE_SHEET = { w: 1792, h: 7168 };
-// 주의: spirit(별의 정령)·turtle(시간 거북)은 시트 미생성 — 이모지 폴백이 현재 의도.
-// 코덱스가 friends 시트를 10종으로 재생성하면 여기에 두 행을 추가하면 된다 (ASSET-PIPELINE 큐 참고)
+// 주의: sprite-request에는 spirit(별의 정령)·turtle(시간 거북)이 있으나 현재 시트는 8종만 산출됨.
+// 다음 sprite-gen 재생성 사이클에서 두 행이 추가되면 여기에 frame_layout을 복사한다.
 const PRODUCER_SPRITE_LAYOUT = {
   chick:   [{ x: 0, y: 0,    w: 896, h: 896 }, { x: 896, y: 0,    w: 896, h: 896 }],
   cat:     [{ x: 0, y: 896,  w: 896, h: 896 }, { x: 896, y: 896,  w: 896, h: 896 }],
@@ -3287,7 +3287,7 @@ function layoutStageUtilityAnchors(areaRect, slimeRect) {
   );
   placeStageUtility(
     'coin-pile',
-    cx + stageW * (mobile ? 0.22 : 0.25),
+    cx + stageW * (mobile ? 0.22 : 0.38),
     slimeTop + stageH * (mobile ? 0.58 : 0.62),
   );
 }
@@ -4509,47 +4509,83 @@ window.addEventListener('keydown', e => {
 });
 
 let floatLane = 0;
+function clampFloatToPlayfield(pos, estimatedWidth, big, perfect) {
+  const area = $('game-area')?.getBoundingClientRect();
+  const leftBound = area?.width ? area.left : 0;
+  const rightBound = area?.width ? area.right : innerWidth;
+  const width = Math.min(innerWidth - 16, estimatedWidth);
+  let left = clampNum(pos.left, leftBound + 8, rightBound - width - 8);
+  let top = pos.top;
+  if (isMobileLayout()) {
+    if (area?.height) {
+      const h = perfect ? 28 : big ? 24 : 18;
+      const minTop = Math.max(8, area.top + 86);
+      const maxTop = Math.max(minTop, area.bottom - h - 42);
+      top = clampNum(top, minTop, maxTop);
+    }
+  }
+  return { left, top };
+}
+
+function settleFloatInPlayfield(el) {
+  const area = $('game-area')?.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  if (!r.width) return;
+  const leftBound = area?.width ? area.left : 0;
+  const rightBound = area?.width ? area.right : innerWidth;
+  let left = parseFloat(el.style.left) || r.left;
+  if (r.right > rightBound - 8) left = Math.max(leftBound + 8, rightBound - r.width - 28);
+  if (r.left < leftBound + 8) left = leftBound + 8;
+  el.style.left = Math.round(left) + 'px';
+  if (isMobileLayout() && area?.height) {
+    let top = parseFloat(el.style.top) || r.top;
+    const minTop = Math.max(8, area.top + 86);
+    const maxTop = Math.max(minTop, area.bottom - r.height - 42);
+    el.style.top = Math.round(clampNum(top, minTop, maxTop)) + 'px';
+  }
+}
+
 function floatPosition(x, y, big, perfect, text = '') {
   const r = slimeCv.getBoundingClientRect();
-  const insideSlimeZone =
-    x >= r.left - r.width * 0.18 && x <= r.right + r.width * 0.18 &&
-    y >= r.top - r.height * 0.12 && y <= r.bottom + r.height * 0.12;
-  if (!insideSlimeZone) {
-    return {
-      left: x - 20 + (Math.random() * 40 - 20),
-      top: y - 30,
-    };
-  }
-  const lane = floatLane++ % 4;
   const mobile = isMobileLayout();
   const estimatedWidth = mobile && (big || perfect)
     ? Math.min(innerWidth - 32, Math.max(90, text.length * 12))
     : Math.min(260, Math.max(70, text.length * (big || perfect ? 13 : 9)));
+  const insideSlimeZone =
+    x >= r.left - r.width * 0.18 && x <= r.right + r.width * 0.18 &&
+    y >= r.top - r.height * 0.12 && y <= r.bottom + r.height * 0.12;
+  if (!insideSlimeZone) {
+    return clampFloatToPlayfield({
+      left: x - 20 + (Math.random() * 40 - 20),
+      top: y - 30,
+    }, estimatedWidth, big, perfect);
+  }
+  const lane = floatLane++ % 4;
   const sideTop = r.top + r.height * ((big || perfect) ? 0.12 : 0.26) + lane * ((big || perfect) ? 18 : 16);
   const right = r.right + 12;
   if (right + estimatedWidth <= innerWidth - 8) {
-    return { left: right, top: sideTop };
+    return clampFloatToPlayfield({ left: right, top: sideTop }, estimatedWidth, big, perfect);
   }
   const left = r.left - estimatedWidth - 12;
   if (left >= 8) {
-    return { left, top: sideTop };
+    return clampFloatToPlayfield({ left, top: sideTop }, estimatedWidth, big, perfect);
   }
   if (big || perfect) {
     if (mobile) {
-      return {
+      return clampFloatToPlayfield({
         left: 16,
         top: r.bottom + 8 + lane * 14,
-      };
+      }, estimatedWidth, big, perfect);
     }
-    return {
+    return clampFloatToPlayfield({
       left: Math.max(8, Math.min(innerWidth - estimatedWidth - 8, r.left + r.width * 0.24)),
       top: Math.max(8, r.top - 22 - lane * 14),
-    };
+    }, estimatedWidth, big, perfect);
   }
-  return {
+  return clampFloatToPlayfield({
     left: Math.max(8, Math.min(innerWidth - estimatedWidth - 8, r.left + r.width * (0.68 + lane * 0.035))),
     top: r.top + r.height * (0.24 + lane * 0.10),
-  };
+  }, estimatedWidth, big, perfect);
 }
 
 function spawnFloat(x, y, text, big, perfect) {
@@ -4560,6 +4596,7 @@ function spawnFloat(x, y, text, big, perfect) {
   el.style.left = p.left + 'px';
   el.style.top = p.top + 'px';
   document.body.appendChild(el);
+  settleFloatInPlayfield(el);
   setTimeout(() => el.remove(), 760);
 }
 
@@ -5914,15 +5951,15 @@ const MOBILE_GROUND_ORDER = ['chick', 'dog', 'cat', 'rabbit', 'unicorn', 'dragon
 
 const DESKTOP_STAGE_FRIEND_SLOTS = {
   chick:   { x: -0.36, y: 0.58 },
-  cat:     { x: 0.30, y: 0.56 },
-  dog:     { x: 0.10, y: 0.70 },
+  cat:     { x: 0.54, y: 0.54 },
+  dog:     { x: 0.40, y: 0.90 },
   rabbit:  { x: -0.46, y: 0.45 },
   unicorn: { x: 0.48, y: 0.38 },
   dragon:  { x: -0.54, y: 0.32 },
   whale:   { x: 0.02, y: -0.18 },
   planet:  { x: 0.64, y: -0.04 },
   spirit:  { x: 0.34, y: 0.30 },
-  turtle:  { x: -0.08, y: 0.72 },
+  turtle:  { x: -0.38, y: 0.90 },
 };
 
 function desktopStageFriendPos(id, size, copyIndex) {
@@ -7222,6 +7259,18 @@ function showToastNow(html) {
   const el = $('toast');
   el.innerHTML = html;   // 주의: 내부 고정 문자열만 전달할 것 (사용자 입력 금지)
   el.classList.add('show');
+  if (isMobileLayout()) {
+    const area = $('game-area')?.getBoundingClientRect();
+    if (area?.height) {
+      el.style.bottom = 'auto';
+      const h = el.getBoundingClientRect().height || 34;
+      el.style.top = Math.max(8, area.bottom - h - 12) + 'px';
+    }
+  } else {
+    const h = el.getBoundingClientRect().height || 52;
+    el.style.top = '';
+    el.style.bottom = Math.max(32, h - 8) + 'px';
+  }
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
     el.classList.remove('show');
