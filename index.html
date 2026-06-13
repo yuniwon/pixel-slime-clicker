@@ -6281,15 +6281,15 @@ function isMobileLayout() {
 const MOBILE_GROUND_ORDER = ['chick', 'dog', 'cat', 'rabbit', 'unicorn', 'dragon', 'spirit', 'turtle'];
 
 const DESKTOP_STAGE_FRIEND_SLOTS = {
-  chick:   { x: -0.36, y: 0.58 },
-  cat:     { x: 0.54, y: 0.54 },
+  chick:   { x: -0.40, y: 0.68 },
+  cat:     { x: 0.35, y: 0.68 },
   dog:     { x: 0.40, y: 0.90 },
   rabbit:  { x: -0.46, y: 0.45 },
-  unicorn: { x: 0.48, y: 0.38 },
-  dragon:  { x: -0.54, y: 0.32 },
+  unicorn: { x: 0.70, y: 0.38 },
+  dragon:  { x: -0.76, y: 0.38 },
   whale:   { x: 0.02, y: -0.18 },
   planet:  { x: 0.64, y: -0.04 },
-  spirit:  { x: 0.34, y: 0.30 },
+  spirit:  { x: 0.72, y: 0.54 },
   turtle:  { x: -0.38, y: 0.90 },
 };
 
@@ -6336,7 +6336,7 @@ function rebuildFriends() {
       else if (p.id === 'planet') pos = { right: '7%', top: '29%' };
       else {
         const slot = MOBILE_GROUND_ORDER.indexOf(p.id);
-        pos = { left: (5 + (slot < 0 ? groundIdx : slot) * 11) + '%', bottom: '7%' };
+        pos = { left: (5 + (slot < 0 ? groundIdx : slot) * 11) + '%', bottom: '6%' };
         groundIdx++;
       }
     }
@@ -6345,7 +6345,7 @@ function rebuildFriends() {
       const el = document.createElement('div');
       el.className = 'friend';
       el.dataset.id = p.id;
-      const size = mobile ? 36 : (p.id === 'whale' || p.id === 'planet') ? 64 : (p.id === 'spirit' ? 42 : 48);
+      const size = mobile ? 30 : (p.id === 'whale' || p.id === 'planet') ? 64 : (p.id === 'spirit' ? 42 : 48);
       const stagePos = !mobile ? desktopStageFriendPos(p.id, size, k) : null;
       if (stagePos) pos = stagePos;
       for (const key of ['left', 'right', 'top', 'bottom']) {
