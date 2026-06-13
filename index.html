@@ -1731,9 +1731,23 @@
     transform: rotate(42deg);
     box-shadow: -7px 9px 0 -1px var(--icon-c);
   }
-  .shop-info { flex: 1; min-width: 0; }
+  .shop-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
   .shop-name { font-size: 14px; font-weight: bold; line-height: 1.25; }
   .shop-desc { font-size: 11px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
+  .shop-payback,
+  .shop-syn {
+    width: fit-content;
+    max-width: 100%;
+    padding-left: 7px;
+    border-left: 2px solid #5a3a8377;
+  }
+  .shop-payback { color: #cfc4ef; }
   .shop-cost {
     display: inline-flex;
     align-items: center;
@@ -2122,6 +2136,8 @@
     font-size: 11px;
     color: var(--gold);
     margin-top: 5px;
+    padding-left: 7px;
+    border-left: 2px solid #5a3a8377;
   }
   .wish-progress { color: #fff2b5; }
   .wish-reward-badge {
