@@ -2088,6 +2088,7 @@
     /* 정보 밀도: 박스·아이콘·여백을 줄이고 폰트는 지킨다 —
        전체 축소(zoom)가 아니라 비율 재조정 */
     #shop-list { -webkit-overflow-scrolling: touch; padding: 6px 8px; }
+    body.toast-mobile-active #shop-list { padding-top: 44px; }
     .shop-item { padding: 6px 8px; gap: 8px; margin-bottom: 5px; border-width: 2px; }
     .shop-icon { width: 40px; min-width: 40px; font-size: 24px; }
     /* scale은 시각만 줄인다 — 음수 마진으로 레이아웃 footprint도 40px로 */
@@ -7642,6 +7643,7 @@ function showToastNow(html) {
   el.innerHTML = html;   // 주의: 내부 고정 문자열만 전달할 것 (사용자 입력 금지)
   el.classList.add('show');
   if (isMobileLayout()) {
+    document.body.classList.add('toast-mobile-active');
     placeMobileToast(el);
     requestAnimationFrame(() => placeMobileToast(el));
   } else {
@@ -7652,6 +7654,7 @@ function showToastNow(html) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
     el.classList.remove('show');
+    document.body.classList.remove('toast-mobile-active');
     toastShowing = false;
     if (toastQueue.length) {
       setTimeout(() => { if (!toastShowing && toastQueue.length) showToastNow(toastQueue.shift()); }, 320);
