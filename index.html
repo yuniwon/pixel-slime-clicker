@@ -586,6 +586,21 @@
     filter: drop-shadow(2px 2px 0 #00000044);
     animation: friend-pop-in .3s ease-out;
   }
+  .friend.zone-ground::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -3px;
+    width: 72%;
+    height: 10px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse, #00000059 0%, transparent 68%);
+    z-index: -1;
+  }
+  .friend.zone-sky,
+  .friend.zone-air {
+    filter: drop-shadow(0 0 8px #b48aff77);
+  }
   @keyframes friend-pop-in {
     from { transform: scale(.2); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
@@ -1218,13 +1233,18 @@
     flex: 1;
     position: relative;
     text-align: center;
-    padding: 10px 0;
+    padding: 10px 4px;
     font-size: 12px;
     cursor: pointer;
     color: var(--text-dim);
-    background: var(--panel);
+    background: linear-gradient(180deg, #2a1a49, #1d1234);
+    border-right: 1px solid #ffffff10;
   }
-  .tab.active { color: var(--gold); background: var(--panel-light); }
+  .tab.active {
+    color: var(--gold);
+    background: linear-gradient(180deg, #493067, #2d1b4e);
+    box-shadow: inset 0 2px 0 #ffd75e55, inset 0 -2px 0 #00000033;
+  }
   .tab[hidden] { display: none; }
   .tab.fresh { animation: tab-fresh 1.2s ease-in-out 3; }
   @keyframes tab-fresh { 0%, 100% { color: var(--text-dim); } 50% { color: var(--gold); } }
@@ -1278,15 +1298,20 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: var(--panel-light);
-    border: 3px solid var(--border);
+    background:
+      linear-gradient(180deg, #342252f2 0%, #241640f2 100%);
+    border: 2px solid #5a3a83;
+    border-radius: 7px;
     padding: 10px 12px;
     margin-bottom: 8px;
     cursor: pointer;
     transition: transform .06s;
     position: relative;
+    box-shadow:
+      inset 0 1px 0 #ffffff14,
+      0 2px 0 #12091fcc;
   }
-  .shop-item:hover:not(.locked) { border-color: var(--gold); }
+  .shop-item:hover:not(.locked) { border-color: var(--gold); box-shadow: inset 0 1px 0 #ffffff18, 0 0 0 1px #ffd75e22; }
   .shop-item:active:not(.locked) { transform: scale(.98); }
   .shop-item.locked { opacity: .45; cursor: not-allowed; }
 
@@ -1294,10 +1319,14 @@
     font-size: 30px;
     width: 72px;
     min-width: 72px;
+    min-height: 58px;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: #160d29aa;
+    border: 2px solid #5a3a83;
+    border-radius: 6px;
     filter: drop-shadow(2px 2px 0 #00000044);
   }
   .challenge-pixel-icon {
@@ -1445,7 +1474,21 @@
   .shop-info { flex: 1; min-width: 0; }
   .shop-name { font-size: 14px; font-weight: bold; }
   .shop-desc { font-size: 11px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
-  .shop-cost { font-size: 13px; color: var(--gold); margin-top: 4px; }
+  .shop-cost {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 22px;
+    padding: 3px 8px;
+    border: 1px solid #ffd75e55;
+    border-radius: 5px;
+    background: #120c2488;
+    font-size: 13px;
+    color: var(--gold);
+    margin-top: 6px;
+    line-height: 1.2;
+  }
   .shop-count {
     position: absolute;
     top: 10px;
@@ -1533,15 +1576,19 @@
     from { transform: translateY(0); }
     to { transform: translateY(-5px); }
   }
-  .decor.center { transform: translateX(-50%); animation: none; }
+  .decor.zone-sky,
+  .decor.zone-sky-back {
+    filter: drop-shadow(0 0 8px #b48aff77);
+  }
+  .decor.center { animation: none; }
   .cosmic-seed-tree {
     filter: drop-shadow(0 0 8px #fff8d6) drop-shadow(0 0 18px #b48affcc);
     animation: cosmic-tree-breathe 3.8s ease-in-out infinite alternate;
   }
   .cosmic-seed-tree img { width: 56px; height: 64px; image-rendering: pixelated; }
   @keyframes cosmic-tree-breathe {
-    from { opacity: .86; transform: translateX(-50%) translateY(-1px) scale(.98); }
-    to { opacity: 1; transform: translateX(-50%) translateY(3px) scale(1.04); }
+    from { opacity: .78; transform: translateY(-1px) scale(.94); }
+    to { opacity: .92; transform: translateY(3px) scale(1.00); }
   }
 
   .room-section-title {
@@ -3563,6 +3610,63 @@ const SPRITE_TINTS = {
   'items:prestige': 'violet',  // 재생성 대기 중인 마지막 회색 셀
 };
 
+/* Visual Direction: one normalized stage map for residents, set pieces, and utility props.
+   x/y are game-area coordinates, not viewport coordinates. */
+const STAGE_LAYOUT = {
+  desktop: {
+    density: { friends: 8, decor: 4 },
+    decor: {
+      pond:        { x: 0.13, y: 0.78, zone: 'ground' },
+      cushion:     { x: 0.58, y: 0.80, zone: 'ground' },
+      lamp:        { x: 0.80, y: 0.64, zone: 'ground' },
+      mat:         { x: 0.67, y: 0.79, zone: 'ground' },
+      fountain:    { x: 0.27, y: 0.65, zone: 'ground' },
+      window:      { x: 0.86, y: 0.25, zone: 'sky' },
+      cosmicTree:  { x: 0.50, y: 0.36, zone: 'sky-back' },
+      crystalBed:  { x: 0.16, y: 0.75, zone: 'ground' },
+      coinPile:    { x: 0.91, y: 0.82, zone: 'ground' },
+    },
+    friends: {
+      whale:   { x: 0.28, y: 0.25, zone: 'sky' },
+      planet:  { x: 0.78, y: 0.23, zone: 'sky' },
+      spirit:  { x: 0.18, y: 0.38, zone: 'sky' },
+      rabbit:  { x: 0.72, y: 0.43, zone: 'air' },
+      dragon:  { x: 0.25, y: 0.62, zone: 'ground' },
+      unicorn: { x: 0.72, y: 0.66, zone: 'ground' },
+      cat:     { x: 0.67, y: 0.78, zone: 'ground' },
+      turtle:  { x: 0.17, y: 0.83, zone: 'ground' },
+      dog:     { x: 0.58, y: 0.86, zone: 'ground' },
+      chick:   { x: 0.45, y: 0.84, zone: 'ground' },
+    },
+  },
+  mobile: {
+    density: { friends: 5, decor: 3 },
+    decor: {
+      pond:        { x: 0.16, y: 0.74, zone: 'ground' },
+      cushion:     { x: 0.78, y: 0.78, zone: 'ground' },
+      lamp:        { x: 0.84, y: 0.54, zone: 'ground' },
+      mat:         { x: 0.68, y: 0.78, zone: 'ground' },
+      fountain:    { x: 0.28, y: 0.66, zone: 'ground' },
+      window:      { x: 0.86, y: 0.30, zone: 'sky' },
+      cosmicTree:  { x: 0.50, y: 0.35, zone: 'sky-back' },
+      crystalBed:  { x: 0.14, y: 0.72, zone: 'ground' },
+      coinPile:    { x: 0.88, y: 0.76, zone: 'ground' },
+    },
+    friends: {
+      whale:   { x: 0.20, y: 0.34, zone: 'sky' },
+      planet:  { x: 0.79, y: 0.34, zone: 'sky' },
+      rabbit:  { x: 0.72, y: 0.50, zone: 'air' },
+      dragon:  { x: 0.22, y: 0.66, zone: 'ground' },
+      unicorn: { x: 0.74, y: 0.67, zone: 'ground' },
+      cat:     { x: 0.67, y: 0.76, zone: 'ground' },
+      turtle:  { x: 0.24, y: 0.80, zone: 'ground' },
+      dog:     { x: 0.58, y: 0.82, zone: 'ground' },
+      chick:   { x: 0.43, y: 0.82, zone: 'ground' },
+      spirit:  { x: 0.18, y: 0.46, zone: 'sky' },
+    },
+  },
+};
+
 function stageBgPosition(sheet, rect) {
   const maxX = Math.max(0, sheet.w - rect.w);
   const maxY = Math.max(0, sheet.h - rect.h);
@@ -3625,23 +3729,24 @@ function placeStageUtility(id, x, y) {
   el.style.bottom = 'auto';
 }
 
-function layoutStageUtilityAnchors(areaRect, slimeRect) {
-  const cx = slimeRect.left - areaRect.left + slimeRect.width / 2;
-  const slimeTop = slimeRect.top - areaRect.top;
-  const stageW = clampNum(slimeRect.width * 1.42, 330, 560);
-  const stageH = clampNum(slimeRect.height * 0.88, 170, 430);
-  const mobile = areaRect.width < 760;
-
-  placeStageUtility(
-    'crystal-bed',
-    cx - stageW * (mobile ? 0.50 : 0.60),
-    slimeTop + stageH * (mobile ? 0.48 : 0.46),
-  );
-  placeStageUtility(
-    'coin-pile',
-    cx + stageW * (mobile ? 0.22 : 0.38),
-    slimeTop + stageH * (mobile ? 0.58 : 0.62),
-  );
+function layoutStageUtilityAnchors() {
+  const layout = currentStageLayout();
+  const utility = [
+    ['crystal-bed', layout.decor.crystalBed],
+    ['coin-pile', layout.decor.coinPile],
+  ];
+  for (const [id, point] of utility) {
+    const el = $(id);
+    if (!el || el.hidden) continue;
+    const r = el.getBoundingClientRect();
+    const size = Math.max(r.width || 56, r.height || 56);
+    const pos = stagePointStyle(point, size, { topGuard: isMobileLayout() ? 88 : 120, bottomGuard: isMobileLayout() ? 28 : 72 });
+    if (!pos) continue;
+    el.style.left = pos.left;
+    el.style.top = pos.top;
+    el.style.right = 'auto';
+    el.style.bottom = 'auto';
+  }
 }
 
 function layoutStageBackdropSprites() {
@@ -3652,7 +3757,7 @@ function layoutStageBackdropSprites() {
 
   const areaRect = area.getBoundingClientRect();
   const slimeRect = slime.getBoundingClientRect();
-  layoutStageUtilityAnchors(areaRect, slimeRect);
+  layoutStageUtilityAnchors();
   if (areaRect.width < 760) {
     clearStageBackdropLayout(root);
     return;
@@ -6088,52 +6193,35 @@ function cosmicSeedHtml() {
 
 /* ════════════════════════ 슬라임 방 (장식) ════════════════════════ */
 
-function desktopStageDecorPos(d, size) {
-  if (!d.stagePos) return null;
-  const area = $('game-area');
-  const slime = $('slime-canvas');
-  if (!area || !slime) return null;
-  const ar = area.getBoundingClientRect();
-  const sr = slime.getBoundingClientRect();
-  if (!ar.width || !sr.width) return null;
-
-  const cx = sr.left - ar.left + sr.width / 2;
-  const top = sr.top - ar.top;
-  const stageW = clampNum(sr.width * 1.42, 410, 560);
-  const stageH = clampNum(sr.height * 0.88, 300, 430);
-  const x = cx + stageW * d.stagePos.x - size / 2;
-  const y = top + stageH * d.stagePos.y - size / 2;
-  return {
-    left: Math.round(clampNum(x, 18, ar.width - size - 18)) + 'px',
-    top: Math.round(clampNum(y, 78, ar.height - size - 72)) + 'px',
-  };
-}
-
 function renderDecor() {
   const layer = $('decor-layer');
   layer.innerHTML = '';
+  const layout = currentStageLayout();
   // 우주 씨앗: 엔딩 도달의 영구 증표 — 방 한가운데 위에서 빛난다
   if (S.cosmicSeed) {
     const seed = document.createElement('div');
     seed.className = 'decor sky cosmic-seed-tree';
-    seed.style.left = '50%';
-    seed.style.top = '8%';
-    seed.style.transform = 'translateX(-50%)';
+    const size = isMobileLayout() ? 40 : 52;
+    const pos = stagePointStyle(layout.decor.cosmicTree, size, { topGuard: 58, bottomGuard: 120 });
+    if (pos) Object.assign(seed.style, pos);
     seed.innerHTML = cosmicSeedHtml();
     layer.appendChild(seed);
   }
-  for (const d of DECOR) {
+  const visibleDecor = STAGE_DECOR_RENDER_ORDER
+    .map(id => DECOR.find(d => d.id === id))
+    .filter(d => d && S.decor[d.id])
+    .slice(0, layout.density.decor);
+  for (const d of visibleDecor) {
     if (!S.decor[d.id]) continue;
     const el = document.createElement('div');
-    // top 기준 배치 = 하늘 장식 (부유 허용), 나머지는 바닥 접지
-    el.className = 'decor' + (d.center ? ' center' : '') + (d.pos.top !== undefined ? ' sky' : '');
-    const decorSize = isMobileLayout() ? 52 : 78;
+    const point = layout.decor[d.id];
+    const zone = point?.zone || (d.pos.top !== undefined ? 'sky' : 'ground');
+    el.className = 'decor zone-' + zone + (zone.startsWith('sky') ? ' sky' : '');
+    const decorSize = isMobileLayout() ? 38 : 58;
     el.innerHTML = decorSpriteHtml(d.id, d.icon, 'room-decor-sprite', decorSize);
-    const stagePos = !isMobileLayout() ? desktopStageDecorPos(d, decorSize) : null;
-    const pos = stagePos || (isMobileLayout() && d.mobilePos ? d.mobilePos : d.pos);
-    for (const k of ['left', 'right', 'top', 'bottom']) {
-      if (pos[k] !== undefined) el.style[k] = pos[k];
-    }
+    const pos = stagePointStyle(point, decorSize, { topGuard: zone.startsWith('sky') ? 56 : 120 });
+    if (pos) Object.assign(el.style, pos);
+    else Object.assign(el.style, isMobileLayout() && d.mobilePos ? d.mobilePos : d.pos);
     layer.appendChild(el);
   }
 }
@@ -6336,90 +6424,75 @@ function isMobileLayout() {
   return window.matchMedia('(max-width: 760px)').matches;
 }
 
-/* 모바일: 종별 1마리, 바닥 한 줄 정렬로 난잡함 방지 */
-const MOBILE_GROUND_ORDER = ['chick', 'dog', 'cat', 'rabbit', 'unicorn', 'dragon', 'spirit', 'turtle'];
+const STAGE_FRIEND_RENDER_ORDER = ['whale', 'planet', 'spirit', 'rabbit', 'dragon', 'unicorn', 'cat', 'turtle', 'dog', 'chick'];
+const STAGE_DECOR_RENDER_ORDER = ['window', 'fountain', 'pond', 'lamp', 'mat', 'cushion'];
 
-const DESKTOP_STAGE_FRIEND_SLOTS = {
-  chick:   { x: -0.34, y: 0.66 },
-  cat:     { x: 0.30, y: 0.66 },
-  dog:     { x: 0.25, y: 0.86 },
-  rabbit:  { x: -0.36, y: 0.48 },
-  unicorn: { x: 0.50, y: 0.40 },
-  dragon:  { x: -0.52, y: 0.40 },
-  whale:   { x: -0.02, y: -0.08 },
-  planet:  { x: 0.48, y: 0.04 },
-  spirit:  { x: 0.50, y: 0.54 },
-  turtle:  { x: -0.28, y: 0.86 },
-};
+function currentStageLayout() {
+  return STAGE_LAYOUT[isMobileLayout() ? 'mobile' : 'desktop'];
+}
 
-function desktopStageFriendPos(id, size, copyIndex) {
+function stagePointStyle(point, size, options = {}) {
   const area = $('game-area');
-  const slime = $('slime-canvas');
-  if (!area || !slime) return null;
+  if (!area || !point) return null;
   const ar = area.getBoundingClientRect();
-  const sr = slime.getBoundingClientRect();
-  if (!ar.width || !sr.width) return null;
+  if (!ar.width) return null;
+  const margin = options.margin ?? 14;
+  const topGuard = options.topGuard ?? (isMobileLayout() ? 44 : 64);
+  const bottomGuard = options.bottomGuard ?? (isMobileLayout() ? 18 : 54);
+  let x = ar.width * point.x - size / 2;
+  let y = ar.height * point.y - size / 2;
 
-  const slot = DESKTOP_STAGE_FRIEND_SLOTS[id];
-  if (!slot) return null;
-
-  const cx = sr.left - ar.left + sr.width / 2;
-  const top = sr.top - ar.top;
-  const stageW = clampNum(sr.width * 1.42, 410, 560);
-  const stageH = clampNum(sr.height * 0.88, 300, 430);
-  const fan = copyIndex * Math.min(24, size * 0.5);
-  const direction = slot.x < 0 ? -1 : 1;
-  const x = cx + stageW * slot.x + fan * direction - size / 2;
-  const y = top + stageH * slot.y - size / 2;
+  if (point.zone === 'ground') {
+    const slime = $('slime-canvas');
+    const sr = slime?.getBoundingClientRect();
+    if (sr?.width) {
+      const cx = sr.left - ar.left + sr.width / 2;
+      const top = sr.top - ar.top;
+      const stageW = clampNum(sr.width * (isMobileLayout() ? 1.72 : 1.92), isMobileLayout() ? 250 : 430, isMobileLayout() ? ar.width * 0.86 : 660);
+      const stageH = clampNum(sr.height * (isMobileLayout() ? 1.02 : 1.08), isMobileLayout() ? 150 : 270, isMobileLayout() ? 260 : 430);
+      x = cx + stageW * (point.x - 0.5) - size / 2;
+      y = top + stageH * (point.y - 0.36) - size / 2;
+    }
+  }
 
   return {
-    left: Math.round(clampNum(x, 18, ar.width - size - 18)) + 'px',
-    top: Math.round(clampNum(y, 230, ar.height - size - 86)) + 'px',
+    left: Math.round(clampNum(x, margin, ar.width - size - margin)) + 'px',
+    top: Math.round(clampNum(y, topGuard, ar.height - size - bottomGuard)) + 'px',
   };
 }
 
 function rebuildFriends() {
   friendsLayer.innerHTML = '';
-  const mobile = isMobileLayout();
-  let groundIdx = 0;
+  const layout = currentStageLayout();
+  let shown = 0;
+  const producersById = Object.fromEntries(PRODUCERS.map(p => [p.id, p]));
+  const ordered = STAGE_FRIEND_RENDER_ORDER.map(id => producersById[id]).filter(Boolean);
 
-  PRODUCERS.forEach(p => {
+  ordered.forEach(p => {
     const bhv = FRIEND_BEHAVIOR[p.id];
     const owned = S.producers[p.id];
     if (!bhv || !owned) return;
-    const n = mobile ? 1 : Math.min(bhv.max, friendCount(owned));
+    if (shown >= layout.density.friends) return;
 
-    let pos = bhv.pos();
-    if (mobile) {
-      if (p.id === 'whale') pos = { left: '4%', top: '24%' };
-      else if (p.id === 'planet') pos = { right: '7%', top: '29%' };
-      else {
-        const slot = MOBILE_GROUND_ORDER.indexOf(p.id);
-        pos = { left: (5 + (slot < 0 ? groundIdx : slot) * 11) + '%', bottom: '8%' };
-        groundIdx++;
-      }
-    }
-
-    for (let k = 0; k < n; k++) {
-      const el = document.createElement('div');
-      el.className = 'friend';
-      el.dataset.id = p.id;
-      const size = mobile ? 30 : (p.id === 'whale' || p.id === 'planet') ? 64 : (p.id === 'spirit' ? 42 : 48);
-      const stagePos = !mobile ? desktopStageFriendPos(p.id, size, k) : null;
-      if (stagePos) pos = stagePos;
-      for (const key of ['left', 'right', 'top', 'bottom']) {
-        if (pos[key] === undefined) continue;
-        el.style[key] = (!stagePos && (key === 'left' || key === 'right'))
-          ? `calc(${pos[key]} + ${k * 46}px)`
-          : pos[key];
-      }
-      const mover = document.createElement('span');
-      mover.className = 'fr-move bv-' + bhv.anim;
-      mover.style.animationDelay = (Math.random() * 2.5).toFixed(2) + 's';
-      mover.innerHTML = friendSpriteAnimHtml(p.id, size);
-      el.appendChild(mover);
-      friendsLayer.appendChild(el);
-    }
+    const point = layout.friends[p.id];
+    if (!point) return;
+    const zone = point.zone || 'ground';
+    const el = document.createElement('div');
+    el.className = 'friend zone-' + zone;
+    el.dataset.id = p.id;
+    const size = isMobileLayout()
+      ? (zone === 'sky' ? 32 : 28)
+      : (zone === 'sky' ? (p.id === 'whale' ? 72 : 52) : (zone === 'air' ? 46 : 40));
+    const pos = stagePointStyle(point, size, { topGuard: zone === 'sky' ? 58 : 120, bottomGuard: isMobileLayout() ? 24 : 70 });
+    if (pos) Object.assign(el.style, pos);
+    else Object.assign(el.style, bhv.pos());
+    const mover = document.createElement('span');
+    mover.className = 'fr-move bv-' + bhv.anim;
+    mover.style.animationDelay = (Math.random() * 2.5).toFixed(2) + 's';
+    mover.innerHTML = friendSpriteAnimHtml(p.id, size);
+    el.appendChild(mover);
+    friendsLayer.appendChild(el);
+    shown++;
   });
 }
 
