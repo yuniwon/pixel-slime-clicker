@@ -3254,9 +3254,20 @@ const CHALLENGES = [
 const CHALLENGE_UNLOCK_RESETS = 2;
 const SPRINT_LIMIT = 15 * 60;
 
+const CHALLENGE_SPRITE_ATLAS = 'assets/generated/sprites/slime-challenges-ai/sprite-sheet-alpha.png';
+const CHALLENGE_SPRITE_SHEET = { w: 256, h: 1024 };
+const CHALLENGE_SPRITE_LAYOUT = {
+  silence: [{ x: 0, y: 0,   w: 256, h: 256 }],
+  mono:    [{ x: 0, y: 256, w: 256, h: 256 }],
+  starlit: [{ x: 0, y: 512, w: 256, h: 256 }],
+  sprint:  [{ x: 0, y: 768, w: 256, h: 256 }],
+};
+
 function challengeIconHtml(id, fallback) {
-  if (!['silence', 'mono', 'starlit', 'sprint'].includes(id)) return fallback;
-  return `<span class="challenge-pixel-icon ${id}" aria-hidden="true"></span>`;
+  const pixelFallback = ['silence', 'mono', 'starlit', 'sprint'].includes(id)
+    ? `<span class="challenge-pixel-icon ${id}" aria-hidden="true"></span>`
+    : fallback;
+  return spriteHtml('challenges', id, pixelFallback, { size: 54, className: 'shop-sprite challenge-sprite' });
 }
 
 const SLIME_MAP = [
@@ -3523,6 +3534,11 @@ const SPRITE_ATLASES = {
     src: ACHIEVEMENT_SPRITE_ATLAS,
     sheet: ACHIEVEMENT_SPRITE_SHEET,
     layout: ACHIEVEMENT_SPRITE_LAYOUT,
+  },
+  challenges: {
+    src: CHALLENGE_SPRITE_ATLAS,
+    sheet: CHALLENGE_SPRITE_SHEET,
+    layout: CHALLENGE_SPRITE_LAYOUT,
   },
   decor: {
     src: DECOR_SPRITE_ATLAS,

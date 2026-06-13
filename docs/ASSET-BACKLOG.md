@@ -7,7 +7,7 @@
 | Done | `spirit` friend | `slime-friends-ai` 2f sprite | 별의 정령 CSS 폴백 제거 완료 | stage resident, friends tab, codex | 896x896, idle 2f | sky glow, no ground shadow, readable at 42-64px |
 | Done | `turtle` friend | `slime-friends-ai` 2f sprite | 시간 거북 CSS 폴백 제거 완료 | stage resident, friends tab, codex | 896x896, idle 2f | ground contact shadow, clock shell must read at small size |
 | 2 | `items:prestige` | gray atlas + runtime violet tint | 환생 버튼은 핵심 전환인데 생성 회색화 이력이 있음 | prestige tab, shop icon | 384-512 square, 1f | use green chroma for violet/pink subject; avoid gray average |
-| 3 | `slime-challenges-ai` 4 icons | CSS pixel fallback | 도전 런 아이콘이 카드 문법에서 가장 수제 느낌 | prestige challenge cards | 256x256, 1f each | names must match `silence`, `mono`, `starlit`, `sprint` |
+| Done | `slime-challenges-ai` 4 icons | `slime-challenges-ai` 1f sprites | 도전 런 CSS 폴백 제거 완료 | prestige challenge cards | 256x256, 1f each | state names match `silence`, `mono`, `starlit`, `sprint` |
 | 4 | stage ground texture 5 stages | current stage backdrop and glow | 진화 단계별 바닥 감각이 아직 약함 | behind/under slime stage | 412x80 tile or manifest rects | do not cover slime face; must support contact shadows |
 | 5 | trophy shelf frame | translucent strip/codex grids | 업적/기록 탭이 수집 공간처럼 보이게 함 | room/codex panels | 412x40 tile, 1f | low contrast frame, no heavy sparkle |
 | 6 | slime expression variants | squish + idle frames only | 클릭/소원/환생 피드백이 더 살아날 수 있음 | slime canvas/body atlas | main atlas extension, 2f per expression | baked per stage/trait where possible; avoid generic sticker mouth |
