@@ -920,19 +920,20 @@
     position: absolute;
     top: 12px; left: 50%;
     transform: translateX(-50%);
-    background: #ffd75e;
-    color: #5e4517;
+    background: #120c24dd;
+    color: var(--gold);
     font-weight: bold;
-    padding: 8px 18px;
-    font-size: 14px;
-    border: 3px solid #fff;
-    box-shadow: 4px 4px 0 #00000055;
+    padding: 5px 12px;
+    font-size: 12px;
+    border: 2px solid #ffd75e88;
+    box-shadow: 3px 3px 0 #00000055;
     display: none;
     z-index: 5;
-    animation: buff-pulse .4s infinite alternate;
+    animation: buff-pulse .6s infinite alternate;
     white-space: nowrap;
+    text-shadow: 1px 1px 0 #00000088;
   }
-  @keyframes buff-pulse { from { transform: translateX(-50%) scale(1);} to { transform: translateX(-50%) scale(1.06);} }
+  @keyframes buff-pulse { from { transform: translateX(-50%) scale(1);} to { transform: translateX(-50%) scale(1.035);} }
 
   /* ── 떠오르는 숫자 ── */
   .float-num {
@@ -2144,8 +2145,18 @@
     #cosmic-ending-card { padding: 14px; }
     #cosmic-ending-card h3 { font-size: 14px; }
     #cosmic-ending-card p { font-size: 11px; }
-    /* 광란/파티 배너: 모바일에선 게임영역 하단, 선반 위 */
-    #buff-banner { top: auto; bottom: 34px; font-size: 11px; padding: 5px 10px; }
+    /* 광란/파티 배너: 무대 바닥·친구 줄을 침범하지 않는 상단 상태 칩 */
+    #buff-banner {
+      top: 2px;
+      bottom: auto;
+      font-size: 9px;
+      line-height: 1.1;
+      padding: 2px 7px;
+      border-width: 1px;
+      max-width: calc(100vw - 28px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     #news-ticker { font-size: 11px; padding: 5px 12px; }
     #wish-strip { padding: 4px 8px; gap: 6px; font-size: 10px; }
     #wish-strip .ws-bar-outer { width: 56px; height: 6px; }
