@@ -1313,6 +1313,7 @@
     border: 3px solid #2d1b4e;
     background: #2b1a3e;
     box-shadow: inset 0 0 0 3px #ffffff1f, 3px 3px 0 #00000055;
+    overflow: hidden;
   }
   .challenge-pixel-icon::before,
   .challenge-pixel-icon::after {
@@ -1367,18 +1368,38 @@
     --icon-b: #ffd75e;
     --icon-c: #56b8f2;
     background:
-      linear-gradient(135deg, transparent 0 42%, #56b8f244 42% 58%, transparent 58%),
+      radial-gradient(circle at 68% 30%, #56b8f244 0 18%, transparent 19%),
       #2b1a3e;
     border-radius: 6px;
   }
   .challenge-pixel-icon.starlit::before {
     left: 20px;
-    top: 8px;
-    width: 7px;
-    height: 28px;
+    top: 9px;
+    width: 6px;
+    height: 26px;
     background: var(--icon-b);
-    box-shadow: -10px 10px 0 0 var(--icon-b), 10px 10px 0 0 var(--icon-b), 0 10px 0 8px var(--icon-a);
+    box-shadow:
+      -10px 10px 0 0 var(--icon-b),
+      10px 10px 0 0 var(--icon-b),
+      0 10px 0 7px var(--icon-a),
+      -14px 4px 0 -1px var(--icon-c),
+      14px 4px 0 -1px var(--icon-c);
     transform: rotate(45deg);
+  }
+  .challenge-pixel-icon.starlit::after {
+    left: 8px;
+    top: 8px;
+    width: 30px;
+    height: 30px;
+    border: 3px solid #56b8f2;
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    box-shadow:
+      inset 0 0 0 2px #ffffff1f,
+      20px -4px 0 -8px var(--icon-a),
+      -2px 24px 0 -7px var(--icon-c);
+    transform: rotate(24deg);
   }
   .challenge-pixel-icon.sprint {
     --icon-a: #e8dcff;
