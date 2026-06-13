@@ -1323,19 +1323,73 @@
   #reset-btn.holding { background: #8a2b2b; }
 
   /* ── 재화 스트립: 별가루·영혼·결정이 항상 한곳에 (해금된 것만) ── */
-  #res-strip { display: flex; gap: 6px; padding: 0 10px 6px; }
+  #res-strip {
+    display: flex;
+    gap: 7px;
+    padding: 0 10px 7px;
+  }
   #res-strip:not(:has(.res-chip:not([hidden]))) { display: none; }
   .res-chip {
-    background: var(--panel-light);
-    border: 2px solid var(--border);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 0;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 42%),
+      radial-gradient(circle at 18% 12%, rgba(255,215,92,.18), transparent 34%),
+      #1d1136;
+    border: 2px solid #4d2d7f;
+    border-radius: 7px;
     color: var(--text);
     font-family: inherit;
-    font-size: 11px;
-    padding: 3px 9px;
-    min-height: 26px;
+    font-size: 12px;
+    padding: 3px 8px 3px 5px;
+    min-height: 30px;
     cursor: pointer;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.12),
+      inset 0 -2px 0 rgba(0,0,0,.24),
+      0 2px 0 rgba(0,0,0,.18);
+    transition: transform .12s ease, border-color .12s ease, background .12s ease;
   }
-  .res-chip b { color: var(--gold); }
+  .res-chip::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,.06);
+    pointer-events: none;
+  }
+  .res-chip:hover {
+    transform: translateY(-1px);
+    border-color: #ffd95c;
+  }
+  .res-chip:active { transform: translateY(1px); }
+  .res-chip b {
+    position: relative;
+    z-index: 1;
+    min-width: 1.8ch;
+    color: var(--gold);
+    line-height: 1;
+    text-align: right;
+    text-shadow: 1px 1px 0 #000;
+  }
+  .res-chip .res-sprite {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    filter: drop-shadow(1px 2px 0 #00000066);
+  }
+  .res-chip .res-fallback-icon {
+    position: relative;
+    z-index: 1;
+    font-size: 17px;
+    line-height: 1;
+  }
+  #res-soul { border-color: #6a4d96; }
+  #res-crystal { border-color: #327d91; }
 
   #shop-tabs { display: flex; border-bottom: 3px solid var(--border); }
   .tab {
@@ -2384,8 +2438,9 @@
     .icon-btn { font-size: 11px; padding: 2px 7px; min-height: 30px; min-width: 34px; }  /* 터치 타겟 */
     .tab { padding: 6px 2px 5px; font-size: 10px; min-height: 48px; gap: 2px; }
     .tab .tab-icon { font-size: 17px; }
-    #res-strip { padding: 0 8px 4px; }
-    .res-chip { font-size: 10px; padding: 2px 7px; min-height: 24px; }
+    #res-strip { padding: 0 8px 5px; gap: 5px; }
+    .res-chip { font-size: 10px; padding: 2px 7px 2px 4px; min-height: 28px; }
+    .res-chip .res-sprite { transform: scale(.9); transform-origin: center; margin: -1px; }
     /* 정보 밀도: 박스·아이콘·여백을 줄이고 폰트는 지킨다 —
        전체 축소(zoom)가 아니라 비율 재조정 */
     #shop-list { -webkit-overflow-scrolling: touch; padding: 6px 8px; }
@@ -4176,6 +4231,15 @@ function tabSpriteHtml(key) {
   if (key === 'prestige') return spriteHtml('achievements', 'rebirth1', '🍮', opts);
   if (key === 'room') return spriteHtml('decor', 'lamp', '🏠', opts);
   if (key === 'wishes') return spriteHtml('wishes', 'ministar', '⭐', opts);
+  return '';
+}
+
+function resourceSpriteHtml(key) {
+  const size = isMobileLayout() ? 21 : 23;
+  const opts = { size, className: 'res-sprite' };
+  if (key === 'dust') return spriteHtml('wishes', 'star', '<span class="res-fallback-icon">💫</span>', opts);
+  if (key === 'soul') return spriteHtml('achievements', 'rebirth1', '<span class="res-fallback-icon">🍮</span>', opts);
+  if (key === 'crystal') return spriteHtml('crystal', 'ripe', '<span class="res-fallback-icon">💎</span>', opts);
   return '';
 }
 
@@ -5986,14 +6050,18 @@ function updateResStrip() {
   const sig = `${dust ? S.stardust : '-'}|${soul ? S.prestige.souls : '-'}|${crys ? S.crystal.count : '-'}`;
   if (sig === resStripCache) return;
   resStripCache = sig;
-  const set = (id, on, v) => {
+  const set = (id, key, on, v) => {
     const el = $(id);
     el.hidden = !on;
-    if (on) el.querySelector('b').textContent = v;
+    if (on) {
+      const value = fmt(v);
+      el.dataset.value = value;
+      el.innerHTML = `${resourceSpriteHtml(key)} <b>${value}</b>`;
+    }
   };
-  set('res-dust', dust, S.stardust);
-  set('res-soul', soul, S.prestige.souls);
-  set('res-crystal', crys, S.crystal.count);
+  set('res-dust', 'dust', dust, S.stardust);
+  set('res-soul', 'soul', soul, S.prestige.souls);
+  set('res-crystal', 'crystal', crys, S.crystal.count);
 }
 
 /* 탭 뱃지: 다음 행동 신호 — 강화는 살 수 있는 개수, 환생은 가능 표시 */
@@ -9289,9 +9357,10 @@ window.uxCheck = async function uxCheck() {
     add('friction', '클릭 피드백 즉시(트랜지션 무지연)', getComputedStyle(slimeWrap).transitionDuration.split(',')[0].trim() <= '0.2s');
 
     /* ═══ 5. 일관성 — 같은 것은 같은 모습으로 ═══ */
-    add('consistency', '별가루 아이콘 통일(💫)', $('res-dust').textContent.includes('💫')
+    const hasResourceIcon = id => !!$(id).querySelector('.res-sprite, .res-fallback-icon');
+    add('consistency', '별가루 아이콘 통일', hasResourceIcon('res-dust')
       && TAB_UNLOCK_TOASTS.wishes.includes('💫'));
-    add('consistency', '결정 아이콘 통일(💎)', $('res-crystal').textContent.includes('💎'));
+    add('consistency', '결정 아이콘 통일', hasResourceIcon('res-crystal'));
     const tabLabel = k => {
       const t = document.querySelector(`.tab[data-tab="${k}"]`);
       const label = t && t.querySelector('.tab-label');
