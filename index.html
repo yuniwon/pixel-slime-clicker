@@ -1334,6 +1334,13 @@
   .shop-item:hover:not(.locked) { border-color: var(--gold); box-shadow: inset 0 1px 0 #ffffff18, 0 0 0 1px #ffd75e22; }
   .shop-item:active:not(.locked) { transform: scale(.98); }
   .shop-item.locked { opacity: .45; cursor: not-allowed; }
+  .shop-item.done,
+  .shop-item.maxed,
+  .shop-item.equipped {
+    border-color: #6abf80;
+    background:
+      linear-gradient(180deg, #2f2f55f2 0%, #1f2444f2 100%);
+  }
 
   .shop-icon {
     font-size: 30px;
@@ -1492,11 +1499,12 @@
     box-shadow: -7px 9px 0 -1px var(--icon-c);
   }
   .shop-info { flex: 1; min-width: 0; }
-  .shop-name { font-size: 14px; font-weight: bold; }
+  .shop-name { font-size: 14px; font-weight: bold; line-height: 1.25; }
   .shop-desc { font-size: 11px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
   .shop-cost {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     width: fit-content;
     max-width: 100%;
     min-height: 22px;
@@ -1508,6 +1516,19 @@
     color: var(--gold);
     margin-top: 6px;
     line-height: 1.2;
+    box-shadow: inset 0 1px 0 #ffffff18;
+  }
+  .shop-item.locked .shop-cost {
+    border-color: #5b4a6c88;
+    background: #120c2444;
+    color: #9384a8;
+  }
+  .shop-item.done .shop-cost,
+  .shop-item.maxed .shop-cost,
+  .shop-item.equipped .shop-cost {
+    border-color: #64e59077;
+    background: #14352099;
+    color: var(--green);
   }
   .shop-count {
     position: absolute;
@@ -1553,6 +1574,7 @@
   .prestige-btn .shop-name { color: var(--soul); }
   .prestige-btn:hover:not(.locked) { border-color: var(--text); }
   .perk-item .shop-cost { color: var(--soul); }
+  .perk-item:not(.locked) .shop-cost { border-color: #b48aff77; background: #21143a99; }
   .perk-item.maxed { border-color: var(--soul); opacity: .8; cursor: default; }
 
   #stats-bar {
@@ -1612,10 +1634,28 @@
   }
 
   .room-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 26px;
+    padding: 5px 9px;
     font-size: 12px;
     color: var(--gold);
-    margin: 14px 4px 8px;
+    margin: 14px 2px 8px;
     letter-spacing: 1px;
+    line-height: 1.25;
+    background: linear-gradient(90deg, #271742d9 0%, #1a102e88 68%, transparent 100%);
+    border-left: 3px solid var(--gold);
+    border-top: 1px solid #ffd75e33;
+    border-bottom: 1px solid #5a3a8355;
+    text-shadow: 1px 1px 0 #00000088;
+  }
+  .room-section-title::after {
+    content: '';
+    flex: 1;
+    min-width: 18px;
+    height: 1px;
+    background: linear-gradient(90deg, #ffd75e55, transparent);
   }
   .codex-grid {
     display: grid;
