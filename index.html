@@ -3720,8 +3720,8 @@ function missingFriendPixelHtml(id, size, className = '') {
   return `<span class="missing-friend-icon mf-${id} ${className}" aria-hidden="true" style="--mf-size:${size}px"></span>`;
 }
 
-function producerSpriteHtml(id, fallback, className = 'shop-sprite', frame = 0) {
-  const size = className.includes('friend-sprite') ? 56 : 64;
+function producerSpriteHtml(id, fallback, className = 'shop-sprite', frame = 0, sizeOverride = null) {
+  const size = sizeOverride || (className.includes('friend-sprite') ? 56 : 64);
   if (!PRODUCER_SPRITE_LAYOUT[id]) {
     const pixelFallback = missingFriendPixelHtml(id, size, className);
     if (pixelFallback) return pixelFallback;
@@ -5564,7 +5564,7 @@ function renderCrystalModal() {
     row.className = 'crystal-row';
     const maxed = lv >= CRYSTAL_LV_CAP;
     row.innerHTML = `
-      <span style="font-size:20px">${spriteHtml('friends', p.id, p.icon, { size: 28, className: 'sprite-icon' })}</span>
+      <span style="font-size:20px">${producerSpriteHtml(p.id, p.icon, 'sprite-icon', 0, 28)}</span>
       <span class="cr-name">${p.name} <span class="cr-lv">Lv.${lv}${lv > 0 ? ` (+${lv}%)` : ''}</span></span>
       <button data-id="${p.id}" ${maxed || S.crystal.count < cost ? 'disabled' : ''}>
         ${maxed ? 'MAX' : `💎${cost}`}
