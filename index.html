@@ -1104,14 +1104,17 @@
     z-index: 61;
     display: none;
     image-rendering: pixelated;
-    filter: drop-shadow(0 4px 10px #00000088);
+    filter: drop-shadow(0 0 10px #7fc4ff66) drop-shadow(0 0 16px #b48aff44);
   }
   #raincloud.drift { animation: cloud-bob 2.4s ease-in-out infinite; }
   @keyframes cloud-bob {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }
   }
-  #raincloud.challenge { animation: cloud-shake .35s ease-in-out infinite; }
+  #raincloud.challenge {
+    animation: cloud-shake .35s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px #7fc4ffaa) drop-shadow(0 0 20px #ffd75e55);
+  }
   @keyframes cloud-shake {
     0%, 100% { transform: rotate(-2deg); }
     50% { transform: rotate(2deg); }
