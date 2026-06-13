@@ -545,21 +545,24 @@
 
   /* ── 말풍선 ── */
   #speech-bubble {
-    --bubble-border: #2d1b4e;
+    --bubble-bg: #241640e6;
+    --bubble-fg: var(--text);
+    --bubble-border: #8a6d1f;
     position: absolute;
     top: 18px; left: calc(100% + 10px);
     transform: scale(0);
     transform-origin: left center;
-    background: var(--text);
-    color: #2d1b4e;
+    background: var(--bubble-bg);
+    color: var(--bubble-fg);
     font-size: 11px;
     line-height: 1.35;
     padding: 6px 10px;
     border: 2px solid var(--bubble-border);
-    box-shadow: 2px 2px 0 #00000055;
+    box-shadow: 2px 2px 0 #00000066, inset 0 0 0 1px #ffffff14;
     max-width: 220px;
     width: max-content;
     text-align: center;
+    text-shadow: 1px 1px 0 #00000088;
     z-index: 10;
     transition: transform .2s ease;
     pointer-events: none;
@@ -1866,8 +1869,8 @@
   }
 
   /* ── 말풍선 테마 ── */
-  #speech-bubble.bubble-pink { --bubble-border: #a8336e; background: #ffd9ec; color: #5e1740; }
-  #speech-bubble.bubble-gold { --bubble-border: #8a6d1f; background: #ffeec4; color: #5c4312; }
+  #speech-bubble.bubble-pink { --bubble-border: #ff8ac4; --bubble-bg: #3a1836ee; --bubble-fg: #ffd9ec; }
+  #speech-bubble.bubble-gold { --bubble-border: #ffd75e; --bubble-bg: #3a2a12ee; --bubble-fg: #ffeec4; }
 
   /* ── 주스: 코인 팝 / 구매 플래시 / 환생 플래시 ── */
   #coin-display.pop { animation: coinpop .15s ease-out; }
