@@ -7165,11 +7165,82 @@ function rebuildFriends() {
 }
 
 /* 코인 배달: 친구 자리에서 코인이 카운터로 날아온다 — "같이 번다" 체감 */
+function segmentHitsRect(a, b, rect, steps = 14) {
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const x = a.x + (b.x - a.x) * t;
+    const y = a.y + (b.y - a.y) * t;
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return true;
+  }
+  return false;
+}
+
+function pointInRect(point, rect) {
+  return !!rect && point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
+}
+
+function speechBubbleAvoidRect(guard = isMobileLayout() ? 18 : 24) {
+  const bubble = $('speech-bubble');
+  if (!bubble?.classList.contains('show')) return null;
+  const br = bubble.getBoundingClientRect();
+  if (!br.width || !br.height) return null;
+  return {
+    left: br.left - guard,
+    right: br.right + guard,
+    top: br.top - guard,
+    bottom: br.bottom + guard,
+  };
+}
+
+function coinFlightWaypoint(start, end) {
+  const direct = {
+    x: start.x + (end.x - start.x) * 0.5,
+    y: start.y + (end.y - start.y) * 0.5 - 40,
+  };
+  const guard = isMobileLayout() ? 18 : 24;
+  const avoid = speechBubbleAvoidRect(guard);
+  if (!avoid) return direct;
+  const clear = point => !segmentHitsRect(start, point, avoid) && !segmentHitsRect(point, end, avoid);
+  if (clear(direct)) return direct;
+
+  const area = $('game-area')?.getBoundingClientRect();
+  const bounds = area?.width
+    ? { left: area.left + 8, right: area.right - 8, top: area.top + 58, bottom: area.bottom - 34 }
+    : { left: 8, right: innerWidth - 8, top: 8, bottom: innerHeight - 8 };
+  const candidates = [
+    { x: avoid.left, y: avoid.top },
+    { x: avoid.right, y: avoid.top },
+    { x: avoid.left, y: avoid.bottom },
+    { x: avoid.right, y: avoid.bottom },
+    { x: (avoid.left + avoid.right) / 2, y: avoid.top },
+    { x: (avoid.left + avoid.right) / 2, y: avoid.bottom },
+  ].map(p => ({
+    x: clampNum(p.x, bounds.left, bounds.right),
+    y: clampNum(p.y, bounds.top, bounds.bottom),
+  }));
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const safe = candidates
+    .filter(clear)
+    .sort((a, b) => (dist(start, a) + dist(a, end)) - (dist(start, b) + dist(b, end)));
+  return safe[0] || { x: direct.x, y: clampNum(avoid.bottom + guard, bounds.top, bounds.bottom) };
+}
+
 function flyCoinFromFriend() {
   if (document.hidden || totalCps() <= 0) return;
-  const friends = friendsLayer.querySelectorAll('.friend');
+  const friends = [...friendsLayer.querySelectorAll('.friend')];
   if (!friends.length) return;
-  const f = friends[Math.floor(Math.random() * friends.length)];
+  const avoid = speechBubbleAvoidRect(isMobileLayout() ? 22 : 28);
+  const startPoint = el => {
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 3, rect: r };
+  };
+  const candidates = friends.filter(el => {
+    const p = startPoint(el);
+    return p.rect.width && (!avoid || !pointInRect(p, avoid));
+  });
+  const pool = candidates.length ? candidates : friends.filter(el => startPoint(el).rect.width);
+  if (!pool.length) return;
+  const f = pool[Math.floor(Math.random() * pool.length)];
   const fr = f.getBoundingClientRect();
   const cr = $('coin-display').getBoundingClientRect();
   if (!fr.width || !cr.width) return;
@@ -7181,11 +7252,13 @@ function flyCoinFromFriend() {
   img.style.left = sx + 'px';
   img.style.top = sy + 'px';
   document.body.appendChild(img);
-  const dx = cr.left + cr.width / 2 - sx;
-  const dy = cr.top + cr.height / 2 - sy;
+  const end = { x: cr.left + cr.width / 2, y: cr.top + cr.height / 2 };
+  const mid = coinFlightWaypoint({ x: sx, y: sy }, end);
+  const dx = end.x - sx;
+  const dy = end.y - sy;
   img.animate([
     { transform: 'translate(0,0) scale(1)', opacity: 1 },
-    { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 40}px) scale(1.1)`, opacity: 1, offset: 0.55 },
+    { transform: `translate(${mid.x - sx}px, ${mid.y - sy}px) scale(1.1)`, opacity: 1, offset: 0.55 },
     { transform: `translate(${dx}px, ${dy}px) scale(.5)`, opacity: 0.9 },
   ], { duration: 750, easing: 'ease-in' }).onfinish = () => {
     img.remove();

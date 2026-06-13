@@ -1,0 +1,548 @@
+너는 pixel-slime-clicker의 비주얼 디렉션/프론트엔드 정리 담당 Codex 에이전트다.
+
+레포:
+https://github.com/yuniwon/pixel-slime-clicker
+
+중요:
+내가 함께 첨부하는 레퍼런스 이미지는 “그대로 똑같이 복제하라”는 뜻이 아니다.
+이 이미지는 게임의 최종 시각 방향을 잡기 위한 Visual North Star다.
+현재 코드에 이미 많은 시스템이 들어오면서 이미지 구성과 배치가 중구난방이 되었으므로, 이번 작업의 목표는 새 기능 추가가 아니라 “작은 말랑 우주 극장”이라는 하나의 기준으로 메인 화면과 탭 UI를 정돈하는 것이다.
+
+절대 하지 말 것:
+- 경제 수치 변경 금지
+- 새 게임 시스템 추가 금지
+- 새 재화 추가 금지
+- 대규모 로직 리팩터링 금지
+- 저장 구조 변경 금지. 꼭 필요할 때만 SAVE_VERSION/migrate 처리
+- 레퍼런스 이미지를 배경 이미지로 통째로 넣는 방식 금지
+- 모든 요소를 항상 레퍼런스 이미지처럼 가득 보이게 만들기 금지
+- UI를 모바일 광고 게임처럼 과하게 반짝이게 만들기 금지
+
+반드시 읽을 것:
+1. 최신 index.html
+2. README.md
+3. docs/ASSET-PIPELINE.md
+4. docs/VISUAL-QA.md
+5. docs/LAUNCH-CRITERIA.md
+6. docs/VISUAL-DIRECTION.md
+7. docs/LIVE-SCREEN-REFERENCE.md
+8. 아래 "레퍼런스 이미지 파일 경로"의 6개 이미지를 작업 시작마다 다시 확인
+
+함께 제공되는 레퍼런스 이미지:
+- Desktop Golden Live Screen
+- Mobile Live Screen
+- Friends Tab Reference
+- Upgrade Tab Reference
+- Wishes Tab Reference
+- Room Tab Reference
+
+레퍼런스 이미지 파일 경로:
+- Mobile Live Screen: C:\dev\game2\ChatGPT Image 2026년 6월 13일 오후 03_43_40 (1).png
+- Friends Tab Reference: C:\dev\game2\ChatGPT Image 2026년 6월 13일 오후 03_43_40 (2).png
+- Upgrade Tab Reference: C:\dev\game2\ChatGPT Image 2026년 6월 13일 오후 03_43_40 (3).png
+- Wishes Tab Reference: C:\dev\game2\ChatGPT Image 2026년 6월 13일 오후 03_43_40 (4).png
+- Room Tab Reference: C:\dev\game2\ChatGPT Image 2026년 6월 13일 오후 03_43_40 (5).png
+- Friends Tab Alternate Reference: C:\dev\game2\ChatGPT Image 2026년 6월 13일 오후 03_43_46.png
+
+작업 시작 체크:
+- 위 필수 문서와 6개 레퍼런스 이미지 경로를 먼저 확인한다.
+- 레퍼런스는 구현 배경이 아니라 Visual North Star로만 사용한다.
+- 매 작업의 수정 방향이 docs/VISUAL-DIRECTION.md와 docs/LIVE-SCREEN-REFERENCE.md의 목표에서 벗어나지 않는지 확인한다.
+
+작업 종료 체크:
+- 검증에 사용한 임시 캡처/영상/리포트 산출물은 다음 작업으로 넘어가기 전에 정리한다.
+- 단, 위 6개 레퍼런스 이미지 파일은 작업 기준 자료이므로 삭제하지 않는다.
+- QA 산출물을 남겨야 할 특별한 이유가 있으면 완료 보고에 경로와 이유를 명시한다.
+
+이 이미지들의 공통 방향:
+- 작은 말랑 우주 극장
+- 깊은 보라 밤하늘
+- 중앙 슬라임이 가장 큰 초점
+- 친구들은 무대의 주민
+- 장식은 무대 세트
+- 하늘 요소와 바닥 요소가 분명히 구분됨
+- 오른쪽/하단 패널은 어두운 보라색 픽셀 UI
+- UI는 많지만 질서 있게
+- 바닥 오브젝트는 접지 그림자
+- 하늘 오브젝트는 은은한 글로우
+- 전체는 풍성하지만 산만하지 않음
+
+이번 작업의 큰 목표:
+1. 레퍼런스 이미지를 기준으로 시각 규칙 문서화
+2. 현재 메인 화면 레이어 구조를 명확히 목록화
+3. 데스크톱/모바일 무대 좌표계를 도입하거나 기존 좌표를 중앙 관리 구조로 정리
+4. 친구/장식/하늘 손님/소원 스트립/뉴스/상점 패널의 배치를 레퍼런스 방향으로 정렬
+5. 탭별 패널 UI의 카드 문법을 통일
+6. VISUAL-QA 기준으로 “AI로 만든 티”, 공중부양, 스티커 느낌, 접지 부재, 스케일 불일치를 줄임
+7. launchCheck(), uxCheck()를 유지
+
+작업은 아래 단계로 진행한다.
+
+────────────────────────
+1단계. 현황 감사
+────────────────────────
+
+현재 index.html에서 메인 화면에 존재하는 레이어를 모두 찾아라.
+
+최소 포함:
+- body/background/star
+- game-area
+- decor-layer
+- friends-layer
+- news-ticker
+- title/stage-name/cosmic-mark
+- evo-progress
+- coin-display/cps-display
+- daily-summary
+- slime-wrap
+- slime-canvas/slime-shadow
+- combo-aura/tier-ring/heat particles
+- wish-strip
+- crystal-bed
+- coin-pile
+- golden-star / mini-star
+- raincloud
+- starlet
+- toast
+- blessing modal
+- crystal modal
+- cosmic ending overlay
+- shop panel
+- res-strip
+- tabs
+- shop-list/cards
+- stats-bar
+
+각 레이어에 대해 다음을 표로 정리한다.
+- 현재 DOM/CSS 위치
+- z-index
+- 하늘 요소인지 / 바닥 요소인지 / UI 요소인지
+- 항상 보이는지 / 조건부인지
+- 레퍼런스 이미지에서 어느 위치에 해당하는지
+- 현재 가장 큰 시각 문제
+
+출력 문서:
+docs/VISUAL-DIRECTION.md 초안에 포함
+
+────────────────────────
+2단계. VISUAL-DIRECTION.md 작성
+────────────────────────
+
+docs/VISUAL-DIRECTION.md를 새로 만들거나 갱신한다.
+
+문서에 반드시 포함할 것:
+
+# Visual Direction
+
+## Core Fantasy
+작은 말랑 우주 극장
+
+## Target Player Feeling
+- 귀여운 슬라임이 사는 작은 우주를 돌본다
+- 친구들이 숫자 생산자가 아니라 방의 주민처럼 보인다
+- 오늘 할 일이 있지만 숙제처럼 느껴지지 않는다
+- 환생과 우주 씨앗은 반복의 흔적을 남긴다
+
+## Visual Hierarchy
+1. Slime
+2. Coin / Level / Evolution Progress
+3. Friends and Decor
+4. Wish Strip / Daily Ritual
+5. Shop Panel
+6. Ambient Guests and Effects
+
+## Stage Zones
+- Sky Zone
+  - 우주 고래
+  - 코인 행성
+  - 별의 정령
+  - 황금별
+  - 별똥이
+  - 우주 창문
+  - 우주 씨앗/별나무 상단
+- Slime Zone
+  - 슬라임
+  - 콤보 오라
+  - 성향 오라
+  - 말풍선
+- Ground Zone
+  - 병아리
+  - 고양이
+  - 강아지
+  - 아기 드래곤
+  - 시간 거북
+  - 쿠션
+  - 연못
+  - 매트
+  - 램프
+  - 코인 분수
+  - 젤리 결정 화단
+  - 코인 더미
+- UI Zone
+  - 뉴스
+  - 레벨/코인/CPS
+  - 오늘의 말랑
+  - 소원 스트립
+  - 상점 패널
+
+## Layer Order
+0 background stars
+1 sky ambient
+2 back decor
+3 back friends
+4 combo aura
+5 slime
+6 front friends
+7 ground props
+8 wish strip
+9 event guests
+10 toast/modal
+
+## Density Rules
+Early game:
+- visible friends: 0~2
+- visible decor: 0~1
+- no cosmic tree
+- no coin pile unless threshold reached
+
+Mid game:
+- visible friends: 3~5
+- visible decor: 2~4
+- wish strip visible
+- one ambient sky object allowed
+
+Late game:
+- visible friends: 6~8
+- visible decor: 4~6
+- cosmic seed/tree allowed
+- coin pile and crystal garden visible
+
+Never:
+- all 10 friends at full size all the time
+- every decoration equally bright
+- UI elements covering slime face
+- unanchored ground props floating
+
+## Size Rules
+Desktop:
+- slime: 280~340px visual height
+- ground friend: 40~64px
+- sky friend: 56~100px
+- decor: 50~95px
+- shop icon: 44~64px
+- wish strip height: compact, no taller than necessary
+
+Mobile:
+- top stage: about 42~45dvh
+- slime: tap-friendly but not crowding
+- visible friends: 3~5 max
+- visible decor: 2~4 max
+- shop cards: 2~3 visible
+- bottom nav/tabs touch-friendly
+
+## Shadow and Glow Rules
+- 바닥 오브젝트는 반드시 접지 그림자
+- 하늘 오브젝트는 접지 그림자 없이 글로우
+- UI는 drop-shadow만 사용
+- 이펙트는 슬라임/오브젝트와 상호작용해야 하며 스티커처럼 붙으면 안 됨
+
+## Color Palette
+- deep violet
+- lavender
+- warm gold
+- mint green
+- strawberry pink
+- soft teal
+- avoid harsh neon
+- avoid pure white blocks except tiny spark highlights
+
+## Reference Image Interpretation
+- 레퍼런스 이미지는 late-game / polished state 기준
+- 실제 early-game 화면은 훨씬 덜 복잡해야 함
+- 레퍼런스의 분위기, 위계, 색감, 패널 문법을 따르고 모든 요소를 1:1 복제하지 않는다
+
+## Visual QA Checklist
+docs/VISUAL-QA.md의 체크리스트를 요약해서 포함:
+- 공중부양
+- 요소 충돌
+- 접지 그림자
+- 스케일 정합
+- 효과 vs 스티커
+- 배치 의도
+- 팔레트 통일
+
+────────────────────────
+3단계. LIVE-SCREEN-REFERENCE.md 작성
+────────────────────────
+
+docs/LIVE-SCREEN-REFERENCE.md를 만든다.
+
+내용:
+- 레퍼런스 이미지의 역할
+- 데스크톱 Golden Live Screen 기준
+- 모바일 Live Screen 기준
+- 현재 코드와 레퍼런스의 차이
+- 구현 시 우선순위
+
+문서에 포함할 구체 규칙:
+
+Desktop Layout:
+- left game stage: 70~74%
+- right shop panel: 26~30%
+- news ticker: top of stage, thin
+- title/level/coin block: upper center
+- slime center: stage x≈50%, y≈58%
+- wish strip: bottom center, thin
+- shop resource strip: top of right panel
+- tabs: below resource strip
+- shop cards: 3~5 visible depending tab
+
+Mobile Layout:
+- top live stage: 42~45dvh
+- bottom panel: remaining height
+- top stage contains only essential UI
+- resource chips should not crowd slime
+- bottom tab buttons must be thumb-friendly
+- shop cards should not require tiny taps
+
+Main stage reference mapping:
+- 우주 고래: sky left/top, slow ambient
+- 코인 행성: sky right/top, small and bright
+- 별의 정령: sky/side, glowing but small
+- 시간 거북: ground lower-left
+- 고양이: mat/cushion near right/mid-ground
+- 강아지: ground lower-right or lower-mid
+- 병아리: ground near center/front
+- 드래곤: coin fountain/treasure side
+- 유니콘: lamp side
+- 토끼: jumping/air right-middle
+- 젤리 결정: lower-left flowerbed
+- 코인 더미: lower-right, behind wish strip if needed
+- 우주 씨앗/별나무: behind/above slime, subtle
+
+────────────────────────
+4단계. STAGE_LAYOUT 도입 또는 기존 좌표 중앙화
+────────────────────────
+
+현재 DECOR와 FRIEND_BEHAVIOR가 각자 pos를 들고 있어 배치가 기능별로 흩어진다.
+무대 좌표를 중앙 관리하는 구조를 도입하라.
+
+권장 형태:
+
+const STAGE_LAYOUT = {
+  desktop: {
+    slime: { x: 0.50, y: 0.58 },
+    zones: {
+      skyY: 0.18,
+      groundY: 0.82,
+      wishY: 0.94
+    },
+    decor: {
+      pond: { x: 0.13, y: 0.78, zone: 'ground' },
+      cushion: { x: 0.58, y: 0.80, zone: 'ground' },
+      lamp: { x: 0.80, y: 0.64, zone: 'ground' },
+      mat: { x: 0.67, y: 0.79, zone: 'ground' },
+      fountain: { x: 0.27, y: 0.65, zone: 'ground' },
+      window: { x: 0.86, y: 0.22, zone: 'sky' },
+      cosmicTree: { x: 0.50, y: 0.30, zone: 'sky-back' },
+      crystalBed: { x: 0.08, y: 0.78, zone: 'ground' },
+      coinPile: { x: 0.86, y: 0.80, zone: 'ground' }
+    },
+    friends: {
+      chick: { x: 0.45, y: 0.84, zone: 'ground' },
+      cat: { x: 0.68, y: 0.79, zone: 'ground' },
+      dog: { x: 0.58, y: 0.86, zone: 'ground' },
+      rabbit: { x: 0.72, y: 0.42, zone: 'air' },
+      unicorn: { x: 0.72, y: 0.66, zone: 'ground' },
+      dragon: { x: 0.25, y: 0.62, zone: 'ground' },
+      whale: { x: 0.28, y: 0.22, zone: 'sky' },
+      planet: { x: 0.78, y: 0.20, zone: 'sky' },
+      spirit: { x: 0.18, y: 0.36, zone: 'sky' },
+      turtle: { x: 0.17, y: 0.83, zone: 'ground' }
+    }
+  },
+  mobile: {
+    // mobile-specific positions
+  }
+};
+
+주의:
+- 경제 로직과 생산자 데이터는 바꾸지 말 것
+- 좌표만 중앙화할 것
+- 기존 DECOR.pos는 남겨도 되지만, 렌더 시 STAGE_LAYOUT을 우선 사용
+- 모바일은 데스크톱 좌표 축소가 아니라 별도 좌표
+- 무대 안 요소는 viewport 좌표가 아니라 game-area 내부 좌표 기준이어야 함
+
+유틸 함수 예:
+stagePos(layoutPoint) → style left/top/bottom 변환
+applyStagePosition(el, point)
+isSky(point)
+isGround(point)
+
+────────────────────────
+5단계. 메인 화면 실제 정렬
+────────────────────────
+
+현재 메인 화면을 레퍼런스 이미지 방향으로 정리한다.
+
+수정 대상:
+- renderDecor()
+- rebuildFriends()
+- crystal-bed position
+- coin-pile position
+- cosmic-seed-tree position
+- news-ticker density
+- wish-strip positioning
+- mobile CSS
+
+요구:
+1. 슬라임이 항상 가장 큰 초점이어야 함.
+2. ground 요소는 접지 그림자를 가져야 함.
+3. sky 요소는 glow만 사용.
+4. 친구는 레퍼런스처럼 반원형으로 배치하되 초반/중반/후반 밀도 제한.
+5. 모바일에서는 친구 종별 최대 1마리, 전체 5마리 내외.
+6. 우주 씨앗/별나무는 중앙 상징이지만 슬라임보다 강하면 안 됨.
+7. 코인 더미/젤리 결정/소원 스트립이 서로 겹치면 안 됨.
+8. 뉴스/토스트/버프 배너가 제목/레벨/코인을 가리면 안 됨.
+
+────────────────────────
+6단계. 탭 UI 카드 문법 통일
+────────────────────────
+
+레퍼런스 이미지의 오른쪽 패널을 기준으로 탭별 카드 문법을 정리한다.
+새 기능 추가 금지. 기존 정보를 더 보기 좋게 묶는 작업만 허용.
+
+탭별 목표:
+
+친구들:
+- 주민 고용과 시너지 확인
+- 카드 구성:
+  icon / name / CPS / owned / payback / next synergy / cost / x1 x10 MAX
+- 너무 긴 flavor text는 모바일에서 숨김
+
+강화:
+- 손맛 성장
+- 카드 구성:
+  icon / name / effect / level or purchased state / cost
+- 업그레이드 아이콘과 cost 버튼 위치 통일
+
+소원:
+- 오늘의 작은 목표
+- 황금 소원, 일반 소원 3개, 젤리 결정, 별가루 꾸미기 구분
+- 목표 카드에는 progress bar가 명확해야 함
+
+방:
+- 흔적과 수집
+- 장식 그리드, 도감, 별의 기록, 앨범, 우주 씨앗 상태 카드
+- 장식은 레퍼런스처럼 grid 카드 문법으로
+- 도감/기록은 너무 빽빽하면 접힘/섹션화 고려
+
+환생:
+- 더 깊어지는 선택
+- 보유 영혼, 총 획득 영혼, 소프트캡 보너스, 환생 버튼, 특성 카드, 도전 런
+- 숫자 표기는 실제 soulMul 기준 유지
+
+설정:
+- 세이브/사운드/진동/통계/개인정보/옵트아웃
+- 위험 구역은 시각적으로 분리
+
+모바일:
+- 탭 버튼은 크게
+- 카드 2~3개가 한 화면에 보이게
+- x1/x10/MAX는 엄지로 누르기 쉬워야 함
+
+────────────────────────
+7단계. 이미지 생성/에셋은 하지 말고, 에셋 요청 목록만 정리
+────────────────────────
+
+이번 작업에서 새 스프라이트를 생성하지 않는다.
+대신 docs/ASSET-PIPELINE.md 또는 새 docs/ASSET-BACKLOG.md에 필요한 에셋만 정리한다.
+
+우선순위:
+1. spirit/turtle 친구 스프라이트 2프레임
+2. prestige 회색 아이콘 재생성
+3. challenge 아이콘 4종
+4. stage ground texture 5종
+5. trophy shelf frame
+6. slime expression variants
+
+각 항목에 대해:
+- 현재 임시 표현
+- 왜 필요한지
+- 사용 위치
+- 셀 크기/프레임 수
+- Visual QA 주의점
+을 적는다.
+
+────────────────────────
+8단계. 검증
+────────────────────────
+
+필수 검증:
+- JS 문법 검사
+- git diff --check
+- launchCheck()
+- uxCheck()
+- 신규 세이브 5분 플로우
+- 데스크톱 1440×900 스크린샷
+- 모바일 390×844 스크린샷
+- 375px 가로 오버플로 0
+- 세이브 코드 내보내기/가져오기 왕복
+- prefers-reduced-motion에서 핵심 화면 깨지지 않는지
+
+Visual QA:
+docs/VISUAL-QA.md 기준으로 아래를 검사하고 보고한다.
+- 공중부양
+- 요소 충돌
+- 접지 그림자
+- 스케일 정합
+- 효과 vs 스티커
+- 배치 의도
+- 팔레트 통일
+
+비판 패스:
+“이 화면에서 싸 보이는 것 5개”를 반드시 적어라.
+0개라고 쓰지 말 것. 적어도 5개를 찾고, 이번 작업에서 해결한 것과 남은 것을 구분하라.
+
+────────────────────────
+9단계. 산출물
+────────────────────────
+
+반드시 산출:
+1. docs/VISUAL-DIRECTION.md
+2. docs/LIVE-SCREEN-REFERENCE.md
+3. 필요하다면 docs/ASSET-BACKLOG.md
+4. index.html의 배치/레이어/UI 정리 패치
+5. 검증 보고
+
+완료 보고 형식:
+- 변경 요약
+- 레퍼런스 이미지에서 반영한 원칙
+- 새로 만든 문서
+- 실제 코드 변경 파일
+- 데스크톱/모바일 배치 변경 요약
+- 탭 UI 정리 요약
+- Visual QA 결과
+- launchCheck / uxCheck 결과
+- 남은 비주얼 부채
+- 다음 단계 제안
+
+성공 기준:
+- 레퍼런스 이미지처럼 “작은 말랑 우주 극장”이라는 한 방향으로 보일 것
+- 슬라임이 첫 번째 초점일 것
+- 친구와 장식이 무작위 배치가 아니라 의도된 주민/무대 세트처럼 보일 것
+- 모바일에서 덜 복잡하고 실제로 터치하기 좋을 것
+- 게임 로직과 경제가 바뀌지 않을 것
+
+참고:
+레퍼런스 이미지는 실제 브라우저 스크린샷이 아니라 최종 목표 분위기다.
+특히 가져와야 할 것은:
+1. 중앙 슬라임 중심성
+2. 하늘/바닥 레이어 구분
+3. 친구들의 반원형 생활감
+4. 보라/골드 픽셀 UI 패널 톤
+5. 소원 스트립과 뉴스 티커의 얇은 정보 배치
+6. 상점 카드의 일관된 문법
+
+그대로 따라하지 말고, 현재 게임 구조와 기능 해금 흐름에 맞게 번역해라.
+초반 화면은 레퍼런스보다 30~40% 비어 있어야 하고, 레퍼런스 이미지는 late-game polished state 기준이다.

@@ -95,6 +95,7 @@
 | slime-wrap | `#slime-wrap` | 2 | slime | always | main character focus | coordinate system is implicit in flex layout |
 | slime-canvas/slime-shadow | `#slime-canvas`, `#slime-shadow` | 2 | slime/ground | always | hero and grounding | shadow grounds slime, but stage props must not cover face |
 | combo-aura/tier-ring/heat | `#combo-aura`, `#tier-ring`, `.heat-particle` | -1/inside | slime/effect | conditional | interactive magic circle | effects are good but need to stay behind/around slime |
+| friend coin delivery | `.fly-coin` | 55 | effect/UI | conditional | friends visibly send coins home | flight path now avoids visible speech bubbles; keep checking event guest and toast crossings |
 | wish-strip | `#wish-strip` | 3 | UI | conditional | bottom daily objective | good thin strip, must not cover coin pile/crystal |
 | crystal-bed | `#crystal-bed` | CSS/JS positioned | ground | conditional | lower-left garden prop | `STAGE_LAYOUT` anchors it with other props; percent label now uses a subdued badge instead of raw stage text |
 | coin-pile | `#coin-pile` | 3 | ground | conditional | lower-right wealth prop | `STAGE_LAYOUT` anchors it with other props; continue checking wish-strip clearance at high wealth |
