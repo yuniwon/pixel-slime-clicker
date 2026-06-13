@@ -105,10 +105,10 @@
 | blessing modal | `#blessing-overlay` | 120 | modal | conditional | run choice | visually separate enough |
 | crystal modal | `#crystal-overlay` | 130 | modal | conditional | feeding loop | visually separate enough |
 | cosmic ending overlay | `#cosmic-ending-overlay` | 210 | modal | conditional | milestone ceremony | should remain rare and stronger than normal UI |
-| shop panel | `#shop` | 2 | UI | always | right/bottom panel | card grammar varied by tab |
+| shop panel | `#shop` | 2 | UI | always | right/bottom panel | header/tabs now read as a darker console; card grammar still varies by tab |
 | res-strip | `#res-strip` | normal | UI | conditional | resource chips | compact, but visually plain next to reference |
-| tabs | `#shop-tabs .tab` | normal | UI | unlocked | tab navigation | text-only tabs feel less tactile than reference |
-| shop-list/cards | `#shop-list`, `.shop-item` | normal | UI | always | cards | icons, costs, counts use mixed visual grammar |
+| tabs | `#shop-tabs .tab` | normal | UI | unlocked | tab navigation | sprite icons and darker active surfaces now improve tactility; still simple versus reference |
+| shop-list/cards | `#shop-list`, `.shop-item` | normal | UI | always | cards | base card, icon frame, cost badge, and count badge are closer; tab-specific metadata layout still needs unification |
 | stats-bar | `#stats-bar` | normal | UI | optional | advanced telemetry | intentionally subdued |
 
 ## Density Rules
