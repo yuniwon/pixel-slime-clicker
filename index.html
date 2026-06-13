@@ -2141,6 +2141,10 @@
       transform: translateX(-50%) translateY(12px);
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
+    body.toast-mobile-active #wish-strip {
+      opacity: 0;
+      pointer-events: none;
+    }
     #cosmic-ending-card { padding: 14px; }
     #cosmic-ending-card h3 { font-size: 14px; }
     #cosmic-ending-card p { font-size: 11px; }
@@ -7604,6 +7608,15 @@ let toastTimer = null;
 const toastQueue = [];
 let toastShowing = false;
 let toastLast = '';
+
+function placeMobileToast(el) {
+  const area = $('game-area')?.getBoundingClientRect();
+  if (!area?.height) return;
+  el.style.bottom = 'auto';
+  const h = el.getBoundingClientRect().height || 34;
+  el.style.top = Math.max(8, area.bottom - h - 12) + 'px';
+}
+
 function toast(html) {
   if (silentTick) return;  // 닫기/숨김 저장 중에는 토스트 생략
   if (toastShowing) {
@@ -7619,12 +7632,9 @@ function showToastNow(html) {
   el.innerHTML = html;   // 주의: 내부 고정 문자열만 전달할 것 (사용자 입력 금지)
   el.classList.add('show');
   if (isMobileLayout()) {
-    const area = $('game-area')?.getBoundingClientRect();
-    if (area?.height) {
-      el.style.bottom = 'auto';
-      const h = el.getBoundingClientRect().height || 34;
-      el.style.top = Math.max(8, area.bottom - h - 12) + 'px';
-    }
+    document.body.classList.add('toast-mobile-active');
+    placeMobileToast(el);
+    requestAnimationFrame(() => placeMobileToast(el));
   } else {
     const h = el.getBoundingClientRect().height || 52;
     el.style.top = '';
@@ -7633,6 +7643,7 @@ function showToastNow(html) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
     el.classList.remove('show');
+    document.body.classList.remove('toast-mobile-active');
     toastShowing = false;
     if (toastQueue.length) {
       setTimeout(() => { if (!toastShowing && toastQueue.length) showToastNow(toastQueue.shift()); }, 320);
