@@ -3,7 +3,7 @@
   "engine": "component-row",
   "game_input": "sprite-sheet-alpha.png",
   "degraded_static_fallback": false,
-  "curation_applied": false,
+  "curation_applied": true,
   "sprite_sheet_alpha": "sprite-sheet-alpha.png",
   "sprite_sheet_alpha_report": "sprite-sheet-alpha.report.json",
   "base_image": null,
@@ -78,12 +78,24 @@
         "frames": 2,
         "fps": 2,
         "loop": true
+      },
+      "spirit": {
+        "row": 8,
+        "frames": 2,
+        "fps": 2,
+        "loop": true
+      },
+      "turtle": {
+        "row": 9,
+        "frames": 2,
+        "fps": 2,
+        "loop": true
       }
     }
   },
   "frame_layout": {
     "sheetWidth": 1792,
-    "sheetHeight": 7168,
+    "sheetHeight": 8960,
     "cellWidth": 896,
     "cellHeight": 896,
     "rows": {
@@ -195,6 +207,34 @@
         {
           "x": 896,
           "y": 6272,
+          "w": 896,
+          "h": 896
+        }
+      ],
+      "spirit": [
+        {
+          "x": 0,
+          "y": 7168,
+          "w": 896,
+          "h": 896
+        },
+        {
+          "x": 896,
+          "y": 7168,
+          "w": 896,
+          "h": 896
+        }
+      ],
+      "turtle": [
+        {
+          "x": 0,
+          "y": 8064,
+          "w": 896,
+          "h": 896
+        },
+        {
+          "x": 896,
+          "y": 8064,
           "w": 896,
           "h": 896
         }

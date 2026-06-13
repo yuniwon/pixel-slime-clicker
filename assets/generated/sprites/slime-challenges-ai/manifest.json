@@ -1,0 +1,100 @@
+{
+  "characterId": "slime-challenges-ai",
+  "engine": "component-row",
+  "game_input": "sprite-sheet-alpha.png",
+  "degraded_static_fallback": false,
+  "curation_applied": false,
+  "sprite_sheet_alpha": "sprite-sheet-alpha.png",
+  "sprite_sheet_alpha_report": "sprite-sheet-alpha.report.json",
+  "base_image": null,
+  "cell": {
+    "shape": "square",
+    "width": 256,
+    "height": 256,
+    "safe_margin_x": 28,
+    "safe_margin_y": 28,
+    "size": 256,
+    "safe_margin": 28
+  },
+  "chroma_key": {
+    "name": "green",
+    "hex": "#00FF00",
+    "rgb": [
+      0,
+      255,
+      0
+    ],
+    "selection": "manual"
+  },
+  "animation": {
+    "cellWidth": 256,
+    "cellHeight": 256,
+    "columns": 1,
+    "rows": {
+      "silence": {
+        "row": 0,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "mono": {
+        "row": 1,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "starlit": {
+        "row": 2,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      },
+      "sprint": {
+        "row": 3,
+        "frames": 1,
+        "fps": 1,
+        "loop": false
+      }
+    }
+  },
+  "frame_layout": {
+    "sheetWidth": 256,
+    "sheetHeight": 1024,
+    "cellWidth": 256,
+    "cellHeight": 256,
+    "rows": {
+      "silence": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "mono": [
+        {
+          "x": 0,
+          "y": 256,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "starlit": [
+        {
+          "x": 0,
+          "y": 512,
+          "w": 256,
+          "h": 256
+        }
+      ],
+      "sprint": [
+        {
+          "x": 0,
+          "y": 768,
+          "w": 256,
+          "h": 256
+        }
+      ]
+    }
+  }
+}

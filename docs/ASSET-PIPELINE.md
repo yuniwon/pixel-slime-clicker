@@ -24,6 +24,9 @@ const SPRITE_ATLASES = {
   guests:       { src, sheet, layout: {...4종} },                        // 연결됨
   stage:        { src, sheet, layout: {...9종} },                        // 연결됨
   crystal:      { src, sheet, layout: {...4종} },                        // 연결됨
+  challenges:   { src, sheet, layout: {...4종} },                        // 연결됨
+  coinpile:     { src, sheet, layout: {...3종} },                        // 연결됨
+  clickfx:      { src, sheet, layout: {...1종/3프레임} },                 // 연결됨
 };
 
 spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
@@ -80,8 +83,8 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | slime-cosmetics-ai | 11 (꾸미기) | ✅ 생성·연결 완료 — 핑크 3종(aura/bubble/heart) atlas 보정 적용 |
 | slime-items-ai | 33 (강화/특성/상점 아이콘) | ⚠️ prestige 회색화 → 런타임 violet 틴트 보정 중 |
 | slime-perks-extra-ai | 3 요청 (후반 환생 특성) | 📝 요청서·프롬프트 준비 완료 — 현재 CSS 픽셀 폴백, 생성 후 soulfire/starborn/deeproot 승격 후보 |
-| slime-friends-ai | 10 요청 / 8 산출 (자동 생산 친구) | ⚠️ `spirit`, `turtle` raw/frames 미생성 → 현재 CSS 픽셀 폴백, 다음 재생성 우선 후보 |
-| slime-challenges-ai | 4 요청 (도전 런 아이콘) | 📝 요청서·프롬프트 준비 완료 — 현재 CSS 픽셀 폴백, 생성 후 silence/mono/starlit/sprint 승격 후보 |
+| slime-friends-ai | 10 요청 / 10 산출 (자동 생산 친구) | ✅ 생성·연결 완료 — `spirit`, `turtle` 2프레임 승격 |
+| slime-challenges-ai | 4 요청 (도전 런 아이콘) | ✅ 생성·연결 완료 — silence/mono/starlit/sprint 1프레임 승격 |
 | slime-guests-ai | 4 (먹구름·별똥이 + happy 표정) | ✅ 생성·연결 완료 |
 | slime-main-v3-ai | 5단계 ×2프레임 (본체 v3) | ✅ 연결됨 — baked 성향 슬라임의 둥근 체형과 기본 본체 실루엣 차이를 줄인 현재 기본값 |
 | slime-main-v2-ai | 5단계 ×2프레임 (본체) | ⏸️ 대체됨 — v3 본체가 기본값 |
@@ -111,7 +114,7 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | ★★ | 클릭 이펙트 (장갑 팝) | 스프라이트 시트 원샷 + 숫자 보상 | 192² 3프레임 | ✅ 연결 완료 (slime-clickfx-ai) |
 | ★ | 지면 텍스처 (진화 단계별 5종) | 글로우 그라디언트 | 412×80 타일 | 대기 |
 | ★ | 트로피 선반 프레임 | 반투명 스트립 | 412×40 타일 | 대기 |
-| ★ | 도전 런 아이콘 4종 | CSS 픽셀 폴백 | 256² ×4 | 대기 — silence/mono/starlit/sprint |
+| ★ | 도전 런 아이콘 4종 | 스프라이트 시트 + CSS 픽셀 폴백 | 256² ×4 | ✅ 연결 완료 (slime-challenges-ai) |
 
 ## 캔버스 직접 렌더
 

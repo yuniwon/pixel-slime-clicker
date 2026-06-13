@@ -514,7 +514,7 @@
   #slime-wrap:focus-visible { filter: drop-shadow(0 0 8px var(--gold)); }
 
   #slime-canvas {
-    width: clamp(250px, 17vw, 420px);
+    width: clamp(280px, 19vw, 420px);
     height: auto;
     aspect-ratio: 288 / 306;
     image-rendering: pixelated;
@@ -535,8 +535,8 @@
   }
 
   #slime-shadow {
-    width: clamp(175px, 11.8vw, 290px);
-    height: clamp(22px, 1.5vw, 38px);
+    width: clamp(196px, 13.2vw, 290px);
+    height: clamp(24px, 1.6vw, 38px);
     background: #00000055;
     border-radius: 50%;
     margin: -18px auto 0;
@@ -545,20 +545,24 @@
 
   /* ── 말풍선 ── */
   #speech-bubble {
+    --bubble-bg: #241640e6;
+    --bubble-fg: var(--text);
+    --bubble-border: #8a6d1f;
     position: absolute;
     top: 18px; left: calc(100% + 10px);
     transform: scale(0);
     transform-origin: left center;
-    background: var(--text);
-    color: #2d1b4e;
+    background: var(--bubble-bg);
+    color: var(--bubble-fg);
     font-size: 11px;
     line-height: 1.35;
     padding: 6px 10px;
-    border: 2px solid #2d1b4e;
-    box-shadow: 2px 2px 0 #00000055;
+    border: 2px solid var(--bubble-border);
+    box-shadow: 2px 2px 0 #00000066, inset 0 0 0 1px #ffffff14;
     max-width: 220px;
     width: max-content;
     text-align: center;
+    text-shadow: 1px 1px 0 #00000088;
     z-index: 10;
     transition: transform .2s ease;
     pointer-events: none;
@@ -570,7 +574,34 @@
     left: -10px; top: 50%;
     margin-top: -5px;
     border: 5px solid transparent;
-    border-right-color: #2d1b4e;
+    border-right-color: var(--bubble-border);
+  }
+  #speech-bubble.bubble-left {
+    left: auto;
+    right: calc(100% + 10px);
+    transform-origin: right center;
+  }
+  #speech-bubble.bubble-left::after {
+    left: auto;
+    right: -10px;
+    border-right-color: transparent;
+    border-left-color: var(--bubble-border);
+  }
+  #speech-bubble.bubble-top {
+    left: 50%;
+    top: -12px;
+    right: auto;
+    transform: translateX(-50%) scale(0);
+    transform-origin: center bottom;
+  }
+  #speech-bubble.bubble-top.show { transform: translateX(-50%) scale(1); }
+  #speech-bubble.bubble-top::after {
+    left: 50%;
+    top: auto;
+    bottom: -10px;
+    margin: 0 0 0 -5px;
+    border-right-color: transparent;
+    border-top-color: var(--bubble-border);
   }
 
   /* ── 친구 시각화: 행동 기반 주민 시스템 ── */
@@ -585,6 +616,24 @@
     position: absolute;
     filter: drop-shadow(2px 2px 0 #00000044);
     animation: friend-pop-in .3s ease-out;
+  }
+  .friend.zone-ground::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -3px;
+    width: 72%;
+    height: 10px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse, #00000059 0%, transparent 68%);
+    z-index: -1;
+  }
+  .friend.zone-sky,
+  .friend.zone-air {
+    filter: drop-shadow(0 0 8px #b48aff77);
+  }
+  .friend[data-id="turtle"] {
+    filter: saturate(1.16) drop-shadow(2px 2px 0 #00000077);
   }
   @keyframes friend-pop-in {
     from { transform: scale(.2); opacity: 0; }
@@ -651,10 +700,10 @@
   }
   .bv-cross { animation-name: bv-cross; animation-duration: 46s; animation-timing-function: linear; }
   @keyframes bv-cross {
-    0% { transform: translateX(calc(-1 * min(34vw, 300px))) scaleX(1); }
-    49% { transform: translateX(min(34vw, 300px)) scaleX(1); }
-    51% { transform: translateX(min(34vw, 300px)) scaleX(-1); }
-    100% { transform: translateX(calc(-1 * min(34vw, 300px))) scaleX(-1); }
+    0% { transform: translateX(calc(-1 * min(9vw, 96px))) scaleX(1); }
+    49% { transform: translateX(min(9vw, 96px)) scaleX(1); }
+    51% { transform: translateX(min(9vw, 96px)) scaleX(-1); }
+    100% { transform: translateX(calc(-1 * min(9vw, 96px))) scaleX(-1); }
   }
   .bv-orbit { animation-name: bv-orbit; animation-duration: 52s; animation-timing-function: linear; }
   @keyframes bv-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -743,6 +792,58 @@
       calc(var(--mf-size, 48px) * -.66) calc(var(--mf-size, 48px) * .02) 0 calc(var(--mf-size, 48px) * -.08) #8ac56a,
       calc(var(--mf-size, 48px) * -.50) calc(var(--mf-size, 48px) * .28) 0 calc(var(--mf-size, 48px) * -.08) #ffeec4,
       calc(var(--mf-size, 48px) * -.22) calc(var(--mf-size, 48px) * .30) 0 calc(var(--mf-size, 48px) * -.09) #ffeec4;
+  }
+  .locked-friend-icon {
+    width: 52px;
+    height: 52px;
+    display: inline-block;
+    position: relative;
+    image-rendering: pixelated;
+    border-radius: 7px;
+    background:
+      radial-gradient(circle at 50% 40%, #30204f 0 30%, transparent 31%),
+      linear-gradient(180deg, #24183df2 0%, #130d27f2 100%);
+    border: 2px solid #5d3c83;
+    box-shadow:
+      inset 0 0 0 2px #ffffff10,
+      inset 0 -6px 0 #0b0719a8,
+      2px 2px 0 #00000055;
+    overflow: hidden;
+    vertical-align: middle;
+  }
+  .locked-friend-icon::before {
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 11px;
+    width: 26px;
+    height: 29px;
+    background:
+      radial-gradient(circle at 36% 42%, #0b0719 0 8%, transparent 9%),
+      radial-gradient(circle at 64% 42%, #0b0719 0 8%, transparent 9%),
+      linear-gradient(180deg, #b49ad9 0%, #7656a8 100%);
+    border: 2px solid #3e2863;
+    border-radius: 48% 48% 42% 42%;
+    box-shadow:
+      -5px 4px 0 -2px #7656a8,
+      5px 4px 0 -2px #7656a8,
+      0 7px 0 -2px #4e3475;
+  }
+  .locked-friend-icon::after {
+    content: '';
+    position: absolute;
+    right: 7px;
+    top: 7px;
+    width: 8px;
+    height: 8px;
+    background: #ffd75e;
+    box-shadow:
+      -4px 4px 0 -2px #fff3a8,
+      0 0 0 2px #8c5d18,
+      -28px 30px 0 -3px #7a5aa8,
+      -21px 32px 0 -3px #7a5aa8,
+      -13px 30px 0 -3px #7a5aa8;
+    transform: rotate(45deg);
   }
   .missing-perk-icon {
     --mp-size: 60px;
@@ -1058,14 +1159,17 @@
     z-index: 61;
     display: none;
     image-rendering: pixelated;
-    filter: drop-shadow(0 4px 10px #00000088);
+    filter: drop-shadow(0 0 10px #7fc4ff66) drop-shadow(0 0 16px #b48aff44);
   }
   #raincloud.drift { animation: cloud-bob 2.4s ease-in-out infinite; }
   @keyframes cloud-bob {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }
   }
-  #raincloud.challenge { animation: cloud-shake .35s ease-in-out infinite; }
+  #raincloud.challenge {
+    animation: cloud-shake .35s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px #7fc4ffaa) drop-shadow(0 0 20px #ffd75e55);
+  }
   @keyframes cloud-shake {
     0%, 100% { transform: rotate(-2deg); }
     50% { transform: rotate(2deg); }
@@ -1078,11 +1182,21 @@
     transform: translateX(-50%);
     font-size: 11px;
     color: var(--gold);
-    background: #000000aa;
-    border: 2px solid var(--border);
+    background: linear-gradient(180deg, #2b1a49ee, #170d2dcc);
+    border: 2px solid #8a6d1f;
     padding: 3px 8px;
     white-space: nowrap;
     text-shadow: 1px 1px 0 #000;
+    box-shadow: 2px 2px 0 #00000055, 0 0 10px #b48aff44;
+  }
+  #cloud-hint::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #8a6d1f;
   }
   #cloud-bar-outer {
     position: absolute;
@@ -1132,11 +1246,21 @@
     transform: translateX(-50%);
     font-size: 11px;
     color: var(--gold);
-    background: #000000aa;
-    border: 2px solid var(--border);
+    background: linear-gradient(180deg, #2b1a49ee, #170d2dcc);
+    border: 2px solid #8a6d1f;
     padding: 3px 8px;
     white-space: nowrap;
     text-shadow: 1px 1px 0 #000;
+    box-shadow: 2px 2px 0 #00000055, 0 0 10px #b48aff44;
+  }
+  #starlet-hint::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #8a6d1f;
   }
   #starlet.hint-left #starlet-hint {
     left: 0;
@@ -1161,7 +1285,9 @@
   /* ── 상점 패널 ── */
   #shop {
     width: 360px;
-    background: var(--panel);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0) 90px),
+      var(--panel);
     border-left: 4px solid var(--border);
     display: flex;
     flex-direction: column;
@@ -1169,11 +1295,27 @@
   }
 
   #shop-header {
+    position: relative;
     padding: 14px 16px 10px;
-    border-bottom: 3px solid var(--border);
+    border-bottom: 2px solid #4d2d7f;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background:
+      linear-gradient(180deg, #2e1d4cf2, #21143bf2);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.1),
+      0 2px 0 rgba(0,0,0,.18);
+  }
+  #shop-header::after {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 2px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,215,92,.35), transparent);
+    pointer-events: none;
   }
   #shop-header h2 { font-size: 16px; color: var(--gold); letter-spacing: 1px; }
   #discount-badge {
@@ -1187,51 +1329,183 @@
   }
 
   .icon-btn {
-    background: var(--panel-light);
-    border: 2px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 45%),
+      #21143c;
+    border: 2px solid #5a3a83;
+    border-radius: 5px;
     color: var(--text);
     font-family: inherit;
     font-size: 14px;
     padding: 4px 10px;
     cursor: pointer;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.1),
+      0 2px 0 rgba(0,0,0,.16);
   }
   .icon-btn:hover { background: var(--border); }
   #reset-btn.holding { background: #8a2b2b; }
 
   /* ── 재화 스트립: 별가루·영혼·결정이 항상 한곳에 (해금된 것만) ── */
-  #res-strip { display: flex; gap: 6px; padding: 0 10px 6px; }
+  #res-strip {
+    display: flex;
+    gap: 7px;
+    padding: 0 10px 7px;
+  }
   #res-strip:not(:has(.res-chip:not([hidden]))) { display: none; }
   .res-chip {
-    background: var(--panel-light);
-    border: 2px solid var(--border);
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 42%),
+      radial-gradient(circle at 18% 12%, rgba(255,215,92,.18), transparent 34%),
+      #1d1136;
+    border: 2px solid #4d2d7f;
+    border-radius: 7px;
     color: var(--text);
     font-family: inherit;
-    font-size: 11px;
-    padding: 3px 9px;
-    min-height: 26px;
+    font-size: 12px;
+    padding: 3px 7px 3px 5px;
+    min-height: 30px;
     cursor: pointer;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.12),
+      inset 0 -2px 0 rgba(0,0,0,.24),
+      0 2px 0 rgba(0,0,0,.18);
+    transition: transform .12s ease, border-color .12s ease, background .12s ease;
   }
-  .res-chip b { color: var(--gold); }
+  .res-chip::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    width: 22px;
+    height: 22px;
+    transform: translateY(-50%);
+    border: 1px solid #ffffff18;
+    border-radius: 5px;
+    background:
+      radial-gradient(circle at 45% 28%, rgba(255,255,255,.18), transparent 45%),
+      #120c2488;
+    box-shadow:
+      inset 0 1px 0 #ffffff12,
+      1px 1px 0 #00000044;
+    pointer-events: none;
+  }
+  .res-chip::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,.06);
+    pointer-events: none;
+  }
+  .res-chip:hover {
+    transform: translateY(-1px);
+    border-color: #ffd95c;
+  }
+  .res-chip:active { transform: translateY(1px); }
+  .res-chip b {
+    position: relative;
+    z-index: 1;
+    min-width: 1.8ch;
+    padding: 2px 5px;
+    border: 1px solid #ffd75e44;
+    border-radius: 4px;
+    background: #120c2477;
+    color: var(--gold);
+    line-height: 1;
+    text-align: right;
+    box-shadow: inset 0 1px 0 #ffffff12;
+    text-shadow: 1px 1px 0 #000;
+  }
+  .res-chip .res-sprite {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    filter: drop-shadow(1px 2px 0 #00000066);
+  }
+  .res-chip .res-fallback-icon {
+    position: relative;
+    z-index: 1;
+    font-size: 17px;
+    line-height: 1;
+  }
+  #res-soul { border-color: #6a4d96; }
+  #res-crystal { border-color: #327d91; }
 
-  #shop-tabs { display: flex; border-bottom: 3px solid var(--border); }
+  #shop-tabs {
+    display: flex;
+    position: relative;
+    border-top: 1px solid #ffffff10;
+    border-bottom: 3px solid #4d2d7f;
+    background: #160d29;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.06),
+      0 3px 0 rgba(0,0,0,.14);
+  }
   .tab {
     flex: 1;
     position: relative;
     text-align: center;
-    padding: 10px 0;
+    padding: 8px 4px 7px;
     font-size: 12px;
     cursor: pointer;
     color: var(--text-dim);
-    background: var(--panel);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 46%),
+      linear-gradient(180deg, #2a1a49, #1d1234);
+    border-right: 1px solid #ffffff10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 52px;
   }
-  .tab.active { color: var(--gold); background: var(--panel-light); }
+  .tab.active {
+    color: var(--gold);
+    background:
+      radial-gradient(circle at 50% 0, rgba(255,215,92,.18), transparent 60%),
+      linear-gradient(180deg, #493067, #2d1b4e);
+    box-shadow:
+      inset 0 2px 0 #ffd75e75,
+      inset 0 -2px 0 #00000033,
+      0 0 12px #ffd75e18;
+  }
   .tab[hidden] { display: none; }
+  .tab .tab-icon {
+    display: block;
+    font-size: 18px;
+    line-height: 1;
+    filter: drop-shadow(1px 1px 0 #00000066);
+  }
+  .tab .tab-sprite {
+    display: block;
+    image-rendering: auto;
+    transform: scale(.72);
+    transform-origin: center;
+    margin: -6px 0 -5px;
+    filter: saturate(1.22) drop-shadow(1px 1px 0 #00000066);
+  }
+  .tab.active .tab-sprite {
+    filter: saturate(1.35) drop-shadow(0 0 5px #ffd75e66) drop-shadow(1px 1px 0 #00000066);
+  }
+  .tab .tab-label {
+    display: block;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
   .tab.fresh { animation: tab-fresh 1.2s ease-in-out 3; }
   @keyframes tab-fresh { 0%, 100% { color: var(--text-dim); } 50% { color: var(--gold); } }
   .tab-badge {
     position: absolute;
-    top: -6px;
-    right: 5px;
+    top: 3px;
+    right: 4px;
     font-size: 9px;
     color: var(--green);
     min-width: 13px;
@@ -1278,27 +1552,65 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    background: var(--panel-light);
-    border: 3px solid var(--border);
+    background:
+      linear-gradient(180deg, #342252f2 0%, #241640f2 100%);
+    border: 2px solid #5a3a83;
+    border-radius: 7px;
     padding: 10px 12px;
     margin-bottom: 8px;
     cursor: pointer;
     transition: transform .06s;
     position: relative;
+    box-shadow:
+      inset 0 1px 0 #ffffff14,
+      0 2px 0 #12091fcc;
   }
-  .shop-item:hover:not(.locked) { border-color: var(--gold); }
+  .shop-item:hover:not(.locked) { border-color: var(--gold); box-shadow: inset 0 1px 0 #ffffff18, 0 0 0 1px #ffd75e22; }
   .shop-item:active:not(.locked) { transform: scale(.98); }
-  .shop-item.locked { opacity: .45; cursor: not-allowed; }
+  .shop-item.locked {
+    cursor: not-allowed;
+    background:
+      linear-gradient(180deg, #2f214cf0 0%, #21143af0 100%);
+    border-color: #4f3475;
+    box-shadow:
+      inset 0 1px 0 #ffffff10,
+      0 2px 0 #12091fa8;
+  }
+  .shop-item.locked .shop-icon {
+    border-color: #4f3475;
+    background: #120c248c;
+    filter: drop-shadow(2px 2px 0 #00000040) saturate(.72);
+  }
+  .shop-item.locked .shop-name { color: #d2c3ef; }
+  .shop-item.locked .shop-desc,
+  .shop-item.locked .shop-payback,
+  .shop-item.locked .shop-syn { color: #8f7db4; }
+  .shop-item.done,
+  .shop-item.maxed,
+  .shop-item.equipped {
+    border-color: #6abf80;
+    background:
+      linear-gradient(180deg, #2f2f55f2 0%, #1f2444f2 100%);
+  }
 
   .shop-icon {
     font-size: 30px;
     width: 72px;
     min-width: 72px;
+    min-height: 58px;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
-    filter: drop-shadow(2px 2px 0 #00000044);
+    background:
+      radial-gradient(circle at 50% 18%, rgba(255,255,255,.08), transparent 58%),
+      #160d29aa;
+    border: 2px solid #5a3a83;
+    border-radius: 6px;
+    box-shadow:
+      inset 0 1px 0 #ffffff16,
+      inset 0 -1px 0 #00000036,
+      2px 2px 0 #00000038;
   }
   .challenge-pixel-icon {
     --icon-a: #ffeec4;
@@ -1442,24 +1754,71 @@
     transform: rotate(42deg);
     box-shadow: -7px 9px 0 -1px var(--icon-c);
   }
-  .shop-info { flex: 1; min-width: 0; }
-  .shop-name { font-size: 14px; font-weight: bold; }
+  .shop-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .shop-name { font-size: 14px; font-weight: bold; line-height: 1.25; }
   .shop-desc { font-size: 11px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; }
-  .shop-cost { font-size: 13px; color: var(--gold); margin-top: 4px; }
+  .shop-payback,
+  .shop-syn {
+    width: fit-content;
+    max-width: 100%;
+    padding-left: 7px;
+    border-left: 2px solid #5a3a8377;
+  }
+  .shop-payback { color: #cfc4ef; }
+  .shop-cost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 22px;
+    padding: 3px 8px;
+    border: 1px solid #ffd75e55;
+    border-radius: 5px;
+    background: #120c2488;
+    font-size: 13px;
+    color: var(--gold);
+    margin-top: 6px;
+    line-height: 1.2;
+    box-shadow: inset 0 1px 0 #ffffff18;
+  }
+  .shop-item.locked .shop-cost {
+    border-color: #5b4a6c88;
+    background: #120c2444;
+    color: #9384a8;
+  }
+  .shop-item.done .shop-cost,
+  .shop-item.maxed .shop-cost,
+  .shop-item.equipped .shop-cost {
+    border-color: #64e59077;
+    background: #14352099;
+    color: var(--green);
+  }
   .shop-count {
     position: absolute;
     top: 10px;
     right: 10px;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     color: var(--green);
-    min-width: 28px;
-    padding: 2px 6px;
+    min-width: 24px;
+    padding: 3px 7px;
     text-align: center;
     line-height: 1;
-    background: #22163fdd;
-    border: 2px solid #3e2a68;
-    box-shadow: 2px 2px 0 #00000044;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 48%),
+      #19102edd;
+    border: 1px solid #64e59077;
+    border-radius: 4px;
+    box-shadow:
+      inset 0 1px 0 #ffffff18,
+      1px 1px 0 #00000044;
     text-shadow: 1px 1px 0 #000;
     pointer-events: none;
   }
@@ -1483,13 +1842,23 @@
     text-align: center;
     font-size: 12px;
     color: var(--soul);
-    padding: 4px 0 10px;
-    line-height: 1.8;
+    padding: 9px 12px 10px;
+    margin: 4px 0 10px;
+    line-height: 1.7;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 44%),
+      #21143acc;
+    border: 2px solid #6b4a96;
+    border-radius: 7px;
+    box-shadow:
+      inset 0 1px 0 #ffffff14,
+      0 2px 0 #12091f99;
   }
   .prestige-btn { border-color: var(--soul); }
   .prestige-btn .shop-name { color: var(--soul); }
   .prestige-btn:hover:not(.locked) { border-color: var(--text); }
   .perk-item .shop-cost { color: var(--soul); }
+  .perk-item:not(.locked) .shop-cost { border-color: #b48aff77; background: #21143a99; }
   .perk-item.maxed { border-color: var(--soul); opacity: .8; cursor: default; }
 
   #stats-bar {
@@ -1533,22 +1902,44 @@
     from { transform: translateY(0); }
     to { transform: translateY(-5px); }
   }
-  .decor.center { transform: translateX(-50%); animation: none; }
+  .decor.zone-sky,
+  .decor.zone-sky-back {
+    filter: drop-shadow(0 0 8px #b48aff77);
+  }
+  .decor.center { animation: none; }
   .cosmic-seed-tree {
     filter: drop-shadow(0 0 8px #fff8d6) drop-shadow(0 0 18px #b48affcc);
     animation: cosmic-tree-breathe 3.8s ease-in-out infinite alternate;
   }
   .cosmic-seed-tree img { width: 56px; height: 64px; image-rendering: pixelated; }
   @keyframes cosmic-tree-breathe {
-    from { opacity: .86; transform: translateX(-50%) translateY(-1px) scale(.98); }
-    to { opacity: 1; transform: translateX(-50%) translateY(3px) scale(1.04); }
+    from { opacity: .78; transform: translateY(-1px) scale(.94); }
+    to { opacity: .92; transform: translateY(3px) scale(1.00); }
   }
 
   .room-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 26px;
+    padding: 5px 9px;
     font-size: 12px;
     color: var(--gold);
-    margin: 14px 4px 8px;
+    margin: 14px 2px 8px;
     letter-spacing: 1px;
+    line-height: 1.25;
+    background: linear-gradient(90deg, #271742d9 0%, #1a102e88 68%, transparent 100%);
+    border-left: 3px solid var(--gold);
+    border-top: 1px solid #ffd75e33;
+    border-bottom: 1px solid #5a3a8355;
+    text-shadow: 1px 1px 0 #00000088;
+  }
+  .room-section-title::after {
+    content: '';
+    flex: 1;
+    min-width: 18px;
+    height: 1px;
+    background: linear-gradient(90deg, #ffd75e55, transparent);
   }
   .codex-grid {
     display: grid;
@@ -1558,20 +1949,36 @@
   }
   .codex-grid.cols4 { grid-template-columns: repeat(4, 1fr); }
   .codex-cell {
-    background: var(--panel-light);
-    border: 2px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 46%),
+      #21143acc;
+    border: 2px solid #5a3a83;
+    border-radius: 6px;
     text-align: center;
     padding: 8px 2px 6px;
     font-size: 10px;
     color: var(--text-dim);
     line-height: 1.4;
     min-height: 58px;
+    box-shadow:
+      inset 0 1px 0 #ffffff12,
+      0 2px 0 #12091f88;
   }
-  .codex-cell.seen { border-color: var(--gold); color: var(--text); }
+  .codex-cell.seen {
+    border-color: #ffd75e99;
+    color: var(--text);
+    background:
+      linear-gradient(180deg, rgba(255,215,94,.09), rgba(255,255,255,0) 48%),
+      #251744dd;
+  }
   .codex-swatch {
     width: 22px; height: 22px;
     margin: 0 auto 4px;
-    border: 2px solid #00000055;
+    border: 2px solid #00000066;
+    border-radius: 4px;
+    box-shadow:
+      inset 0 1px 0 #ffffff22,
+      1px 1px 0 #00000044;
   }
   .trait-cell {
     min-height: 92px;
@@ -1591,36 +1998,86 @@
   .trait-cell.seen .trait-desc { color: var(--text); opacity: .8; }
   .codex-cell .sprite-icon { margin-bottom: 2px; }
   .story-entry {
-    background: var(--panel-light);
-    border: 3px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 44%),
+      #21143acc;
+    border: 2px solid #5a3a83;
     border-left-color: var(--gold);
+    border-radius: 7px;
     padding: 10px 12px;
     margin-bottom: 8px;
     font-size: 11px;
     line-height: 1.7;
     color: var(--text);
+    box-shadow:
+      inset 0 1px 0 #ffffff14,
+      0 2px 0 #12091f99;
   }
   .story-entry .story-title { color: var(--gold); font-weight: bold; margin-bottom: 4px; font-size: 12px; }
-  .story-entry.locked { opacity: .4; border-left-color: var(--border); }
+  .story-entry.locked {
+    opacity: .68;
+    color: #9a8ab8;
+    border-color: #4f3475;
+    border-left-color: #6b4a96;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0) 44%),
+      #1b102fcc;
+  }
   .story-entry.cosmic-status.locked { opacity: .78; }
 
   /* ── 소원 스트립: 지금 목표와 진행률이 항상 무대에 보인다 (선반 대체) ── */
   #wish-strip {
     position: absolute;
-    bottom: 0; left: 0; right: 0;
+    bottom: clamp(10px, 1.1vw, 18px);
+    left: 50%;
+    width: min(560px, calc(100% - 56px));
     z-index: 3;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: clamp(8px, 0.7vw, 18px);
-    padding: clamp(6px, 0.5vw, 13px) 14px;
-    background: #00000033;
-    border-top: 2px solid #ffffff0d;
+    gap: clamp(6px, 0.6vw, 14px);
+    padding: clamp(5px, 0.42vw, 10px) 12px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 48%),
+      radial-gradient(circle at 12% 50%, rgba(255,215,92,.2), transparent 36%),
+      rgba(29, 17, 54, .9);
+    border: 2px solid #ffd75e;
+    border-radius: 5px;
     cursor: pointer;
     font-size: clamp(11px, 0.78vw, 22px);
     color: var(--text-dim);
+    transform: translateX(-50%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.14),
+      inset 0 -2px 0 rgba(0,0,0,.28),
+      0 4px 0 rgba(0,0,0,.18),
+      0 0 22px rgba(255,215,92,.12);
+    backdrop-filter: blur(2px);
+  }
+  #wish-strip::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 3px;
+    pointer-events: none;
+  }
+  #wish-strip .ws-icon {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    filter: drop-shadow(1px 2px 0 #00000066);
+  }
+  #wish-strip .ws-label {
+    position: relative;
+    z-index: 1;
+    color: var(--gold);
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
   }
   #wish-strip .ws-text {
+    position: relative;
+    z-index: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1628,10 +2085,13 @@
     color: var(--text);
   }
   #wish-strip .ws-bar-outer {
-    width: clamp(70px, 7vw, 180px);
+    position: relative;
+    z-index: 1;
+    width: clamp(82px, 8vw, 176px);
     height: clamp(7px, 0.55vw, 13px);
-    background: #00000066;
-    border: 2px solid var(--border);
+    background: #12091f;
+    border: 2px solid #4d2d7f;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
     display: inline-block;
   }
   #wish-strip .ws-bar {
@@ -1640,15 +2100,34 @@
     background: linear-gradient(90deg, var(--pink), var(--gold));
     transition: width .25s ease;
   }
-  #wish-strip .ws-count { color: var(--gold); white-space: nowrap; }
-  #wish-strip.golden { border-top-color: #ffd75e44; }
+  #wish-strip .ws-count {
+    position: relative;
+    z-index: 1;
+    color: var(--gold);
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+  }
+  #wish-strip.golden {
+    border-color: #ffe279;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.18),
+      inset 0 -2px 0 rgba(0,0,0,.28),
+      0 4px 0 rgba(0,0,0,.18),
+      0 0 26px rgba(255,215,92,.2);
+  }
 
   /* ── 슬라임 앨범 ── */
   .album-box {
-    background: var(--panel-light);
-    border: 3px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 44%),
+      #21143acc;
+    border: 2px solid #5a3a83;
+    border-radius: 7px;
     padding: 10px 14px;
     margin-bottom: 8px;
+    box-shadow:
+      inset 0 1px 0 #ffffff14,
+      0 2px 0 #12091f99;
   }
   .album-row {
     display: flex;
@@ -1656,7 +2135,7 @@
     font-size: 11px;
     color: var(--text-dim);
     padding: 4px 0;
-    border-bottom: 1px solid #00000033;
+    border-bottom: 1px solid #5a3a8355;
   }
   .album-row:last-child { border-bottom: none; }
   .album-row b { color: var(--gold); }
@@ -1672,20 +2151,71 @@
     color: var(--gold);
     padding: 6px 0 10px;
   }
-  .wish-item { cursor: default; }
+  .wish-item {
+    cursor: default;
+    align-items: stretch;
+    border-color: #6b4a96;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,0) 40%),
+      linear-gradient(180deg, #352252f2 0%, #22143df2 100%);
+  }
   .wish-item.done { border-color: var(--green); }
+  .wish-item .shop-info {
+    display: flex;
+    min-height: 58px;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .wish-item .shop-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #fff2b5;
+    line-height: 1.22;
+  }
+  .wish-chip {
+    flex: 0 0 auto;
+    padding: 2px 6px;
+    border: 1px solid #ffd75e99;
+    border-radius: 4px;
+    background: #12091f99;
+    color: var(--gold);
+    font-size: 10px;
+    line-height: 1;
+    text-shadow: 1px 1px 0 #000;
+  }
   .wish-bar-outer {
-    height: 8px;
-    background: #00000066;
-    border: 2px solid var(--border);
-    margin-top: 6px;
+    height: 10px;
+    background: #12091f;
+    border: 2px solid #4d2d7f;
+    margin-top: 7px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
   }
   .wish-bar {
     height: 100%; width: 0%;
     background: linear-gradient(90deg, var(--pink), var(--gold));
     transition: width .25s ease;
   }
-  .wish-reward { font-size: 11px; color: var(--gold); margin-top: 4px; }
+  .wish-reward {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--gold);
+    margin-top: 5px;
+    padding-left: 7px;
+    border-left: 2px solid #5a3a8377;
+  }
+  .wish-progress { color: #fff2b5; }
+  .wish-reward-badge {
+    flex: 0 0 auto;
+    padding: 2px 6px;
+    border: 1px solid #ffd75e66;
+    border-radius: 4px;
+    background: #00000030;
+    white-space: nowrap;
+  }
   .cosmetic-item.equipped { border-color: var(--gold); }
   .cosmetic-item.equipped .shop-name::after { content: ' (장착 중)'; color: var(--green); font-size: 11px; }
 
@@ -1708,10 +2238,8 @@
   }
 
   /* ── 말풍선 테마 ── */
-  #speech-bubble.bubble-pink { background: #ffd9ec; border-color: #a8336e; color: #5e1740; }
-  #speech-bubble.bubble-pink::after { border-right-color: #a8336e; }
-  #speech-bubble.bubble-gold { background: #ffeec4; border-color: #8a6d1f; color: #5c4312; }
-  #speech-bubble.bubble-gold::after { border-right-color: #8a6d1f; }
+  #speech-bubble.bubble-pink { --bubble-border: #ff8ac4; --bubble-bg: #3a1836ee; --bubble-fg: #ffd9ec; }
+  #speech-bubble.bubble-gold { --bubble-border: #ffd75e; --bubble-bg: #3a2a12ee; --bubble-fg: #ffeec4; }
 
   /* ── 주스: 코인 팝 / 구매 플래시 / 환생 플래시 ── */
   #coin-display.pop { animation: coinpop .15s ease-out; }
@@ -1834,35 +2362,65 @@
   /* ── 젤리 결정: 화단 + 먹이기 모달 ── */
   #crystal-bed {
     position: absolute;
-    left: 14px;
+    left: clamp(26px, 12vw, 150px);
     bottom: clamp(46px, 4.2vw, 100px);  /* 기록의 선반 위 */
     z-index: 4;
     cursor: pointer;
     text-align: center;
     padding: 6px;
   }
+  #crystal-bed::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    width: 68%;
+    height: 10px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse, #00000059 0%, transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+  }
   #crystal-visual {
     display: block;
     font-size: clamp(26px, 2vw, 44px);
-    filter: drop-shadow(0 2px 4px #00000088);
+    filter: drop-shadow(2px 2px 0 #00000055);
     transition: filter .4s;
   }
   #crystal-bed.ripe #crystal-visual {
     animation: crystal-pulse 1.6s ease-in-out infinite;
-    filter: drop-shadow(0 0 10px #b48aff) drop-shadow(0 2px 4px #00000088);
+    filter: drop-shadow(0 0 9px #b48affaa) drop-shadow(2px 2px 0 #00000055);
   }
   @keyframes crystal-pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.12); }
   }
   #crystal-label {
-    display: block;
-    font-size: clamp(9px, 0.62vw, 16px);
+    display: inline-block;
+    min-width: 28px;
+    padding: 1px 5px 2px;
+    font-size: clamp(8px, 0.52vw, 11px);
     color: var(--text-dim);
+    line-height: 1.15;
+    text-align: center;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0) 58%),
+      #150f2dcc;
+    border: 1px solid #8f6fd466;
+    border-radius: 999px;
+    box-shadow:
+      inset 0 1px 0 #ffffff14,
+      0 2px 0 #09041288;
     text-shadow: 1px 1px 0 #000c;
-    margin-top: 2px;
+    margin-top: 1px;
   }
-  #crystal-bed.ripe #crystal-label { color: var(--gold); }
+  #crystal-bed.ripe #crystal-label {
+    color: var(--gold);
+    border-color: #ffd75e88;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 58%),
+      #2a1f18d9;
+  }
   #crystal-overlay {
     position: fixed;
     inset: 0;
@@ -1905,7 +2463,17 @@
   }
   .crystal-row button:disabled { border-color: var(--border); color: var(--text-dim); cursor: default; }
   /* 황금 소원 카드 */
-  .wish-item.golden { border-color: var(--gold); background: #ffd75e14; }
+  .wish-item.golden {
+    border-color: var(--gold);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,0) 40%),
+      radial-gradient(circle at 14% 16%, rgba(255,215,92,.22), transparent 36%),
+      linear-gradient(180deg, #402a58f2 0%, #26163cf2 100%);
+    box-shadow:
+      inset 0 1px 0 #ffffff18,
+      0 2px 0 #12091fcc,
+      0 0 18px #ffd75e1f;
+  }
   .wish-item.golden.done { border-color: var(--green); }
   #crystal-banner { border-color: #b48aff; cursor: pointer; }
   #settings-modal {
@@ -2117,6 +2685,8 @@
     #challenge-badge { font-size: 10px; padding: 2px 8px; margin-bottom: 4px; }
     .friend { font-size: 20px; }
     #speech-bubble { top: 18px; left: calc(100% + 6px); font-size: 10px; max-width: 128px; padding: 5px 8px; }
+    #speech-bubble.bubble-left { left: auto; right: calc(100% + 6px); }
+    #speech-bubble.bubble-top { left: 50%; top: -10px; max-width: min(180px, calc(100vw - 32px)); }
     /* 상점: 나머지 전부 + iOS 홈바 안전영역 */
     #shop {
       width: 100%;
@@ -2126,12 +2696,20 @@
       min-height: 0;
       padding-bottom: env(safe-area-inset-bottom);
     }
-    #shop-header { padding: 6px 12px 4px; }
+    #shop-header {
+      padding: 6px 12px 5px;
+      border-bottom-width: 2px;
+    }
     #shop-header h2 { font-size: 12px; }
-    .icon-btn { font-size: 11px; padding: 2px 7px; min-height: 30px; min-width: 34px; }  /* 터치 타겟 */
-    .tab { padding: 9px 0; font-size: 11px; }
-    #res-strip { padding: 0 8px 4px; }
-    .res-chip { font-size: 10px; padding: 2px 7px; min-height: 24px; }
+    .icon-btn { font-size: 11px; padding: 2px 7px; min-height: 30px; min-width: 34px; border-radius: 4px; }  /* 터치 타겟 */
+    #shop-tabs { border-bottom-width: 2px; }
+    .tab { padding: 6px 2px 5px; font-size: 10px; min-height: 48px; gap: 2px; }
+    .tab .tab-icon { font-size: 17px; }
+    #res-strip { padding: 0 8px 5px; gap: 5px; }
+    .res-chip { font-size: 10px; padding: 2px 5px 2px 4px; min-height: 28px; gap: 4px; }
+    .res-chip::before { left: 3px; width: 20px; height: 20px; }
+    .res-chip b { padding: 2px 4px; }
+    .res-chip .res-sprite { transform: scale(.9); transform-origin: center; margin: -1px; }
     /* 정보 밀도: 박스·아이콘·여백을 줄이고 폰트는 지킨다 —
        전체 축소(zoom)가 아니라 비율 재조정 */
     #shop-list { -webkit-overflow-scrolling: touch; padding: 6px 8px; }
@@ -2140,8 +2718,29 @@
     .shop-icon { width: 40px; min-width: 40px; font-size: 24px; }
     /* scale은 시각만 줄인다 — 음수 마진으로 레이아웃 footprint도 40px로 */
     .shop-icon .sprite-icon { transform: scale(.62); transform-origin: center; margin: -12px; }
+    .shop-icon .challenge-sprite { transform: scale(.78); margin: -6px; }
     .shop-icon .challenge-pixel-icon { transform: scale(.78); transform-origin: center; }
     .shop-icon .missing-friend-icon { transform: scale(.62); transform-origin: center; margin: -12px; }
+    .shop-icon .locked-friend-icon { width: 34px; height: 34px; }
+    .shop-icon .locked-friend-icon::before {
+      left: 8px;
+      top: 7px;
+      width: 18px;
+      height: 19px;
+      border-width: 2px;
+    }
+    .shop-icon .locked-friend-icon::after {
+      right: 4px;
+      top: 4px;
+      width: 6px;
+      height: 6px;
+      box-shadow:
+        -3px 3px 0 -2px #fff3a8,
+        0 0 0 2px #8c5d18,
+        -18px 20px 0 -3px #7a5aa8,
+        -13px 22px 0 -3px #7a5aa8,
+        -8px 20px 0 -3px #7a5aa8;
+    }
     .shop-icon .missing-perk-icon { transform: scale(.62); transform-origin: center; margin: -12px; }
     .shop-name { font-size: 13px; }
     .shop-desc { font-size: 10px; margin-top: 1px; line-height: 1.3; }
@@ -2158,9 +2757,13 @@
     .story-entry { padding: 7px 9px; margin-bottom: 5px; font-size: 10px; }
     .album-box { padding: 6px 10px; }
     .album-row { font-size: 10px; padding: 3px 0; }
-    .wish-bar-outer { margin-top: 4px; }
-    .wish-reward { font-size: 10px; margin-top: 2px; }
-    #ach-summary, #stardust-display, #prestige-info { font-size: 11px; padding: 3px 0 6px; }
+    .wish-item .shop-info { min-height: 48px; }
+    .wish-chip { font-size: 9px; padding: 2px 4px; }
+    .wish-bar-outer { margin-top: 4px; height: 7px; }
+    .wish-reward { font-size: 10px; margin-top: 3px; gap: 5px; }
+    .wish-reward-badge { padding: 1px 4px; }
+    #ach-summary, #stardust-display { font-size: 11px; padding: 3px 0 6px; }
+    #prestige-info { font-size: 10px; padding: 7px 9px 8px; margin: 3px 0 7px; line-height: 1.55; }
     .blessing-card { padding: 8px 10px; margin-bottom: 6px; gap: 9px; }
     .blessing-card .b-icon { font-size: 22px; }
     .blessing-card .b-icon .sprite-icon { transform: scale(.7); transform-origin: center; }
@@ -2173,20 +2776,23 @@
       column-gap: 10px;
     }
     body.stats-open #stats-bar { display: flex; }
-    /* 토스트: 모바일에선 뉴스 스트립 아래 */
+    /* 토스트: 모바일에선 상점 카드보다 가벼운 상태 칩으로 */
     #toast {
       top: auto;
       bottom: calc(56dvh + env(safe-area-inset-bottom, 0px) + 8px);
-      font-size: 10px;
-      padding: 6px 10px;
+      background: #21133de6;
+      border-color: #b8953f;
+      color: #ded6ff;
+      font-size: 9px;
+      padding: 5px 8px;
       width: max-content;
-      max-width: min(72vw, 280px);
+      max-width: min(62vw, 244px);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       line-height: 1.2;
       border-width: 2px;
-      box-shadow: 3px 3px 0 #00000066;
+      box-shadow: 2px 2px 0 #00000066;
       transform: translateX(-50%) translateY(12px);
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
@@ -2206,12 +2812,24 @@
       text-overflow: ellipsis;
     }
     #news-ticker { font-size: 11px; padding: 5px 12px; }
-    #wish-strip { padding: 4px 8px; gap: 6px; font-size: 10px; }
-    #wish-strip .ws-bar-outer { width: 56px; height: 6px; }
+    #wish-strip {
+      bottom: 8px;
+      width: min(320px, calc(100% - 28px));
+      padding: 4px 7px;
+      gap: 5px;
+      font-size: 10px;
+    }
+    #wish-strip .ws-label { display: none; }
+    #wish-strip .ws-icon { transform: scale(.88); transform-origin: center; margin: -2px; }
+    #wish-strip .ws-text { max-width: 44%; }
+    #wish-strip .ws-bar-outer { width: 58px; height: 6px; border-width: 1px; }
     /* 일일 요약은 모바일 무대에선 수직 공간이 없어 잘려 보임 — 숨김 (소원 스트립이 목표 역할) */
     #daily-summary { display: none; }
     #combo-box { margin-top: 2px; }
   }
+
+  #speech-bubble.show:not(.bubble-top) { transform: scale(1); }
+  #speech-bubble.bubble-top.show { transform: translateX(-50%) scale(1); }
 </style>
 </head>
 <body>
@@ -2292,12 +2910,12 @@
     <button class="res-chip" id="res-crystal" hidden aria-label="젤리 결정 — 먹이기 열기">💎 <b>0</b></button>
   </div>
   <div id="shop-tabs">
-    <div class="tab active" data-tab="producers" role="button">친구들</div>
-    <div class="tab" data-tab="upgrades" role="button">강화</div>
-    <div class="tab" data-tab="achievements" role="button">업적</div>
-    <div class="tab" data-tab="prestige" role="button">환생</div>
-    <div class="tab" data-tab="room" role="button">방</div>
-    <div class="tab" data-tab="wishes" role="button">소원</div>
+    <div class="tab active" data-tab="producers" role="button"><span class="tab-icon">🐤</span><span class="tab-label">친구들</span></div>
+    <div class="tab" data-tab="upgrades" role="button"><span class="tab-icon">⬆️</span><span class="tab-label">강화</span></div>
+    <div class="tab" data-tab="achievements" role="button"><span class="tab-icon">🏆</span><span class="tab-label">업적</span></div>
+    <div class="tab" data-tab="prestige" role="button"><span class="tab-icon">🍮</span><span class="tab-label">환생</span></div>
+    <div class="tab" data-tab="room" role="button"><span class="tab-icon">🏠</span><span class="tab-label">방</span></div>
+    <div class="tab" data-tab="wishes" role="button"><span class="tab-icon">⭐</span><span class="tab-label">소원</span></div>
   </div>
   <div id="buy-modes" class="on">
     <button class="mode-btn active" data-mode="1">x1</button>
@@ -2416,9 +3034,7 @@ const PRODUCERS = [
 ];
 
 const PRODUCER_SPRITE_ATLAS = 'assets/generated/sprites/slime-friends-ai/sprite-sheet-alpha.png';
-const PRODUCER_SPRITE_SHEET = { w: 1792, h: 7168 };
-// 주의: sprite-request에는 spirit(별의 정령)·turtle(시간 거북)이 있으나 현재 시트는 8종만 산출됨.
-// 다음 sprite-gen 재생성 사이클에서 두 행이 추가되면 여기에 frame_layout을 복사한다.
+const PRODUCER_SPRITE_SHEET = { w: 1792, h: 8960 };
 const PRODUCER_SPRITE_LAYOUT = {
   chick:   [{ x: 0, y: 0,    w: 896, h: 896 }, { x: 896, y: 0,    w: 896, h: 896 }],
   cat:     [{ x: 0, y: 896,  w: 896, h: 896 }, { x: 896, y: 896,  w: 896, h: 896 }],
@@ -2428,6 +3044,8 @@ const PRODUCER_SPRITE_LAYOUT = {
   dragon:  [{ x: 0, y: 4480, w: 896, h: 896 }, { x: 896, y: 4480, w: 896, h: 896 }],
   whale:   [{ x: 0, y: 5376, w: 896, h: 896 }, { x: 896, y: 5376, w: 896, h: 896 }],
   planet:  [{ x: 0, y: 6272, w: 896, h: 896 }, { x: 896, y: 6272, w: 896, h: 896 }],
+  spirit:  [{ x: 0, y: 7168, w: 896, h: 896 }, { x: 896, y: 7168, w: 896, h: 896 }],
+  turtle:  [{ x: 0, y: 8064, w: 896, h: 896 }, { x: 896, y: 8064, w: 896, h: 896 }],
 };
 
 const ITEM_SPRITE_ATLAS = 'assets/generated/sprites/slime-items-ai/sprite-sheet-alpha.png';
@@ -3186,9 +3804,20 @@ const CHALLENGES = [
 const CHALLENGE_UNLOCK_RESETS = 2;
 const SPRINT_LIMIT = 15 * 60;
 
+const CHALLENGE_SPRITE_ATLAS = 'assets/generated/sprites/slime-challenges-ai/sprite-sheet-alpha.png';
+const CHALLENGE_SPRITE_SHEET = { w: 256, h: 1024 };
+const CHALLENGE_SPRITE_LAYOUT = {
+  silence: [{ x: 0, y: 0,   w: 256, h: 256 }],
+  mono:    [{ x: 0, y: 256, w: 256, h: 256 }],
+  starlit: [{ x: 0, y: 512, w: 256, h: 256 }],
+  sprint:  [{ x: 0, y: 768, w: 256, h: 256 }],
+};
+
 function challengeIconHtml(id, fallback) {
-  if (!['silence', 'mono', 'starlit', 'sprint'].includes(id)) return fallback;
-  return `<span class="challenge-pixel-icon ${id}" aria-hidden="true"></span>`;
+  const pixelFallback = ['silence', 'mono', 'starlit', 'sprint'].includes(id)
+    ? `<span class="challenge-pixel-icon ${id}" aria-hidden="true"></span>`
+    : fallback;
+  return spriteHtml('challenges', id, pixelFallback, { size: 54, className: 'shop-sprite challenge-sprite' });
 }
 
 const SLIME_MAP = [
@@ -3456,6 +4085,11 @@ const SPRITE_ATLASES = {
     sheet: ACHIEVEMENT_SPRITE_SHEET,
     layout: ACHIEVEMENT_SPRITE_LAYOUT,
   },
+  challenges: {
+    src: CHALLENGE_SPRITE_ATLAS,
+    sheet: CHALLENGE_SPRITE_SHEET,
+    layout: CHALLENGE_SPRITE_LAYOUT,
+  },
   decor: {
     src: DECOR_SPRITE_ATLAS,
     sheet: DECOR_SPRITE_SHEET,
@@ -3563,6 +4197,63 @@ const SPRITE_TINTS = {
   'items:prestige': 'violet',  // 재생성 대기 중인 마지막 회색 셀
 };
 
+/* Visual Direction: one normalized stage map for residents, set pieces, and utility props.
+   x/y are game-area coordinates, not viewport coordinates. */
+const STAGE_LAYOUT = {
+  desktop: {
+    density: { friends: 8, decor: 4 },
+    decor: {
+      pond:        { x: 0.13, y: 0.78, zone: 'ground' },
+      cushion:     { x: 0.58, y: 0.80, zone: 'ground' },
+      lamp:        { x: 0.83, y: 0.64, zone: 'ground' },
+      mat:         { x: 0.67, y: 0.79, zone: 'ground' },
+      fountain:    { x: 0.21, y: 0.65, zone: 'ground' },
+      window:      { x: 0.86, y: 0.25, zone: 'sky' },
+      cosmicTree:  { x: 0.50, y: 0.36, zone: 'sky-back' },
+      crystalBed:  { x: 0.16, y: 0.75, zone: 'ground' },
+      coinPile:    { x: 0.91, y: 0.82, zone: 'ground' },
+    },
+    friends: {
+      whale:   { x: 0.28, y: 0.25, zone: 'sky' },
+      planet:  { x: 0.78, y: 0.23, zone: 'sky' },
+      spirit:  { x: 0.18, y: 0.38, zone: 'sky' },
+      rabbit:  { x: 0.72, y: 0.43, zone: 'air' },
+      dragon:  { x: 0.25, y: 0.62, zone: 'ground' },
+      unicorn: { x: 0.72, y: 0.66, zone: 'ground' },
+      cat:     { x: 0.67, y: 0.78, zone: 'ground' },
+      turtle:  { x: 0.17, y: 0.83, zone: 'ground' },
+      dog:     { x: 0.58, y: 0.86, zone: 'ground' },
+      chick:   { x: 0.45, y: 0.84, zone: 'ground' },
+    },
+  },
+  mobile: {
+    density: { friends: 5, decor: 3 },
+    decor: {
+      pond:        { x: 0.10, y: 0.82, zone: 'ground' },
+      cushion:     { x: 0.78, y: 0.78, zone: 'ground' },
+      lamp:        { x: 0.84, y: 0.54, zone: 'ground' },
+      mat:         { x: 0.68, y: 0.78, zone: 'ground' },
+      fountain:    { x: 0.18, y: 0.70, zone: 'ground' },
+      window:      { x: 0.86, y: 0.30, zone: 'sky' },
+      cosmicTree:  { x: 0.50, y: 0.35, zone: 'sky-back' },
+      crystalBed:  { x: 0.14, y: 0.72, zone: 'ground' },
+      coinPile:    { x: 0.88, y: 0.76, zone: 'ground' },
+    },
+    friends: {
+      whale:   { x: 0.20, y: 0.34, zone: 'sky' },
+      planet:  { x: 0.79, y: 0.34, zone: 'sky' },
+      rabbit:  { x: 0.72, y: 0.50, zone: 'air' },
+      dragon:  { x: 0.22, y: 0.66, zone: 'ground' },
+      unicorn: { x: 0.74, y: 0.67, zone: 'ground' },
+      cat:     { x: 0.67, y: 0.76, zone: 'ground' },
+      turtle:  { x: 0.14, y: 0.88, zone: 'ground' },
+      dog:     { x: 0.58, y: 0.82, zone: 'ground' },
+      chick:   { x: 0.43, y: 0.82, zone: 'ground' },
+      spirit:  { x: 0.18, y: 0.46, zone: 'sky' },
+    },
+  },
+};
+
 function stageBgPosition(sheet, rect) {
   const maxX = Math.max(0, sheet.w - rect.w);
   const maxY = Math.max(0, sheet.h - rect.h);
@@ -3625,23 +4316,24 @@ function placeStageUtility(id, x, y) {
   el.style.bottom = 'auto';
 }
 
-function layoutStageUtilityAnchors(areaRect, slimeRect) {
-  const cx = slimeRect.left - areaRect.left + slimeRect.width / 2;
-  const slimeTop = slimeRect.top - areaRect.top;
-  const stageW = clampNum(slimeRect.width * 1.42, 330, 560);
-  const stageH = clampNum(slimeRect.height * 0.88, 170, 430);
-  const mobile = areaRect.width < 760;
-
-  placeStageUtility(
-    'crystal-bed',
-    cx - stageW * (mobile ? 0.50 : 0.60),
-    slimeTop + stageH * (mobile ? 0.48 : 0.46),
-  );
-  placeStageUtility(
-    'coin-pile',
-    cx + stageW * (mobile ? 0.22 : 0.38),
-    slimeTop + stageH * (mobile ? 0.58 : 0.62),
-  );
+function layoutStageUtilityAnchors() {
+  const layout = currentStageLayout();
+  const utility = [
+    ['crystal-bed', layout.decor.crystalBed],
+    ['coin-pile', layout.decor.coinPile],
+  ];
+  for (const [id, point] of utility) {
+    const el = $(id);
+    if (!el || el.hidden) continue;
+    const r = el.getBoundingClientRect();
+    const size = Math.max(r.width || 56, r.height || 56);
+    const pos = stagePointStyle(point, size, { topGuard: isMobileLayout() ? 88 : 120, bottomGuard: isMobileLayout() ? 28 : 72 });
+    if (!pos) continue;
+    el.style.left = pos.left;
+    el.style.top = pos.top;
+    el.style.right = 'auto';
+    el.style.bottom = 'auto';
+  }
 }
 
 function layoutStageBackdropSprites() {
@@ -3652,7 +4344,7 @@ function layoutStageBackdropSprites() {
 
   const areaRect = area.getBoundingClientRect();
   const slimeRect = slime.getBoundingClientRect();
-  layoutStageUtilityAnchors(areaRect, slimeRect);
+  layoutStageUtilityAnchors();
   if (areaRect.width < 760) {
     clearStageBackdropLayout(root);
     return;
@@ -3737,7 +4429,10 @@ function layoutStageBackdropSprites() {
   });
 }
 
-window.addEventListener('resize', () => requestAnimationFrame(layoutStageBackdropSprites));
+window.addEventListener('resize', () => requestAnimationFrame(() => {
+  layoutStageBackdropSprites();
+  applyTabSpriteIcons();
+}));
 
 /* 범용 스프라이트 렌더러.
    opts: { size, className, frame } — layout 미존재 시 fallback(이모지) 반환 */
@@ -3777,6 +4472,10 @@ function producerSpriteHtml(id, fallback, className = 'shop-sprite', frame = 0, 
   return spriteHtml('friends', id, fallback, { size, className, frame });
 }
 
+function lockedProducerSpriteHtml() {
+  return '<span class="locked-friend-icon" aria-hidden="true"></span>';
+}
+
 function itemSpriteHtml(id, fallback, className = 'shop-sprite') {
   if (!ITEM_SPRITE_LAYOUT[id]) {
     const perkFallback = missingPerkPixelHtml(id, 60, className);
@@ -3802,7 +4501,37 @@ function decorSpriteHtml(id, fallback, className = 'shop-sprite', sizeOverride =
 
 function setProducerShopIcon(el, p, reveal) {
   const icon = el.querySelector('.shop-icon');
-  icon.innerHTML = reveal ? producerSpriteHtml(p.id, p.icon) : '❓';
+  icon.innerHTML = reveal ? producerSpriteHtml(p.id, p.icon) : lockedProducerSpriteHtml();
+}
+
+function tabSpriteHtml(key) {
+  const size = isMobileLayout() ? 38 : 42;
+  const opts = { size, className: 'tab-sprite' };
+  if (key === 'producers') return spriteHtml('friends', 'chick', '🐤', opts);
+  if (key === 'upgrades') return spriteHtml('items', 'hand1', '⬆️', opts);
+  if (key === 'achievements') return spriteHtml('achievements', 'allUp', '🏆', opts);
+  if (key === 'prestige') return spriteHtml('achievements', 'rebirth1', '🍮', opts);
+  if (key === 'room') return spriteHtml('decor', 'lamp', '🏠', opts);
+  if (key === 'wishes') return spriteHtml('wishes', 'ministar', '⭐', opts);
+  return '';
+}
+
+function resourceSpriteHtml(key) {
+  const size = isMobileLayout() ? 21 : 23;
+  const opts = { size, className: 'res-sprite' };
+  if (key === 'dust') return spriteHtml('wishes', 'star', '<span class="res-fallback-icon">💫</span>', opts);
+  if (key === 'soul') return spriteHtml('achievements', 'rebirth1', '<span class="res-fallback-icon">🍮</span>', opts);
+  if (key === 'crystal') return spriteHtml('crystal', 'ripe', '<span class="res-fallback-icon">💎</span>', opts);
+  return '';
+}
+
+function applyTabSpriteIcons() {
+  document.querySelectorAll('#shop-tabs .tab').forEach(tab => {
+    const icon = tab.querySelector('.tab-icon');
+    if (!icon) return;
+    const html = tabSpriteHtml(tab.dataset.tab);
+    if (html) icon.innerHTML = html;
+  });
 }
 
 function fmt(n) {
@@ -4692,6 +5421,39 @@ function hideQuip() {
   clearTimeout(quipHideTimer);
 }
 
+function layoutQuipBubble() {
+  const el = $('speech-bubble');
+  const area = $('game-area');
+  const wrap = $('slime-wrap');
+  if (!el || !area || !wrap || !el.classList.contains('show')) return;
+  const areaRect = area.getBoundingClientRect();
+  const wrapRect = wrap.getBoundingClientRect();
+  const gap = isMobileLayout() ? 10 : 14;
+  const rightRoom = areaRect.right - wrapRect.right;
+  const leftRoom = wrapRect.left - areaRect.left;
+  const bubbleWidth = Math.max(el.offsetWidth || 0, el.getBoundingClientRect().width || 0);
+
+  el.style.removeProperty('left');
+  el.classList.remove('bubble-left', 'bubble-top');
+  let r = el.getBoundingClientRect();
+  if (r.right <= areaRect.right - gap && r.left >= areaRect.left + gap) return;
+
+  if (leftRoom > rightRoom && leftRoom > Math.min(r.width + gap, 170)) {
+    el.classList.add('bubble-left');
+    r = el.getBoundingClientRect();
+    if (r.left >= areaRect.left + gap && r.right <= areaRect.right - gap) return;
+  }
+
+  el.classList.remove('bubble-left');
+  el.classList.add('bubble-top');
+  const half = bubbleWidth / 2;
+  const minCenter = areaRect.left + gap + half;
+  const maxCenter = areaRect.right - gap - half;
+  const desiredCenter = wrapRect.left + wrapRect.width / 2;
+  const clampedCenter = clampNum(desiredCenter, minCenter, maxCenter);
+  el.style.left = `${Math.round(clampedCenter - wrapRect.left)}px`;
+}
+
 function showQuip(text) {
   if (silentTick) return;
   const el = $('speech-bubble');
@@ -4699,8 +5461,12 @@ function showQuip(text) {
     hideQuip();
     return;
   }
+  el.style.removeProperty('left');
+  el.classList.remove('bubble-left', 'bubble-top');
   el.textContent = text;
   el.classList.add('show');
+  requestAnimationFrame(() => requestAnimationFrame(layoutQuipBubble));
+  setTimeout(layoutQuipBubble, 240);
   clearTimeout(quipHideTimer);
   quipHideTimer = setTimeout(() => el.classList.remove('show'), 4000);
 }
@@ -5225,7 +5991,10 @@ function renderWishStrip() {
   el.classList.toggle('golden', golden);
   const txt = golden ? goldenWishText(w) : wishText(w);
   const pct = Math.min(100, w.progress / w.target * 100);
-  el.innerHTML = `<span>${golden ? '🌟' : '💫'}</span>`
+  const iconId = golden ? 'ministar' : w.type;
+  const iconFallback = golden ? '🌟' : w.icon;
+  el.innerHTML = spriteHtml('wishes', iconId, iconFallback, { size: 24, className: 'ws-icon' })
+    + `<span class="ws-label">${golden ? '황금 소원' : '오늘의 소원'}</span>`
     + `<span class="ws-text">${txt}</span>`
     + `<span class="ws-bar-outer"><span class="ws-bar" style="width:${pct.toFixed(0)}%"></span></span>`
     + `<span class="ws-count">${fmt(Math.min(w.progress, w.target))}/${fmt(w.target)}</span>`;
@@ -5566,14 +6335,18 @@ function updateResStrip() {
   const sig = `${dust ? S.stardust : '-'}|${soul ? S.prestige.souls : '-'}|${crys ? S.crystal.count : '-'}`;
   if (sig === resStripCache) return;
   resStripCache = sig;
-  const set = (id, on, v) => {
+  const set = (id, key, on, v) => {
     const el = $(id);
     el.hidden = !on;
-    if (on) el.querySelector('b').textContent = v;
+    if (on) {
+      const value = fmt(v);
+      el.dataset.value = value;
+      el.innerHTML = `${resourceSpriteHtml(key)} <b>${value}</b>`;
+    }
   };
-  set('res-dust', dust, S.stardust);
-  set('res-soul', soul, S.prestige.souls);
-  set('res-crystal', crys, S.crystal.count);
+  set('res-dust', 'dust', dust, S.stardust);
+  set('res-soul', 'soul', soul, S.prestige.souls);
+  set('res-crystal', 'crystal', crys, S.crystal.count);
 }
 
 /* 탭 뱃지: 다음 행동 신호 — 강화는 살 수 있는 개수, 환생은 가능 표시 */
@@ -6088,52 +6861,35 @@ function cosmicSeedHtml() {
 
 /* ════════════════════════ 슬라임 방 (장식) ════════════════════════ */
 
-function desktopStageDecorPos(d, size) {
-  if (!d.stagePos) return null;
-  const area = $('game-area');
-  const slime = $('slime-canvas');
-  if (!area || !slime) return null;
-  const ar = area.getBoundingClientRect();
-  const sr = slime.getBoundingClientRect();
-  if (!ar.width || !sr.width) return null;
-
-  const cx = sr.left - ar.left + sr.width / 2;
-  const top = sr.top - ar.top;
-  const stageW = clampNum(sr.width * 1.42, 410, 560);
-  const stageH = clampNum(sr.height * 0.88, 300, 430);
-  const x = cx + stageW * d.stagePos.x - size / 2;
-  const y = top + stageH * d.stagePos.y - size / 2;
-  return {
-    left: Math.round(clampNum(x, 18, ar.width - size - 18)) + 'px',
-    top: Math.round(clampNum(y, 78, ar.height - size - 72)) + 'px',
-  };
-}
-
 function renderDecor() {
   const layer = $('decor-layer');
   layer.innerHTML = '';
+  const layout = currentStageLayout();
   // 우주 씨앗: 엔딩 도달의 영구 증표 — 방 한가운데 위에서 빛난다
   if (S.cosmicSeed) {
     const seed = document.createElement('div');
     seed.className = 'decor sky cosmic-seed-tree';
-    seed.style.left = '50%';
-    seed.style.top = '8%';
-    seed.style.transform = 'translateX(-50%)';
+    const size = isMobileLayout() ? 40 : 52;
+    const pos = stagePointStyle(layout.decor.cosmicTree, size, { topGuard: 58, bottomGuard: 120 });
+    if (pos) Object.assign(seed.style, pos);
     seed.innerHTML = cosmicSeedHtml();
     layer.appendChild(seed);
   }
-  for (const d of DECOR) {
+  const visibleDecor = STAGE_DECOR_RENDER_ORDER
+    .map(id => DECOR.find(d => d.id === id))
+    .filter(d => d && S.decor[d.id])
+    .slice(0, layout.density.decor);
+  for (const d of visibleDecor) {
     if (!S.decor[d.id]) continue;
     const el = document.createElement('div');
-    // top 기준 배치 = 하늘 장식 (부유 허용), 나머지는 바닥 접지
-    el.className = 'decor' + (d.center ? ' center' : '') + (d.pos.top !== undefined ? ' sky' : '');
-    const decorSize = isMobileLayout() ? 52 : 78;
+    const point = layout.decor[d.id];
+    const zone = point?.zone || (d.pos.top !== undefined ? 'sky' : 'ground');
+    el.className = 'decor zone-' + zone + (zone.startsWith('sky') ? ' sky' : '');
+    const decorSize = isMobileLayout() ? 38 : 58;
     el.innerHTML = decorSpriteHtml(d.id, d.icon, 'room-decor-sprite', decorSize);
-    const stagePos = !isMobileLayout() ? desktopStageDecorPos(d, decorSize) : null;
-    const pos = stagePos || (isMobileLayout() && d.mobilePos ? d.mobilePos : d.pos);
-    for (const k of ['left', 'right', 'top', 'bottom']) {
-      if (pos[k] !== undefined) el.style[k] = pos[k];
-    }
+    const pos = stagePointStyle(point, decorSize, { topGuard: zone.startsWith('sky') ? 56 : 120 });
+    if (pos) Object.assign(el.style, pos);
+    else Object.assign(el.style, isMobileLayout() && d.mobilePos ? d.mobilePos : d.pos);
     layer.appendChild(el);
   }
 }
@@ -6336,99 +7092,155 @@ function isMobileLayout() {
   return window.matchMedia('(max-width: 760px)').matches;
 }
 
-/* 모바일: 종별 1마리, 바닥 한 줄 정렬로 난잡함 방지 */
-const MOBILE_GROUND_ORDER = ['chick', 'dog', 'cat', 'rabbit', 'unicorn', 'dragon', 'spirit', 'turtle'];
+const STAGE_FRIEND_RENDER_ORDER = ['whale', 'planet', 'spirit', 'rabbit', 'dragon', 'unicorn', 'cat', 'turtle', 'dog', 'chick'];
+const STAGE_DECOR_RENDER_ORDER = ['window', 'fountain', 'pond', 'lamp', 'mat', 'cushion'];
 
-const DESKTOP_STAGE_FRIEND_SLOTS = {
-  chick:   { x: -0.34, y: 0.66 },
-  cat:     { x: 0.30, y: 0.66 },
-  dog:     { x: 0.25, y: 0.86 },
-  rabbit:  { x: -0.36, y: 0.48 },
-  unicorn: { x: 0.50, y: 0.40 },
-  dragon:  { x: -0.52, y: 0.40 },
-  whale:   { x: -0.02, y: -0.08 },
-  planet:  { x: 0.48, y: 0.04 },
-  spirit:  { x: 0.50, y: 0.54 },
-  turtle:  { x: -0.28, y: 0.86 },
-};
+function currentStageLayout() {
+  return STAGE_LAYOUT[isMobileLayout() ? 'mobile' : 'desktop'];
+}
 
-function desktopStageFriendPos(id, size, copyIndex) {
+function stagePointStyle(point, size, options = {}) {
   const area = $('game-area');
-  const slime = $('slime-canvas');
-  if (!area || !slime) return null;
+  if (!area || !point) return null;
   const ar = area.getBoundingClientRect();
-  const sr = slime.getBoundingClientRect();
-  if (!ar.width || !sr.width) return null;
+  if (!ar.width) return null;
+  const margin = options.margin ?? 14;
+  const topGuard = options.topGuard ?? (isMobileLayout() ? 44 : 64);
+  const bottomGuard = options.bottomGuard ?? (isMobileLayout() ? 18 : 54);
+  let x = ar.width * point.x - size / 2;
+  let y = ar.height * point.y - size / 2;
 
-  const slot = DESKTOP_STAGE_FRIEND_SLOTS[id];
-  if (!slot) return null;
-
-  const cx = sr.left - ar.left + sr.width / 2;
-  const top = sr.top - ar.top;
-  const stageW = clampNum(sr.width * 1.42, 410, 560);
-  const stageH = clampNum(sr.height * 0.88, 300, 430);
-  const fan = copyIndex * Math.min(24, size * 0.5);
-  const direction = slot.x < 0 ? -1 : 1;
-  const x = cx + stageW * slot.x + fan * direction - size / 2;
-  const y = top + stageH * slot.y - size / 2;
+  if (point.zone === 'ground') {
+    const slime = $('slime-canvas');
+    const sr = slime?.getBoundingClientRect();
+    if (sr?.width) {
+      const cx = sr.left - ar.left + sr.width / 2;
+      const top = sr.top - ar.top;
+      const stageW = clampNum(sr.width * (isMobileLayout() ? 1.72 : 1.92), isMobileLayout() ? 250 : 430, isMobileLayout() ? ar.width * 0.86 : 660);
+      const stageH = clampNum(sr.height * (isMobileLayout() ? 1.02 : 1.08), isMobileLayout() ? 150 : 270, isMobileLayout() ? 260 : 430);
+      x = cx + stageW * (point.x - 0.5) - size / 2;
+      y = top + stageH * (point.y - 0.36) - size / 2;
+    }
+  }
 
   return {
-    left: Math.round(clampNum(x, 18, ar.width - size - 18)) + 'px',
-    top: Math.round(clampNum(y, 230, ar.height - size - 86)) + 'px',
+    left: Math.round(clampNum(x, margin, ar.width - size - margin)) + 'px',
+    top: Math.round(clampNum(y, topGuard, ar.height - size - bottomGuard)) + 'px',
   };
 }
 
 function rebuildFriends() {
   friendsLayer.innerHTML = '';
-  const mobile = isMobileLayout();
-  let groundIdx = 0;
+  const layout = currentStageLayout();
+  let shown = 0;
+  const producersById = Object.fromEntries(PRODUCERS.map(p => [p.id, p]));
+  const ordered = STAGE_FRIEND_RENDER_ORDER.map(id => producersById[id]).filter(Boolean);
 
-  PRODUCERS.forEach(p => {
+  ordered.forEach(p => {
     const bhv = FRIEND_BEHAVIOR[p.id];
     const owned = S.producers[p.id];
     if (!bhv || !owned) return;
-    const n = mobile ? 1 : Math.min(bhv.max, friendCount(owned));
+    if (shown >= layout.density.friends) return;
 
-    let pos = bhv.pos();
-    if (mobile) {
-      if (p.id === 'whale') pos = { left: '4%', top: '24%' };
-      else if (p.id === 'planet') pos = { right: '7%', top: '29%' };
-      else {
-        const slot = MOBILE_GROUND_ORDER.indexOf(p.id);
-        pos = { left: (5 + (slot < 0 ? groundIdx : slot) * 11) + '%', bottom: '8%' };
-        groundIdx++;
-      }
-    }
-
-    for (let k = 0; k < n; k++) {
-      const el = document.createElement('div');
-      el.className = 'friend';
-      el.dataset.id = p.id;
-      const size = mobile ? 30 : (p.id === 'whale' || p.id === 'planet') ? 64 : (p.id === 'spirit' ? 42 : 48);
-      const stagePos = !mobile ? desktopStageFriendPos(p.id, size, k) : null;
-      if (stagePos) pos = stagePos;
-      for (const key of ['left', 'right', 'top', 'bottom']) {
-        if (pos[key] === undefined) continue;
-        el.style[key] = (!stagePos && (key === 'left' || key === 'right'))
-          ? `calc(${pos[key]} + ${k * 46}px)`
-          : pos[key];
-      }
-      const mover = document.createElement('span');
-      mover.className = 'fr-move bv-' + bhv.anim;
-      mover.style.animationDelay = (Math.random() * 2.5).toFixed(2) + 's';
-      mover.innerHTML = friendSpriteAnimHtml(p.id, size);
-      el.appendChild(mover);
-      friendsLayer.appendChild(el);
-    }
+    const point = layout.friends[p.id];
+    if (!point) return;
+    const zone = point.zone || 'ground';
+    const el = document.createElement('div');
+    el.className = 'friend zone-' + zone;
+    el.dataset.id = p.id;
+    const size = isMobileLayout()
+      ? (zone === 'sky' ? 32 : (p.id === 'turtle' ? 46 : 28))
+      : (zone === 'sky' ? (p.id === 'whale' ? 72 : 52) : (zone === 'air' ? 46 : (p.id === 'turtle' ? 46 : 40)));
+    const pos = stagePointStyle(point, size, { topGuard: zone === 'sky' ? 58 : 120, bottomGuard: isMobileLayout() ? 24 : 70 });
+    if (pos) Object.assign(el.style, pos);
+    else Object.assign(el.style, bhv.pos());
+    const mover = document.createElement('span');
+    mover.className = 'fr-move bv-' + bhv.anim;
+    mover.style.animationDelay = (Math.random() * 2.5).toFixed(2) + 's';
+    mover.innerHTML = friendSpriteAnimHtml(p.id, size);
+    el.appendChild(mover);
+    friendsLayer.appendChild(el);
+    shown++;
   });
 }
 
 /* 코인 배달: 친구 자리에서 코인이 카운터로 날아온다 — "같이 번다" 체감 */
+function segmentHitsRect(a, b, rect, steps = 14) {
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const x = a.x + (b.x - a.x) * t;
+    const y = a.y + (b.y - a.y) * t;
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return true;
+  }
+  return false;
+}
+
+function pointInRect(point, rect) {
+  return !!rect && point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
+}
+
+function speechBubbleAvoidRect(guard = isMobileLayout() ? 18 : 24) {
+  const bubble = $('speech-bubble');
+  if (!bubble?.classList.contains('show')) return null;
+  const br = bubble.getBoundingClientRect();
+  if (!br.width || !br.height) return null;
+  return {
+    left: br.left - guard,
+    right: br.right + guard,
+    top: br.top - guard,
+    bottom: br.bottom + guard,
+  };
+}
+
+function coinFlightWaypoint(start, end) {
+  const direct = {
+    x: start.x + (end.x - start.x) * 0.5,
+    y: start.y + (end.y - start.y) * 0.5 - 40,
+  };
+  const guard = isMobileLayout() ? 18 : 24;
+  const avoid = speechBubbleAvoidRect(guard);
+  if (!avoid) return direct;
+  const clear = point => !segmentHitsRect(start, point, avoid) && !segmentHitsRect(point, end, avoid);
+  if (clear(direct)) return direct;
+
+  const area = $('game-area')?.getBoundingClientRect();
+  const bounds = area?.width
+    ? { left: area.left + 8, right: area.right - 8, top: area.top + 58, bottom: area.bottom - 34 }
+    : { left: 8, right: innerWidth - 8, top: 8, bottom: innerHeight - 8 };
+  const candidates = [
+    { x: avoid.left, y: avoid.top },
+    { x: avoid.right, y: avoid.top },
+    { x: avoid.left, y: avoid.bottom },
+    { x: avoid.right, y: avoid.bottom },
+    { x: (avoid.left + avoid.right) / 2, y: avoid.top },
+    { x: (avoid.left + avoid.right) / 2, y: avoid.bottom },
+  ].map(p => ({
+    x: clampNum(p.x, bounds.left, bounds.right),
+    y: clampNum(p.y, bounds.top, bounds.bottom),
+  }));
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const safe = candidates
+    .filter(clear)
+    .sort((a, b) => (dist(start, a) + dist(a, end)) - (dist(start, b) + dist(b, end)));
+  return safe[0] || { x: direct.x, y: clampNum(avoid.bottom + guard, bounds.top, bounds.bottom) };
+}
+
 function flyCoinFromFriend() {
   if (document.hidden || totalCps() <= 0) return;
-  const friends = friendsLayer.querySelectorAll('.friend');
+  const friends = [...friendsLayer.querySelectorAll('.friend')];
   if (!friends.length) return;
-  const f = friends[Math.floor(Math.random() * friends.length)];
+  const avoid = speechBubbleAvoidRect(isMobileLayout() ? 22 : 28);
+  const startPoint = el => {
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 3, rect: r };
+  };
+  const candidates = friends.filter(el => {
+    const p = startPoint(el);
+    return p.rect.width && (!avoid || !pointInRect(p, avoid));
+  });
+  const pool = candidates.length ? candidates : friends.filter(el => startPoint(el).rect.width);
+  if (!pool.length) return;
+  const f = pool[Math.floor(Math.random() * pool.length)];
   const fr = f.getBoundingClientRect();
   const cr = $('coin-display').getBoundingClientRect();
   if (!fr.width || !cr.width) return;
@@ -6440,11 +7252,13 @@ function flyCoinFromFriend() {
   img.style.left = sx + 'px';
   img.style.top = sy + 'px';
   document.body.appendChild(img);
-  const dx = cr.left + cr.width / 2 - sx;
-  const dy = cr.top + cr.height / 2 - sy;
+  const end = { x: cr.left + cr.width / 2, y: cr.top + cr.height / 2 };
+  const mid = coinFlightWaypoint({ x: sx, y: sy }, end);
+  const dx = end.x - sx;
+  const dy = end.y - sy;
   img.animate([
     { transform: 'translate(0,0) scale(1)', opacity: 1 },
-    { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 40}px) scale(1.1)`, opacity: 1, offset: 0.55 },
+    { transform: `translate(${mid.x - sx}px, ${mid.y - sy}px) scale(1.1)`, opacity: 1, offset: 0.55 },
     { transform: `translate(${dx}px, ${dy}px) scale(.5)`, opacity: 0.9 },
   ], { duration: 750, easing: 'ease-in' }).onfinish = () => {
     img.remove();
@@ -6597,9 +7411,9 @@ function buildWishesTab() {
     el.innerHTML = `
       <div class="shop-icon">${spriteHtml('wishes', g.type, g.icon, { size: 54 })}</div>
       <div class="shop-info">
-        <div class="shop-name">🌟 오늘의 황금 소원 — ${goldenWishText(g)}</div>
+        <div class="shop-name"><span class="wish-chip">황금</span> ${goldenWishText(g)}</div>
         <div class="wish-bar-outer"><div class="wish-bar"></div></div>
-        <div class="wish-reward">${g.done ? '✅ 오늘 성취! 내일 새 소원이 와요' : `진행 <span class="wish-progress"></span> · 보상 별가루 +${g.reward}`}</div>
+        <div class="wish-reward">${g.done ? '<span class="wish-progress">오늘 성취! 내일 새 소원이 와요</span>' : '진행 <span class="wish-progress"></span>'} <span class="wish-reward-badge">별가루 +${g.reward}</span></div>
       </div>`;
     shopList.appendChild(el);
   }
@@ -6616,9 +7430,9 @@ function buildWishesTab() {
     el.innerHTML = `
       <div class="shop-icon">${spriteHtml('wishes', w.type, w.icon, { size: 54 })}</div>
       <div class="shop-info">
-        <div class="shop-name">${wishText(w)}</div>
+        <div class="shop-name"><span class="wish-chip">소원</span> ${wishText(w)}</div>
         <div class="wish-bar-outer"><div class="wish-bar"></div></div>
-        <div class="wish-reward">진행 <span class="wish-progress"></span> · 보상 별가루 +${w.reward}</div>
+        <div class="wish-reward">진행 <span class="wish-progress"></span> <span class="wish-reward-badge">별가루 +${w.reward}</span></div>
       </div>`;
     shopList.appendChild(el);
   });
@@ -6774,7 +7588,7 @@ function buildRoomTab() {
   shopList.appendChild(cosmicStatus);
 
   // 별의 기록
-  const unlockedCount = Object.keys(S.story).length;
+  const unlockedCount = STORY.filter(st => S.story[st.id]).length;
   const title5 = document.createElement('div');
   title5.className = 'room-section-title';
   title5.textContent = `📜 별의 기록 (${unlockedCount}/${STORY.length})`;
@@ -6956,6 +7770,7 @@ function refreshShop() {
 
       const reveal = S.totalEarned >= p.baseCost * 0.4 || S.producers[p.id] > 0;
       el.querySelector('.shop-name').textContent = reveal ? p.name : '???';
+      el.querySelector('.shop-desc.flavor').textContent = reveal ? p.desc : '무대 뒤에서 차례를 기다리는 친구예요';
       setProducerShopIcon(el, p, reveal);
 
       // 다음 시너지 표시 — "25마리까지만 더 사자"를 만드는 줄
@@ -6992,7 +7807,11 @@ function refreshShop() {
       const pct = w.done ? 100 : Math.min(100, w.progress / w.target * 100);
       el.querySelector('.wish-bar').style.width = pct + '%';
       const prog = el.querySelector('.wish-progress');
-      if (prog) prog.textContent = `${fmt(Math.min(w.progress, w.target))} / ${fmt(w.target)}`;
+      if (prog) {
+        prog.textContent = w.done && el.dataset.golden
+          ? '오늘 성취! 내일 새 소원이 와요'
+          : `${fmt(Math.min(w.progress, w.target))} / ${fmt(w.target)}`;
+      }
     }
     for (const el of shopList.querySelectorAll('.cosmetic-item')) {
       const c = COSMETICS.find(x => x.id === el.dataset.id);
@@ -7158,17 +7977,21 @@ function starSpawnRect(kind = 'star', index = 0, total = 1) {
   const cy = slime.top + slime.height * 0.48;
   const stageW = clampNum(slime.width * 1.42, mobile ? 300 : 410, mobile ? area.width * 0.92 : 560);
   const stageH = clampNum(slime.height * 0.88, mobile ? 180 : 300, mobile ? 310 : 430);
-  const minX = Math.max(area.left + margin, cx - stageW * 0.58);
-  const maxX = Math.min(area.right - size - margin, cx + stageW * 0.58);
-  const minY = area.top + (kind === 'mini' ? (mobile ? 118 : 172) : (mobile ? 150 : 220));
-  const maxY = area.bottom - size - (mobile ? 68 : 86);
+  const lane = kind === 'cloud' ? 'sky' : kind === 'starlet' ? 'air' : kind === 'mini' ? 'slime-arc' : 'sky';
+  const topHudGuard = mobile ? 116 : 158;
+  const bottomUiGuard = kind === 'mini' ? (mobile ? 104 : 126) : (mobile ? 82 : 104);
+  const minX = Math.max(area.left + margin, cx - stageW * (lane === 'sky' ? 0.62 : 0.56));
+  const maxX = Math.min(area.right - size - margin, cx + stageW * (lane === 'sky' ? 0.62 : 0.56));
+  const minY = Math.max(area.top + topHudGuard, slime.top - stageH * (lane === 'sky' ? 0.42 : 0.18));
+  const maxY = Math.min(area.bottom - size - bottomUiGuard, slime.bottom + stageH * (lane === 'air' ? 0.24 : 0.12));
   const bounds = { minX, maxX, minY, maxY, cx, mobile, slime };
 
   if (kind === 'cloud') {
     const side = Math.random() < 0.5 ? -1 : 1;
+    const sidePull = mobile ? 0.49 : 0.22;
     const pos = {
-      x: clampEventCoord(cx + side * stageW * (0.22 + Math.random() * 0.23) - size / 2, minX, maxX),
-      y: clampEventCoord(slime.top - size * 0.55 + Math.random() * stageH * 0.18, minY, slime.top + stageH * 0.08),
+      x: clampEventCoord(cx + side * stageW * (sidePull + Math.random() * 0.08) - size / 2, minX, maxX),
+      y: clampEventCoord(slime.top - size * 0.68 + Math.random() * stageH * 0.16, minY, Math.min(maxY, slime.top - size * 0.12)),
     };
     return avoidActiveGuestOverlap(kind, pos, size, bounds);
   }
@@ -7177,16 +8000,20 @@ function starSpawnRect(kind = 'star', index = 0, total = 1) {
     const side = Math.random() < 0.5 ? -1 : 1;
     const pos = {
       x: clampEventCoord(cx + side * stageW * (0.34 + Math.random() * 0.12) - size / 2, minX, maxX),
-      y: clampEventCoord(slime.top + slime.height * (0.46 + Math.random() * 0.15), minY, maxY),
+      y: clampEventCoord(slime.top + slime.height * (0.34 + Math.random() * 0.18), minY, maxY),
     };
     return avoidActiveGuestOverlap(kind, pos, size, bounds);
   }
 
-  const arcStart = kind === 'mini' ? 205 : 220;
-  const arcEnd = kind === 'mini' ? 335 : 320;
+  const arcStart = kind === 'mini' ? (mobile ? 190 : 200) : (mobile ? 202 : 214);
+  const arcEnd = kind === 'mini' ? (mobile ? 350 : 340) : (mobile ? 338 : 326);
   const a = (arcStart + Math.random() * (arcEnd - arcStart)) * Math.PI / 180;
-  const rx = stageW * (kind === 'mini' ? 0.46 + Math.random() * 0.1 : 0.36 + Math.random() * 0.12);
-  const ry = stageH * (kind === 'mini' ? 0.34 + Math.random() * 0.08 : 0.32 + Math.random() * 0.08);
+  const rx = stageW * (kind === 'mini'
+    ? (mobile ? 0.56 : 0.46) + Math.random() * 0.08
+    : (mobile ? 0.48 : 0.36) + Math.random() * 0.10);
+  const ry = stageH * (kind === 'mini'
+    ? (mobile ? 0.39 : 0.34) + Math.random() * 0.06
+    : (mobile ? 0.38 : 0.32) + Math.random() * 0.06);
   const pos = {
     x: clampEventCoord(cx + Math.cos(a) * rx - size / 2, minX, maxX),
     y: clampEventCoord(cy + Math.sin(a) * ry - size / 2, minY, maxY),
@@ -7670,10 +8497,13 @@ function placeMobileToast(el) {
   const list = $('shop-list')?.getBoundingClientRect();
   el.style.bottom = 'auto';
   const h = el.getBoundingClientRect().height || 34;
-  document.body.style.setProperty('--mobile-toast-space', Math.ceil(h + 16) + 'px');
   const laneTop = (list?.top || shop.top + 46) + 8;
   const maxTop = window.innerHeight - h - 12;
+  const listTop = list?.top || shop.top + 46;
   el.style.top = Math.round(clampNum(laneTop, shop.top + 8, maxTop)) + 'px';
+  const rect = el.getBoundingClientRect();
+  const reserved = Math.max(h + 40, rect.bottom - listTop + 32);
+  document.body.style.setProperty('--mobile-toast-space', Math.ceil(reserved) + 'px');
 }
 
 function toast(html) {
@@ -8202,11 +9032,33 @@ setInterval(() => {
 
 /* ════════════════════════ 초기화 ════════════════════════ */
 
+function starBackdropPoint() {
+  const mobile = isMobileLayout();
+  for (let attempt = 0; attempt < 80; attempt++) {
+    const x = Math.random() * (mobile ? 100 : 76);
+    const y = Math.random() * 100;
+    const focusCx = mobile ? 50 : 38;
+    const focusCy = mobile ? 30 : 58;
+    const focusRx = mobile ? 32 : 22;
+    const focusRy = mobile ? 24 : 30;
+    const inHeroFocus = Math.pow((x - focusCx) / focusRx, 2) + Math.pow((y - focusCy) / focusRy, 2) < 1;
+    const inTitleLane = mobile
+      ? (y < 18 && x > 18 && x < 82)
+      : (y > 12 && y < 38 && x > 25 && x < 52);
+    const inWishLane = mobile
+      ? (y > 36 && y < 45 && x > 6 && x < 94)
+      : (y > 87 && x > 18 && x < 60);
+    if (!inHeroFocus && !inTitleLane && !inWishLane) return { x, y };
+  }
+  return mobile ? { x: 8 + Math.random() * 84, y: 52 + Math.random() * 40 } : { x: Math.random() * 76, y: Math.random() * 100 };
+}
+
 for (let i = 0; i < 40; i++) {
   const s = document.createElement('div');
   s.className = 'star';
-  s.style.left = Math.random() * 100 + 'vw';
-  s.style.top = Math.random() * 100 + 'vh';
+  const p = starBackdropPoint();
+  s.style.left = p.x + 'vw';
+  s.style.top = p.y + 'vh';
   s.style.animationDelay = Math.random() * 2.4 + 's';
   if (Math.random() < 0.3) { s.style.width = '6px'; s.style.height = '6px'; }
   document.body.appendChild(s);
@@ -8381,6 +9233,7 @@ crystalTick();
 // UX 점진 해금: 탭 뱃지 슬롯 주입 + 기존 진행분은 조용히 해금 처리 (토스트 일괄 발사 방지)
 document.querySelectorAll('#shop-tabs .tab').forEach(t =>
   t.insertAdjacentHTML('beforeend', '<span class="tab-badge"></span>'));
+applyTabSpriteIcons();
 updateTabVisibility(true);
 
 // 재화 스트립: 누르면 쓰는 곳으로
@@ -8891,12 +9744,14 @@ window.uxCheck = async function uxCheck() {
     add('friction', '클릭 피드백 즉시(트랜지션 무지연)', getComputedStyle(slimeWrap).transitionDuration.split(',')[0].trim() <= '0.2s');
 
     /* ═══ 5. 일관성 — 같은 것은 같은 모습으로 ═══ */
-    add('consistency', '별가루 아이콘 통일(💫)', $('res-dust').textContent.includes('💫')
+    const hasResourceIcon = id => !!$(id).querySelector('.res-sprite, .res-fallback-icon');
+    add('consistency', '별가루 아이콘 통일', hasResourceIcon('res-dust')
       && TAB_UNLOCK_TOASTS.wishes.includes('💫'));
-    add('consistency', '결정 아이콘 통일(💎)', $('res-crystal').textContent.includes('💎'));
+    add('consistency', '결정 아이콘 통일', hasResourceIcon('res-crystal'));
     const tabLabel = k => {
       const t = document.querySelector(`.tab[data-tab="${k}"]`);
-      return t ? t.textContent.replace(/[!0-9]/g, '').trim() : '';
+      const label = t && t.querySelector('.tab-label');
+      return label ? label.textContent.trim() : (t ? t.textContent.replace(/[!0-9]/g, '').trim() : '');
     };
     add('consistency', '해금 안내와 탭 라벨 일치',
       Object.keys(TAB_UNLOCK_TOASTS).every(k => TAB_UNLOCK_TOASTS[k].includes(tabLabel(k))));

@@ -1,6 +1,7 @@
 # slime-friends-ai QA Notes
 
-- Runtime atlas currently contains 8 generated friends: chick, cat, dog, rabbit, unicorn, dragon, whale, planet.
-- `sprite-request.json` also declares `spirit` and `turtle`, but no `raw/` or `frames/` files exist for those states in this run.
-- Game code intentionally falls back to emoji for `spirit` and `turtle` until the friends atlas is regenerated with all 10 requested states.
-- Next sprite-gen cycle should prioritize regenerating this atlas from the existing request and then copy the new `frame_layout` rows into `PRODUCER_SPRITE_LAYOUT`.
+- Runtime atlas now contains 10 generated producer friends: chick, cat, dog, rabbit, unicorn, dragon, whale, planet, spirit, turtle.
+- `spirit` was regenerated as a two-frame pale-gold star spirit hover and curated at 1.75x scale. QA verdict: pass; small detached spark accents are limited to the hover frame and read as a sky-resident effect at runtime scale.
+- `turtle` was regenerated as a two-frame sleepy cosmic turtle with a readable hourglass shell motif and curated at 1.25x scale. QA verdict: pass; slow breathing motion preserves the ground-resident silhouette.
+- Existing 8 generated friends were unpacked from the previous manifest-backed atlas and recomposed without layout changes.
+- New sheet size: 1792 x 8960. New rows: `spirit` at y=7168, `turtle` at y=8064.
