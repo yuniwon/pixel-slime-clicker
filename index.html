@@ -6293,16 +6293,16 @@ function isMobileLayout() {
 const MOBILE_GROUND_ORDER = ['chick', 'dog', 'cat', 'rabbit', 'unicorn', 'dragon', 'spirit', 'turtle'];
 
 const DESKTOP_STAGE_FRIEND_SLOTS = {
-  chick:   { x: -0.40, y: 0.68 },
-  cat:     { x: 0.35, y: 0.68 },
-  dog:     { x: 0.40, y: 0.90 },
-  rabbit:  { x: -0.46, y: 0.45 },
-  unicorn: { x: 0.70, y: 0.38 },
-  dragon:  { x: -0.76, y: 0.38 },
-  whale:   { x: 0.02, y: -0.18 },
-  planet:  { x: 0.64, y: -0.04 },
-  spirit:  { x: 0.72, y: 0.54 },
-  turtle:  { x: -0.38, y: 0.90 },
+  chick:   { x: -0.34, y: 0.66 },
+  cat:     { x: 0.30, y: 0.66 },
+  dog:     { x: 0.25, y: 0.86 },
+  rabbit:  { x: -0.36, y: 0.48 },
+  unicorn: { x: 0.50, y: 0.40 },
+  dragon:  { x: -0.52, y: 0.40 },
+  whale:   { x: -0.02, y: -0.08 },
+  planet:  { x: 0.48, y: 0.04 },
+  spirit:  { x: 0.50, y: 0.54 },
+  turtle:  { x: -0.28, y: 0.86 },
 };
 
 function desktopStageFriendPos(id, size, copyIndex) {
@@ -6320,7 +6320,7 @@ function desktopStageFriendPos(id, size, copyIndex) {
   const top = sr.top - ar.top;
   const stageW = clampNum(sr.width * 1.42, 410, 560);
   const stageH = clampNum(sr.height * 0.88, 300, 430);
-  const fan = copyIndex * Math.min(34, size * 0.72);
+  const fan = copyIndex * Math.min(24, size * 0.5);
   const direction = slot.x < 0 ? -1 : 1;
   const x = cx + stageW * slot.x + fan * direction - size / 2;
   const y = top + stageH * slot.y - size / 2;
