@@ -1902,20 +1902,56 @@
   /* ── 소원 스트립: 지금 목표와 진행률이 항상 무대에 보인다 (선반 대체) ── */
   #wish-strip {
     position: absolute;
-    bottom: 0; left: 0; right: 0;
+    bottom: clamp(10px, 1.1vw, 18px);
+    left: 50%;
+    width: min(560px, calc(100% - 56px));
     z-index: 3;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: clamp(8px, 0.7vw, 18px);
-    padding: clamp(6px, 0.5vw, 13px) 14px;
-    background: #00000033;
-    border-top: 2px solid #ffffff0d;
+    gap: clamp(6px, 0.6vw, 14px);
+    padding: clamp(5px, 0.42vw, 10px) 12px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 48%),
+      radial-gradient(circle at 12% 50%, rgba(255,215,92,.2), transparent 36%),
+      rgba(29, 17, 54, .9);
+    border: 2px solid #ffd75e;
+    border-radius: 5px;
     cursor: pointer;
     font-size: clamp(11px, 0.78vw, 22px);
     color: var(--text-dim);
+    transform: translateX(-50%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.14),
+      inset 0 -2px 0 rgba(0,0,0,.28),
+      0 4px 0 rgba(0,0,0,.18),
+      0 0 22px rgba(255,215,92,.12);
+    backdrop-filter: blur(2px);
+  }
+  #wish-strip::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 3px;
+    pointer-events: none;
+  }
+  #wish-strip .ws-icon {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    filter: drop-shadow(1px 2px 0 #00000066);
+  }
+  #wish-strip .ws-label {
+    position: relative;
+    z-index: 1;
+    color: var(--gold);
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
   }
   #wish-strip .ws-text {
+    position: relative;
+    z-index: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1923,10 +1959,13 @@
     color: var(--text);
   }
   #wish-strip .ws-bar-outer {
-    width: clamp(70px, 7vw, 180px);
+    position: relative;
+    z-index: 1;
+    width: clamp(82px, 8vw, 176px);
     height: clamp(7px, 0.55vw, 13px);
-    background: #00000066;
-    border: 2px solid var(--border);
+    background: #12091f;
+    border: 2px solid #4d2d7f;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
     display: inline-block;
   }
   #wish-strip .ws-bar {
@@ -1935,8 +1974,21 @@
     background: linear-gradient(90deg, var(--pink), var(--gold));
     transition: width .25s ease;
   }
-  #wish-strip .ws-count { color: var(--gold); white-space: nowrap; }
-  #wish-strip.golden { border-top-color: #ffd75e44; }
+  #wish-strip .ws-count {
+    position: relative;
+    z-index: 1;
+    color: var(--gold);
+    white-space: nowrap;
+    text-shadow: 1px 1px 0 #000;
+  }
+  #wish-strip.golden {
+    border-color: #ffe279;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.18),
+      inset 0 -2px 0 rgba(0,0,0,.28),
+      0 4px 0 rgba(0,0,0,.18),
+      0 0 26px rgba(255,215,92,.2);
+  }
 
   /* ── 슬라임 앨범 ── */
   .album-box {
@@ -2539,8 +2591,17 @@
       text-overflow: ellipsis;
     }
     #news-ticker { font-size: 11px; padding: 5px 12px; }
-    #wish-strip { padding: 4px 8px; gap: 6px; font-size: 10px; }
-    #wish-strip .ws-bar-outer { width: 56px; height: 6px; }
+    #wish-strip {
+      bottom: 8px;
+      width: min(320px, calc(100% - 28px));
+      padding: 4px 7px;
+      gap: 5px;
+      font-size: 10px;
+    }
+    #wish-strip .ws-label { display: none; }
+    #wish-strip .ws-icon { transform: scale(.88); transform-origin: center; margin: -2px; }
+    #wish-strip .ws-text { max-width: 44%; }
+    #wish-strip .ws-bar-outer { width: 58px; height: 6px; border-width: 1px; }
     /* 일일 요약은 모바일 무대에선 수직 공간이 없어 잘려 보임 — 숨김 (소원 스트립이 목표 역할) */
     #daily-summary { display: none; }
     #combo-box { margin-top: 2px; }
@@ -5709,7 +5770,10 @@ function renderWishStrip() {
   el.classList.toggle('golden', golden);
   const txt = golden ? goldenWishText(w) : wishText(w);
   const pct = Math.min(100, w.progress / w.target * 100);
-  el.innerHTML = `<span>${golden ? '🌟' : '💫'}</span>`
+  const iconId = golden ? 'ministar' : w.type;
+  const iconFallback = golden ? '🌟' : w.icon;
+  el.innerHTML = spriteHtml('wishes', iconId, iconFallback, { size: 24, className: 'ws-icon' })
+    + `<span class="ws-label">${golden ? '황금 소원' : '오늘의 소원'}</span>`
     + `<span class="ws-text">${txt}</span>`
     + `<span class="ws-bar-outer"><span class="ws-bar" style="width:${pct.toFixed(0)}%"></span></span>`
     + `<span class="ws-count">${fmt(Math.min(w.progress, w.target))}/${fmt(w.target)}</span>`;
