@@ -1701,7 +1701,7 @@
 
   /* ── 퍼펙트 말랑 ── */
   .float-num.perfect {
-    font-size: 32px;
+    font-size: 28px;
     color: #ff5ea8;
     text-shadow: 2px 2px 0 #ffffff88, 4px 4px 0 #00000066;
   }
@@ -4702,7 +4702,7 @@ function firstSquishOfDay(x, y) {
   confettiBurst();
   sndPerfect();
   haptic([12, 40, 12]);
-  spawnFloat(x, y - 34, '🌅 오늘의 첫 말랑! +' + fmt(bonus), true, true);
+  spawnFloat(x, y - 34, '첫 말랑! +' + fmt(bonus), true, false);
   toast(`🌅 <b>오늘의 첫 말랑!</b> +${fmt(bonus)} 코인 · 별가루 +2`);
   showQuip(MORNING_QUIPS[new Date().getDate() % MORNING_QUIPS.length]);
   save();
@@ -4734,7 +4734,7 @@ function doClick(x, y) {
   slimeCv.classList.add('squish');
 
   if (perfect) {
-    spawnFloat(x, y - 10, '퍼펙트 말랑! +' + fmt(gain), false, true);
+    spawnFloat(x, y - 10, (isMobileLayout() ? '완벽! +' : '퍼펙트! +') + fmt(gain), false, true);
     spawnSparks(x, y);
     spawnSparks(x, y);
     spawnClickFx(x, y);
@@ -4856,12 +4856,26 @@ function settleFloatInPlayfield(el) {
   }
 }
 
+function floatCandidateClear(pos, width, height) {
+  const bubble = $('speech-bubble');
+  if (!bubble?.classList.contains('show')) return true;
+  const b = bubble.getBoundingClientRect();
+  if (!b.width || !b.height) return true;
+  return !(
+    pos.left < b.right + 6 &&
+    pos.left + width > b.left - 6 &&
+    pos.top < b.bottom + 6 &&
+    pos.top + height > b.top - 6
+  );
+}
+
 function floatPosition(x, y, big, perfect, text = '') {
   const r = slimeCv.getBoundingClientRect();
   const mobile = isMobileLayout();
   const estimatedWidth = mobile && (big || perfect)
     ? Math.min(innerWidth - 32, Math.max(90, text.length * 12))
-    : Math.min(260, Math.max(70, text.length * (big || perfect ? 13 : 9)));
+    : Math.min(perfect ? 340 : 260, Math.max(70, text.length * (perfect ? 17 : big ? 13 : 9)));
+  const estimatedHeight = mobile ? (perfect ? 25 : big ? 21 : 16) : (perfect ? 38 : big ? 28 : 20);
   const insideSlimeZone =
     x >= r.left - r.width * 0.18 && x <= r.right + r.width * 0.18 &&
     y >= r.top - r.height * 0.12 && y <= r.bottom + r.height * 0.12;
@@ -4873,19 +4887,23 @@ function floatPosition(x, y, big, perfect, text = '') {
   }
   const lane = floatLane++ % 4;
   const sideTop = r.top + r.height * ((big || perfect) ? 0.12 : 0.26) + lane * ((big || perfect) ? 18 : 16);
-  const right = r.right + 12;
-  if (right + estimatedWidth <= innerWidth - 8) {
-    return clampFloatToPlayfield({ left: right, top: sideTop }, estimatedWidth, big, perfect);
+  const sideGap = perfect ? (mobile ? 12 : 28) : 12;
+  const right = r.right + sideGap;
+  const rightPos = { left: right, top: sideTop };
+  if (right + estimatedWidth <= innerWidth - 8 && floatCandidateClear(rightPos, estimatedWidth, estimatedHeight)) {
+    return clampFloatToPlayfield(rightPos, estimatedWidth, big, perfect);
   }
-  const left = r.left - estimatedWidth - 12;
-  if (left >= 8) {
-    return clampFloatToPlayfield({ left, top: sideTop }, estimatedWidth, big, perfect);
+  const left = r.left - estimatedWidth - sideGap;
+  const leftPos = { left, top: sideTop };
+  if (left >= 8 && floatCandidateClear(leftPos, estimatedWidth, estimatedHeight)) {
+    return clampFloatToPlayfield(leftPos, estimatedWidth, big, perfect);
   }
   if (big || perfect) {
     if (mobile) {
+      const railTop = r.top - (perfect ? 26 : 22) - lane * 12;
       return clampFloatToPlayfield({
-        left: 16,
-        top: r.bottom + 8 + lane * 14,
+        left: r.left + r.width / 2 - estimatedWidth / 2,
+        top: railTop,
       }, estimatedWidth, big, perfect);
     }
     return clampFloatToPlayfield({
@@ -7053,8 +7071,8 @@ function eventRectOverlaps(p, size, r, pad = 0) {
 
 function avoidMiniStarSlimeOverlap(pos, size, bounds, index = 0) {
   const slime = bounds.slime;
-  if (!slime || !eventRectOverlaps(pos, size, slime, bounds.mobile ? 6 : 10)) return pos;
-  const pad = bounds.mobile ? 8 : 14;
+  if (!slime || !eventRectOverlaps(pos, size, slime, bounds.mobile ? 12 : 34)) return pos;
+  const pad = bounds.mobile ? 14 : 44;
   const lane = Math.floor(index / 2);
   const side = index % 2 === 0 ? -1 : 1;
   const sideX = side < 0
