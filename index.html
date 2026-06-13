@@ -1285,7 +1285,9 @@
   /* ── 상점 패널 ── */
   #shop {
     width: 360px;
-    background: var(--panel);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0) 90px),
+      var(--panel);
     border-left: 4px solid var(--border);
     display: flex;
     flex-direction: column;
@@ -1293,11 +1295,27 @@
   }
 
   #shop-header {
+    position: relative;
     padding: 14px 16px 10px;
-    border-bottom: 3px solid var(--border);
+    border-bottom: 2px solid #4d2d7f;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background:
+      linear-gradient(180deg, #2e1d4cf2, #21143bf2);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.1),
+      0 2px 0 rgba(0,0,0,.18);
+  }
+  #shop-header::after {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 2px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,215,92,.35), transparent);
+    pointer-events: none;
   }
   #shop-header h2 { font-size: 16px; color: var(--gold); letter-spacing: 1px; }
   #discount-badge {
@@ -1311,13 +1329,19 @@
   }
 
   .icon-btn {
-    background: var(--panel-light);
-    border: 2px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0) 45%),
+      #21143c;
+    border: 2px solid #5a3a83;
+    border-radius: 5px;
     color: var(--text);
     font-family: inherit;
     font-size: 14px;
     padding: 4px 10px;
     cursor: pointer;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.1),
+      0 2px 0 rgba(0,0,0,.16);
   }
   .icon-btn:hover { background: var(--border); }
   #reset-btn.holding { background: #8a2b2b; }
@@ -1391,7 +1415,16 @@
   #res-soul { border-color: #6a4d96; }
   #res-crystal { border-color: #327d91; }
 
-  #shop-tabs { display: flex; border-bottom: 3px solid var(--border); }
+  #shop-tabs {
+    display: flex;
+    position: relative;
+    border-top: 1px solid #ffffff10;
+    border-bottom: 3px solid #4d2d7f;
+    background: #160d29;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.06),
+      0 3px 0 rgba(0,0,0,.14);
+  }
   .tab {
     flex: 1;
     position: relative;
@@ -1400,7 +1433,9 @@
     font-size: 12px;
     cursor: pointer;
     color: var(--text-dim);
-    background: linear-gradient(180deg, #2a1a49, #1d1234);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 46%),
+      linear-gradient(180deg, #2a1a49, #1d1234);
     border-right: 1px solid #ffffff10;
     display: flex;
     flex-direction: column;
@@ -1411,8 +1446,13 @@
   }
   .tab.active {
     color: var(--gold);
-    background: linear-gradient(180deg, #493067, #2d1b4e);
-    box-shadow: inset 0 2px 0 #ffd75e55, inset 0 -2px 0 #00000033;
+    background:
+      radial-gradient(circle at 50% 0, rgba(255,215,92,.18), transparent 60%),
+      linear-gradient(180deg, #493067, #2d1b4e);
+    box-shadow:
+      inset 0 2px 0 #ffd75e75,
+      inset 0 -2px 0 #00000033,
+      0 0 12px #ffd75e18;
   }
   .tab[hidden] { display: none; }
   .tab .tab-icon {
@@ -2544,9 +2584,13 @@
       min-height: 0;
       padding-bottom: env(safe-area-inset-bottom);
     }
-    #shop-header { padding: 6px 12px 4px; }
+    #shop-header {
+      padding: 6px 12px 5px;
+      border-bottom-width: 2px;
+    }
     #shop-header h2 { font-size: 12px; }
-    .icon-btn { font-size: 11px; padding: 2px 7px; min-height: 30px; min-width: 34px; }  /* 터치 타겟 */
+    .icon-btn { font-size: 11px; padding: 2px 7px; min-height: 30px; min-width: 34px; border-radius: 4px; }  /* 터치 타겟 */
+    #shop-tabs { border-bottom-width: 2px; }
     .tab { padding: 6px 2px 5px; font-size: 10px; min-height: 48px; gap: 2px; }
     .tab .tab-icon { font-size: 17px; }
     #res-strip { padding: 0 8px 5px; gap: 5px; }
