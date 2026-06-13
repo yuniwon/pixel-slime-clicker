@@ -2,7 +2,7 @@
    버전을 올리면 구 캐시가 정리된다. */
 'use strict';
 
-const CACHE = 'slime-clicker-v10';
+const CACHE = 'slime-clicker-v11';
 
 const CORE = [
   './',

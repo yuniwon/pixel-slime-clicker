@@ -4,8 +4,8 @@
 
 | Priority | Asset | Current Temporary Expression | Why Needed | Use Location | Cell / Frames | Visual QA Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `spirit` friend | CSS pixel fallback | 별의 정령만 다른 친구보다 임시 티가 남음 | stage resident, friends tab, codex | 896x896, idle 2f | sky glow, no ground shadow, readable at 42-64px |
-| 1 | `turtle` friend | CSS pixel fallback | 시간 거북은 역할상 자주 보이며 fallback outline이 단순함 | stage resident, friends tab, codex | 896x896, idle 2f | ground contact shadow, clock shell must read at small size |
+| Done | `spirit` friend | `slime-friends-ai` 2f sprite | 별의 정령 CSS 폴백 제거 완료 | stage resident, friends tab, codex | 896x896, idle 2f | sky glow, no ground shadow, readable at 42-64px |
+| Done | `turtle` friend | `slime-friends-ai` 2f sprite | 시간 거북 CSS 폴백 제거 완료 | stage resident, friends tab, codex | 896x896, idle 2f | ground contact shadow, clock shell must read at small size |
 | 2 | `items:prestige` | gray atlas + runtime violet tint | 환생 버튼은 핵심 전환인데 생성 회색화 이력이 있음 | prestige tab, shop icon | 384-512 square, 1f | use green chroma for violet/pink subject; avoid gray average |
 | 3 | `slime-challenges-ai` 4 icons | CSS pixel fallback | 도전 런 아이콘이 카드 문법에서 가장 수제 느낌 | prestige challenge cards | 256x256, 1f each | names must match `silence`, `mono`, `starlit`, `sprint` |
 | 4 | stage ground texture 5 stages | current stage backdrop and glow | 진화 단계별 바닥 감각이 아직 약함 | behind/under slime stage | 412x80 tile or manifest rects | do not cover slime face; must support contact shadows |

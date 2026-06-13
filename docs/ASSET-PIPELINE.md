@@ -80,7 +80,7 @@ spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
 | slime-cosmetics-ai | 11 (꾸미기) | ✅ 생성·연결 완료 — 핑크 3종(aura/bubble/heart) atlas 보정 적용 |
 | slime-items-ai | 33 (강화/특성/상점 아이콘) | ⚠️ prestige 회색화 → 런타임 violet 틴트 보정 중 |
 | slime-perks-extra-ai | 3 요청 (후반 환생 특성) | 📝 요청서·프롬프트 준비 완료 — 현재 CSS 픽셀 폴백, 생성 후 soulfire/starborn/deeproot 승격 후보 |
-| slime-friends-ai | 10 요청 / 8 산출 (자동 생산 친구) | ⚠️ `spirit`, `turtle` raw/frames 미생성 → 현재 CSS 픽셀 폴백, 다음 재생성 우선 후보 |
+| slime-friends-ai | 10 요청 / 10 산출 (자동 생산 친구) | ✅ 생성·연결 완료 — `spirit`, `turtle` 2프레임 승격 |
 | slime-challenges-ai | 4 요청 (도전 런 아이콘) | 📝 요청서·프롬프트 준비 완료 — 현재 CSS 픽셀 폴백, 생성 후 silence/mono/starlit/sprint 승격 후보 |
 | slime-guests-ai | 4 (먹구름·별똥이 + happy 표정) | ✅ 생성·연결 완료 |
 | slime-main-v3-ai | 5단계 ×2프레임 (본체 v3) | ✅ 연결됨 — baked 성향 슬라임의 둥근 체형과 기본 본체 실루엣 차이를 줄인 현재 기본값 |

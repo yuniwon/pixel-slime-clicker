@@ -601,6 +601,9 @@
   .friend.zone-air {
     filter: drop-shadow(0 0 8px #b48aff77);
   }
+  .friend[data-id="turtle"] {
+    filter: saturate(1.16) drop-shadow(2px 2px 0 #00000077);
+  }
   @keyframes friend-pop-in {
     from { transform: scale(.2); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
@@ -2481,9 +2484,7 @@ const PRODUCERS = [
 ];
 
 const PRODUCER_SPRITE_ATLAS = 'assets/generated/sprites/slime-friends-ai/sprite-sheet-alpha.png';
-const PRODUCER_SPRITE_SHEET = { w: 1792, h: 7168 };
-// 주의: sprite-request에는 spirit(별의 정령)·turtle(시간 거북)이 있으나 현재 시트는 8종만 산출됨.
-// 다음 sprite-gen 재생성 사이클에서 두 행이 추가되면 여기에 frame_layout을 복사한다.
+const PRODUCER_SPRITE_SHEET = { w: 1792, h: 8960 };
 const PRODUCER_SPRITE_LAYOUT = {
   chick:   [{ x: 0, y: 0,    w: 896, h: 896 }, { x: 896, y: 0,    w: 896, h: 896 }],
   cat:     [{ x: 0, y: 896,  w: 896, h: 896 }, { x: 896, y: 896,  w: 896, h: 896 }],
@@ -2493,6 +2494,8 @@ const PRODUCER_SPRITE_LAYOUT = {
   dragon:  [{ x: 0, y: 4480, w: 896, h: 896 }, { x: 896, y: 4480, w: 896, h: 896 }],
   whale:   [{ x: 0, y: 5376, w: 896, h: 896 }, { x: 896, y: 5376, w: 896, h: 896 }],
   planet:  [{ x: 0, y: 6272, w: 896, h: 896 }, { x: 896, y: 6272, w: 896, h: 896 }],
+  spirit:  [{ x: 0, y: 7168, w: 896, h: 896 }, { x: 896, y: 7168, w: 896, h: 896 }],
+  turtle:  [{ x: 0, y: 8064, w: 896, h: 896 }, { x: 896, y: 8064, w: 896, h: 896 }],
 };
 
 const ITEM_SPRITE_ATLAS = 'assets/generated/sprites/slime-items-ai/sprite-sheet-alpha.png';
@@ -3677,7 +3680,7 @@ const STAGE_LAYOUT = {
       dragon:  { x: 0.22, y: 0.66, zone: 'ground' },
       unicorn: { x: 0.74, y: 0.67, zone: 'ground' },
       cat:     { x: 0.67, y: 0.76, zone: 'ground' },
-      turtle:  { x: 0.24, y: 0.80, zone: 'ground' },
+      turtle:  { x: 0.14, y: 0.88, zone: 'ground' },
       dog:     { x: 0.58, y: 0.82, zone: 'ground' },
       chick:   { x: 0.43, y: 0.82, zone: 'ground' },
       spirit:  { x: 0.18, y: 0.46, zone: 'sky' },
@@ -6499,8 +6502,8 @@ function rebuildFriends() {
     el.className = 'friend zone-' + zone;
     el.dataset.id = p.id;
     const size = isMobileLayout()
-      ? (zone === 'sky' ? 32 : 28)
-      : (zone === 'sky' ? (p.id === 'whale' ? 72 : 52) : (zone === 'air' ? 46 : 40));
+      ? (zone === 'sky' ? 32 : (p.id === 'turtle' ? 46 : 28))
+      : (zone === 'sky' ? (p.id === 'whale' ? 72 : 52) : (zone === 'air' ? 46 : (p.id === 'turtle' ? 46 : 40)));
     const pos = stagePointStyle(point, size, { topGuard: zone === 'sky' ? 58 : 120, bottomGuard: isMobileLayout() ? 24 : 70 });
     if (pos) Object.assign(el.style, pos);
     else Object.assign(el.style, bhv.pos());
