@@ -2019,20 +2019,69 @@
     color: var(--gold);
     padding: 6px 0 10px;
   }
-  .wish-item { cursor: default; }
+  .wish-item {
+    cursor: default;
+    align-items: stretch;
+    border-color: #6b4a96;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,0) 40%),
+      linear-gradient(180deg, #352252f2 0%, #22143df2 100%);
+  }
   .wish-item.done { border-color: var(--green); }
+  .wish-item .shop-info {
+    display: flex;
+    min-height: 58px;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .wish-item .shop-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #fff2b5;
+    line-height: 1.22;
+  }
+  .wish-chip {
+    flex: 0 0 auto;
+    padding: 2px 6px;
+    border: 1px solid #ffd75e99;
+    border-radius: 4px;
+    background: #12091f99;
+    color: var(--gold);
+    font-size: 10px;
+    line-height: 1;
+    text-shadow: 1px 1px 0 #000;
+  }
   .wish-bar-outer {
-    height: 8px;
-    background: #00000066;
-    border: 2px solid var(--border);
-    margin-top: 6px;
+    height: 10px;
+    background: #12091f;
+    border: 2px solid #4d2d7f;
+    margin-top: 7px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
   }
   .wish-bar {
     height: 100%; width: 0%;
     background: linear-gradient(90deg, var(--pink), var(--gold));
     transition: width .25s ease;
   }
-  .wish-reward { font-size: 11px; color: var(--gold); margin-top: 4px; }
+  .wish-reward {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--gold);
+    margin-top: 5px;
+  }
+  .wish-progress { color: #fff2b5; }
+  .wish-reward-badge {
+    flex: 0 0 auto;
+    padding: 2px 6px;
+    border: 1px solid #ffd75e66;
+    border-radius: 4px;
+    background: #00000030;
+    white-space: nowrap;
+  }
   .cosmetic-item.equipped { border-color: var(--gold); }
   .cosmetic-item.equipped .shop-name::after { content: ' (장착 중)'; color: var(--green); font-size: 11px; }
 
@@ -2262,7 +2311,17 @@
   }
   .crystal-row button:disabled { border-color: var(--border); color: var(--text-dim); cursor: default; }
   /* 황금 소원 카드 */
-  .wish-item.golden { border-color: var(--gold); background: #ffd75e14; }
+  .wish-item.golden {
+    border-color: var(--gold);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,0) 40%),
+      radial-gradient(circle at 14% 16%, rgba(255,215,92,.22), transparent 36%),
+      linear-gradient(180deg, #402a58f2 0%, #26163cf2 100%);
+    box-shadow:
+      inset 0 1px 0 #ffffff18,
+      0 2px 0 #12091fcc,
+      0 0 18px #ffd75e1f;
+  }
   .wish-item.golden.done { border-color: var(--green); }
   #crystal-banner { border-color: #b48aff; cursor: pointer; }
   #settings-modal {
@@ -2540,8 +2599,11 @@
     .story-entry { padding: 7px 9px; margin-bottom: 5px; font-size: 10px; }
     .album-box { padding: 6px 10px; }
     .album-row { font-size: 10px; padding: 3px 0; }
-    .wish-bar-outer { margin-top: 4px; }
-    .wish-reward { font-size: 10px; margin-top: 2px; }
+    .wish-item .shop-info { min-height: 48px; }
+    .wish-chip { font-size: 9px; padding: 2px 4px; }
+    .wish-bar-outer { margin-top: 4px; height: 7px; }
+    .wish-reward { font-size: 10px; margin-top: 3px; gap: 5px; }
+    .wish-reward-badge { padding: 1px 4px; }
     #ach-summary, #stardust-display, #prestige-info { font-size: 11px; padding: 3px 0 6px; }
     .blessing-card { padding: 8px 10px; margin-bottom: 6px; gap: 9px; }
     .blessing-card .b-icon { font-size: 22px; }
@@ -7117,9 +7179,9 @@ function buildWishesTab() {
     el.innerHTML = `
       <div class="shop-icon">${spriteHtml('wishes', g.type, g.icon, { size: 54 })}</div>
       <div class="shop-info">
-        <div class="shop-name">🌟 오늘의 황금 소원 — ${goldenWishText(g)}</div>
+        <div class="shop-name"><span class="wish-chip">황금</span> ${goldenWishText(g)}</div>
         <div class="wish-bar-outer"><div class="wish-bar"></div></div>
-        <div class="wish-reward">${g.done ? '✅ 오늘 성취! 내일 새 소원이 와요' : `진행 <span class="wish-progress"></span> · 보상 별가루 +${g.reward}`}</div>
+        <div class="wish-reward">${g.done ? '<span class="wish-progress">오늘 성취! 내일 새 소원이 와요</span>' : '진행 <span class="wish-progress"></span>'} <span class="wish-reward-badge">별가루 +${g.reward}</span></div>
       </div>`;
     shopList.appendChild(el);
   }
@@ -7136,9 +7198,9 @@ function buildWishesTab() {
     el.innerHTML = `
       <div class="shop-icon">${spriteHtml('wishes', w.type, w.icon, { size: 54 })}</div>
       <div class="shop-info">
-        <div class="shop-name">${wishText(w)}</div>
+        <div class="shop-name"><span class="wish-chip">소원</span> ${wishText(w)}</div>
         <div class="wish-bar-outer"><div class="wish-bar"></div></div>
-        <div class="wish-reward">진행 <span class="wish-progress"></span> · 보상 별가루 +${w.reward}</div>
+        <div class="wish-reward">진행 <span class="wish-progress"></span> <span class="wish-reward-badge">별가루 +${w.reward}</span></div>
       </div>`;
     shopList.appendChild(el);
   });
@@ -7513,7 +7575,11 @@ function refreshShop() {
       const pct = w.done ? 100 : Math.min(100, w.progress / w.target * 100);
       el.querySelector('.wish-bar').style.width = pct + '%';
       const prog = el.querySelector('.wish-progress');
-      if (prog) prog.textContent = `${fmt(Math.min(w.progress, w.target))} / ${fmt(w.target)}`;
+      if (prog) {
+        prog.textContent = w.done && el.dataset.golden
+          ? '오늘 성취! 내일 새 소원이 와요'
+          : `${fmt(Math.min(w.progress, w.target))} / ${fmt(w.target)}`;
+      }
     }
     for (const el of shopList.querySelectorAll('.cosmetic-item')) {
       const c = COSMETICS.find(x => x.id === el.dataset.id);
