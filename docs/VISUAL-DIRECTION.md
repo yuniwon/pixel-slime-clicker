@@ -106,7 +106,7 @@
 | crystal modal | `#crystal-overlay` | 130 | modal | conditional | feeding loop | visually separate enough |
 | cosmic ending overlay | `#cosmic-ending-overlay` | 210 | modal | conditional | milestone ceremony | should remain rare and stronger than normal UI |
 | shop panel | `#shop` | 2 | UI | always | right/bottom panel | header/tabs now read as a darker console; card grammar still varies by tab |
-| res-strip | `#res-strip` | normal | UI | conditional | resource chips | compact, but visually plain next to reference |
+| res-strip | `#res-strip` | normal | UI | conditional | resource chips | compact chips now have icon wells/value badges closer to the reference currency blocks; keep checking mobile width pressure as more resources unlock |
 | tabs | `#shop-tabs .tab` | normal | UI | unlocked | tab navigation | sprite icons and darker active surfaces now improve tactility; still simple versus reference |
 | shop-list/cards | `#shop-list`, `.shop-item` | normal | UI | always | cards | base card, icon frame, cost/count badges, producer/wish metadata, prestige summary panel, and room codex/story/album surfaces now share the darker framed-panel grammar; final pass should focus on any remaining tab-specific oddities |
 | stats-bar | `#stats-bar` | normal | UI | optional | advanced telemetry | intentionally subdued |
