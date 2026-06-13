@@ -2345,20 +2345,23 @@
       column-gap: 10px;
     }
     body.stats-open #stats-bar { display: flex; }
-    /* 토스트: 모바일에선 뉴스 스트립 아래 */
+    /* 토스트: 모바일에선 상점 카드보다 가벼운 상태 칩으로 */
     #toast {
       top: auto;
       bottom: calc(56dvh + env(safe-area-inset-bottom, 0px) + 8px);
-      font-size: 10px;
-      padding: 6px 10px;
+      background: #21133de6;
+      border-color: #b8953f;
+      color: #ded6ff;
+      font-size: 9px;
+      padding: 5px 8px;
       width: max-content;
-      max-width: min(72vw, 280px);
+      max-width: min(62vw, 244px);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       line-height: 1.2;
       border-width: 2px;
-      box-shadow: 3px 3px 0 #00000066;
+      box-shadow: 2px 2px 0 #00000066;
       transform: translateX(-50%) translateY(12px);
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
@@ -7932,7 +7935,7 @@ function placeMobileToast(el) {
   const list = $('shop-list')?.getBoundingClientRect();
   el.style.bottom = 'auto';
   const h = el.getBoundingClientRect().height || 34;
-  document.body.style.setProperty('--mobile-toast-space', Math.ceil(h + 16) + 'px');
+  document.body.style.setProperty('--mobile-toast-space', Math.ceil(h + 12) + 'px');
   const laneTop = (list?.top || shop.top + 46) + 8;
   const maxTop = window.innerHeight - h - 12;
   el.style.top = Math.round(clampNum(laneTop, shop.top + 8, maxTop)) + 'px';
