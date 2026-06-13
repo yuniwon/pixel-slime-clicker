@@ -1367,6 +1367,17 @@
     line-height: 1;
     filter: drop-shadow(1px 1px 0 #00000066);
   }
+  .tab .tab-sprite {
+    display: block;
+    image-rendering: auto;
+    transform: scale(.72);
+    transform-origin: center;
+    margin: -6px 0 -5px;
+    filter: saturate(1.22) drop-shadow(1px 1px 0 #00000066);
+  }
+  .tab.active .tab-sprite {
+    filter: saturate(1.35) drop-shadow(0 0 5px #ffd75e66) drop-shadow(1px 1px 0 #00000066);
+  }
   .tab .tab-label {
     display: block;
     line-height: 1.1;
@@ -4081,7 +4092,10 @@ function layoutStageBackdropSprites() {
   });
 }
 
-window.addEventListener('resize', () => requestAnimationFrame(layoutStageBackdropSprites));
+window.addEventListener('resize', () => requestAnimationFrame(() => {
+  layoutStageBackdropSprites();
+  applyTabSpriteIcons();
+}));
 
 /* 범용 스프라이트 렌더러.
    opts: { size, className, frame } — layout 미존재 시 fallback(이모지) 반환 */
@@ -4151,6 +4165,27 @@ function decorSpriteHtml(id, fallback, className = 'shop-sprite', sizeOverride =
 function setProducerShopIcon(el, p, reveal) {
   const icon = el.querySelector('.shop-icon');
   icon.innerHTML = reveal ? producerSpriteHtml(p.id, p.icon) : lockedProducerSpriteHtml();
+}
+
+function tabSpriteHtml(key) {
+  const size = isMobileLayout() ? 38 : 42;
+  const opts = { size, className: 'tab-sprite' };
+  if (key === 'producers') return spriteHtml('friends', 'chick', '🐤', opts);
+  if (key === 'upgrades') return spriteHtml('items', 'hand1', '⬆️', opts);
+  if (key === 'achievements') return spriteHtml('achievements', 'allUp', '🏆', opts);
+  if (key === 'prestige') return spriteHtml('achievements', 'rebirth1', '🍮', opts);
+  if (key === 'room') return spriteHtml('decor', 'lamp', '🏠', opts);
+  if (key === 'wishes') return spriteHtml('wishes', 'ministar', '⭐', opts);
+  return '';
+}
+
+function applyTabSpriteIcons() {
+  document.querySelectorAll('#shop-tabs .tab').forEach(tab => {
+    const icon = tab.querySelector('.tab-icon');
+    if (!icon) return;
+    const html = tabSpriteHtml(tab.dataset.tab);
+    if (html) icon.innerHTML = html;
+  });
 }
 
 function fmt(n) {
@@ -8743,6 +8778,7 @@ crystalTick();
 // UX 점진 해금: 탭 뱃지 슬롯 주입 + 기존 진행분은 조용히 해금 처리 (토스트 일괄 발사 방지)
 document.querySelectorAll('#shop-tabs .tab').forEach(t =>
   t.insertAdjacentHTML('beforeend', '<span class="tab-badge"></span>'));
+applyTabSpriteIcons();
 updateTabVisibility(true);
 
 // 재화 스트립: 누르면 쓰는 곳으로
