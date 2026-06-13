@@ -111,7 +111,6 @@
 ## 에셋
 
 게임이 사용하는 것은 각 스프라이트 폴더의 `sprite-sheet-alpha.png`입니다.
-친구 10종 중 별의 정령·시간 거북은 시트 미생성으로 **이모지 폴백이 의도된 현재 상태**입니다 (재생성 큐 대기).
-현재 본체·친구·아이템·업적·장식·축복·소원·꾸미기·손님 아틀라스를 사용하며,
-생성 대기 큐와 협업 규약은 [docs/ASSET-PIPELINE.md](docs/ASSET-PIPELINE.md)를 보세요.
+현재 본체·친구 10종·아이템·업적·장식·축복·소원·꾸미기·손님·도전 런 아이콘 아틀라스를 사용하며,
+남은 생성 대기 큐와 협업 규약은 [docs/ASSET-PIPELINE.md](docs/ASSET-PIPELINE.md)를 보세요.
 생성 중간 산출물(raw/qa/frames/prompts/references)은 gitignore 처리되어 있습니다.

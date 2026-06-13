@@ -24,6 +24,9 @@ const SPRITE_ATLASES = {
   guests:       { src, sheet, layout: {...4종} },                        // 연결됨
   stage:        { src, sheet, layout: {...9종} },                        // 연결됨
   crystal:      { src, sheet, layout: {...4종} },                        // 연결됨
+  challenges:   { src, sheet, layout: {...4종} },                        // 연결됨
+  coinpile:     { src, sheet, layout: {...3종} },                        // 연결됨
+  clickfx:      { src, sheet, layout: {...1종/3프레임} },                 // 연결됨
 };
 
 spriteHtml(atlasKey, id, fallbackEmoji, { size, className, frame })
