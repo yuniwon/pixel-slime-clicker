@@ -85,7 +85,7 @@
 | body/background/star | `body`, `.star` | 0 | sky | always | deep violet night sky | generated stars now avoid the title, slime focus, and wish-strip lanes; remaining polish is constellation-style clustering rather than raw random scatter |
 | game-area | `#game-area` | 1/2 children | UI/stage | always | left live theater | flex centering fights stage-specific coordinates |
 | stage garden | `#stage-backdrop`, `.pg-*` | 0-5 internal | back decor | always | small planet garden / spaceship deck | desktop uses custom math, mobile uses CSS fallback, other props use separate math |
-| decor-layer | `#decor-layer`, `.decor` | 1 | ground/sky | conditional | room set pieces | decor positions live in `DECOR`, not in one stage map |
+| decor-layer | `#decor-layer`, `.decor` | 1 | ground/sky | conditional | room set pieces | `STAGE_LAYOUT` now owns desktop/mobile positions; mobile first-pass decor is tuned toward a left-ground garden cluster |
 | friends-layer | `#friends-layer`, `.friend` | 1 | ground/sky | conditional | living residents | max copies can make residents feel like scattered stickers |
 | news-ticker | `#news-ticker` | 3 | UI | conditional fade | thin top news strip | can compete with title if too dense |
 | title/stage-name/cosmic-mark | `#title`, `#stage-name`, `#cosmic-mark` | 2 | UI | always/conditional | upper center identity | title block has no explicit safe lane from guests |
