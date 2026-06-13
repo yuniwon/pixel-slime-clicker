@@ -545,6 +545,7 @@
 
   /* ── 말풍선 ── */
   #speech-bubble {
+    --bubble-border: #2d1b4e;
     position: absolute;
     top: 18px; left: calc(100% + 10px);
     transform: scale(0);
@@ -554,7 +555,7 @@
     font-size: 11px;
     line-height: 1.35;
     padding: 6px 10px;
-    border: 2px solid #2d1b4e;
+    border: 2px solid var(--bubble-border);
     box-shadow: 2px 2px 0 #00000055;
     max-width: 220px;
     width: max-content;
@@ -570,7 +571,34 @@
     left: -10px; top: 50%;
     margin-top: -5px;
     border: 5px solid transparent;
-    border-right-color: #2d1b4e;
+    border-right-color: var(--bubble-border);
+  }
+  #speech-bubble.bubble-left {
+    left: auto;
+    right: calc(100% + 10px);
+    transform-origin: right center;
+  }
+  #speech-bubble.bubble-left::after {
+    left: auto;
+    right: -10px;
+    border-right-color: transparent;
+    border-left-color: var(--bubble-border);
+  }
+  #speech-bubble.bubble-top {
+    left: 50%;
+    top: -12px;
+    right: auto;
+    transform: translateX(-50%) scale(0);
+    transform-origin: center bottom;
+  }
+  #speech-bubble.bubble-top.show { transform: translateX(-50%) scale(1); }
+  #speech-bubble.bubble-top::after {
+    left: 50%;
+    top: auto;
+    bottom: -10px;
+    margin: 0 0 0 -5px;
+    border-right-color: transparent;
+    border-top-color: var(--bubble-border);
   }
 
   /* ── 친구 시각화: 행동 기반 주민 시스템 ── */
@@ -1815,10 +1843,8 @@
   }
 
   /* ── 말풍선 테마 ── */
-  #speech-bubble.bubble-pink { background: #ffd9ec; border-color: #a8336e; color: #5e1740; }
-  #speech-bubble.bubble-pink::after { border-right-color: #a8336e; }
-  #speech-bubble.bubble-gold { background: #ffeec4; border-color: #8a6d1f; color: #5c4312; }
-  #speech-bubble.bubble-gold::after { border-right-color: #8a6d1f; }
+  #speech-bubble.bubble-pink { --bubble-border: #a8336e; background: #ffd9ec; color: #5e1740; }
+  #speech-bubble.bubble-gold { --bubble-border: #8a6d1f; background: #ffeec4; color: #5c4312; }
 
   /* ── 주스: 코인 팝 / 구매 플래시 / 환생 플래시 ── */
   #coin-display.pop { animation: coinpop .15s ease-out; }
@@ -2224,6 +2250,8 @@
     #challenge-badge { font-size: 10px; padding: 2px 8px; margin-bottom: 4px; }
     .friend { font-size: 20px; }
     #speech-bubble { top: 18px; left: calc(100% + 6px); font-size: 10px; max-width: 128px; padding: 5px 8px; }
+    #speech-bubble.bubble-left { left: auto; right: calc(100% + 6px); }
+    #speech-bubble.bubble-top { left: 50%; top: -10px; max-width: min(180px, calc(100vw - 32px)); }
     /* 상점: 나머지 전부 + iOS 홈바 안전영역 */
     #shop {
       width: 100%;
@@ -2321,6 +2349,9 @@
     #daily-summary { display: none; }
     #combo-box { margin-top: 2px; }
   }
+
+  #speech-bubble.show:not(.bubble-top) { transform: scale(1); }
+  #speech-bubble.bubble-top.show { transform: translateX(-50%) scale(1); }
 </style>
 </head>
 <body>
@@ -4875,6 +4906,39 @@ function hideQuip() {
   clearTimeout(quipHideTimer);
 }
 
+function layoutQuipBubble() {
+  const el = $('speech-bubble');
+  const area = $('game-area');
+  const wrap = $('slime-wrap');
+  if (!el || !area || !wrap || !el.classList.contains('show')) return;
+  const areaRect = area.getBoundingClientRect();
+  const wrapRect = wrap.getBoundingClientRect();
+  const gap = isMobileLayout() ? 10 : 14;
+  const rightRoom = areaRect.right - wrapRect.right;
+  const leftRoom = wrapRect.left - areaRect.left;
+  const bubbleWidth = Math.max(el.offsetWidth || 0, el.getBoundingClientRect().width || 0);
+
+  el.style.removeProperty('left');
+  el.classList.remove('bubble-left', 'bubble-top');
+  let r = el.getBoundingClientRect();
+  if (r.right <= areaRect.right - gap && r.left >= areaRect.left + gap) return;
+
+  if (leftRoom > rightRoom && leftRoom > Math.min(r.width + gap, 170)) {
+    el.classList.add('bubble-left');
+    r = el.getBoundingClientRect();
+    if (r.left >= areaRect.left + gap && r.right <= areaRect.right - gap) return;
+  }
+
+  el.classList.remove('bubble-left');
+  el.classList.add('bubble-top');
+  const half = bubbleWidth / 2;
+  const minCenter = areaRect.left + gap + half;
+  const maxCenter = areaRect.right - gap - half;
+  const desiredCenter = wrapRect.left + wrapRect.width / 2;
+  const clampedCenter = clampNum(desiredCenter, minCenter, maxCenter);
+  el.style.left = `${Math.round(clampedCenter - wrapRect.left)}px`;
+}
+
 function showQuip(text) {
   if (silentTick) return;
   const el = $('speech-bubble');
@@ -4882,8 +4946,12 @@ function showQuip(text) {
     hideQuip();
     return;
   }
+  el.style.removeProperty('left');
+  el.classList.remove('bubble-left', 'bubble-top');
   el.textContent = text;
   el.classList.add('show');
+  requestAnimationFrame(() => requestAnimationFrame(layoutQuipBubble));
+  setTimeout(layoutQuipBubble, 240);
   clearTimeout(quipHideTimer);
   quipHideTimer = setTimeout(() => el.classList.remove('show'), 4000);
 }
