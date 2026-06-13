@@ -717,29 +717,32 @@
       calc(var(--mf-size, 48px) * -.10) calc(var(--mf-size, 48px) * .58) 0 #ffffff;
   }
   .missing-friend-icon.mf-turtle::before {
-    left: 16%;
-    top: 44%;
-    width: 64%;
-    height: 34%;
-    background: #56b868;
+    left: 17%;
+    top: 36%;
+    width: 58%;
+    height: 42%;
+    background:
+      linear-gradient(90deg, transparent 0 29%, #2f8a50 29% 36%, transparent 36% 64%, #2f8a50 64% 71%, transparent 71%),
+      linear-gradient(180deg, #9ee07f 0 38%, #56b868 38% 100%);
     border: max(2px, calc(var(--mf-size, 48px) * .055)) solid #1d5135;
-    border-radius: 42% 42% 28% 28%;
+    border-radius: 46% 48% 34% 38%;
     box-shadow:
       inset 0 calc(var(--mf-size, 48px) * -.10) 0 #2f8a50,
-      calc(var(--mf-size, 48px) * -.12) calc(var(--mf-size, 48px) * .18) 0 calc(var(--mf-size, 48px) * -.08) #2f8a50,
-      calc(var(--mf-size, 48px) * .12) calc(var(--mf-size, 48px) * .18) 0 calc(var(--mf-size, 48px) * -.08) #2f8a50;
+      calc(var(--mf-size, 48px) * -.12) calc(var(--mf-size, 48px) * .18) 0 calc(var(--mf-size, 48px) * -.09) #2f8a50,
+      calc(var(--mf-size, 48px) * .18) calc(var(--mf-size, 48px) * .18) 0 calc(var(--mf-size, 48px) * -.09) #2f8a50;
   }
   .missing-friend-icon.mf-turtle::after {
     left: 70%;
-    top: 42%;
-    width: 20%;
-    height: 20%;
-    background: #7dff8a;
+    top: 38%;
+    width: 18%;
+    height: 18%;
+    background: radial-gradient(circle at 66% 38%, #1d5135 0 11%, transparent 12%), #9ee07f;
     border: max(2px, calc(var(--mf-size, 48px) * .045)) solid #1d5135;
-    border-radius: 45%;
+    border-radius: 48%;
     box-shadow:
-      calc(var(--mf-size, 48px) * -.22) calc(var(--mf-size, 48px) * -.04) 0 calc(var(--mf-size, 48px) * -.06) #9ee07f,
-      calc(var(--mf-size, 48px) * -.08) calc(var(--mf-size, 48px) * .12) 0 calc(var(--mf-size, 48px) * -.08) #ffeec4;
+      calc(var(--mf-size, 48px) * -.66) calc(var(--mf-size, 48px) * .02) 0 calc(var(--mf-size, 48px) * -.08) #8ac56a,
+      calc(var(--mf-size, 48px) * -.50) calc(var(--mf-size, 48px) * .28) 0 calc(var(--mf-size, 48px) * -.08) #ffeec4,
+      calc(var(--mf-size, 48px) * -.22) calc(var(--mf-size, 48px) * .30) 0 calc(var(--mf-size, 48px) * -.09) #ffeec4;
   }
   .missing-perk-icon {
     --mp-size: 60px;
@@ -759,25 +762,32 @@
     image-rendering: pixelated;
   }
   .missing-perk-icon.mp-soulfire::before {
-    left: 28%;
-    top: 14%;
-    width: 44%;
-    height: 62%;
-    background: #ff8ac4;
+    left: 27%;
+    top: 9%;
+    width: 46%;
+    height: 66%;
+    background:
+      radial-gradient(circle at 52% 62%, #fff8d6 0 19%, transparent 20%),
+      linear-gradient(145deg, transparent 0 18%, #ff8ac4 18% 48%, #ffd75e 49% 100%);
     border: max(2px, calc(var(--mp-size) * .045)) solid #5e1740;
-    border-radius: 46% 46% 40% 40%;
+    border-radius: 66% 34% 58% 42%;
     box-shadow:
-      inset 0 calc(var(--mp-size) * -.16) 0 #ffd75e,
-      0 calc(var(--mp-size) * .16) 0 calc(var(--mp-size) * .06) #8d5ce8;
+      inset calc(var(--mp-size) * -.09) calc(var(--mp-size) * -.14) 0 #ffd75e,
+      calc(var(--mp-size) * -.12) calc(var(--mp-size) * .18) 0 calc(var(--mp-size) * -.08) #8d5ce8,
+      calc(var(--mp-size) * .12) calc(var(--mp-size) * .20) 0 calc(var(--mp-size) * -.09) #8d5ce8;
+    transform: rotate(8deg);
   }
   .missing-perk-icon.mp-soulfire::after {
-    left: 41%;
-    top: 32%;
-    width: 18%;
+    left: 42%;
+    top: 20%;
+    width: 16%;
     height: 30%;
     background: #fff8d6;
-    border-radius: 50% 50% 35% 35%;
-    box-shadow: 0 calc(var(--mp-size) * .30) 0 calc(var(--mp-size) * .08) #ffd75e;
+    border-radius: 68% 32% 58% 42%;
+    box-shadow:
+      calc(var(--mp-size) * -.12) calc(var(--mp-size) * .34) 0 calc(var(--mp-size) * .06) #ffd75e,
+      calc(var(--mp-size) * .10) calc(var(--mp-size) * .36) 0 calc(var(--mp-size) * .04) #ff8ac4;
+    transform: rotate(10deg);
   }
   .missing-perk-icon.mp-starborn::before {
     left: 45%;
@@ -920,19 +930,20 @@
     position: absolute;
     top: 12px; left: 50%;
     transform: translateX(-50%);
-    background: #ffd75e;
-    color: #5e4517;
+    background: #120c24dd;
+    color: var(--gold);
     font-weight: bold;
-    padding: 8px 18px;
-    font-size: 14px;
-    border: 3px solid #fff;
-    box-shadow: 4px 4px 0 #00000055;
+    padding: 5px 12px;
+    font-size: 12px;
+    border: 2px solid #ffd75e88;
+    box-shadow: 3px 3px 0 #00000055;
     display: none;
     z-index: 5;
-    animation: buff-pulse .4s infinite alternate;
+    animation: buff-pulse .6s infinite alternate;
     white-space: nowrap;
+    text-shadow: 1px 1px 0 #00000088;
   }
-  @keyframes buff-pulse { from { transform: translateX(-50%) scale(1);} to { transform: translateX(-50%) scale(1.06);} }
+  @keyframes buff-pulse { from { transform: translateX(-50%) scale(1);} to { transform: translateX(-50%) scale(1.035);} }
 
   /* ── 떠오르는 숫자 ── */
   .float-num {
@@ -1302,6 +1313,7 @@
     border: 3px solid #2d1b4e;
     background: #2b1a3e;
     box-shadow: inset 0 0 0 3px #ffffff1f, 3px 3px 0 #00000055;
+    overflow: hidden;
   }
   .challenge-pixel-icon::before,
   .challenge-pixel-icon::after {
@@ -1334,40 +1346,76 @@
     box-shadow: 0 7px 0 #5e1740;
   }
   .challenge-pixel-icon.mono {
-    --icon-a: #c8b6ff;
+    --icon-a: #d9c4ff;
     --icon-b: #8d5ce8;
+    --icon-c: #ffeec4;
+    background:
+      linear-gradient(90deg, transparent 0 34%, #4d3478 34% 66%, transparent 66%),
+      #2b1a3e;
     border-radius: 6px;
   }
   .challenge-pixel-icon.mono::before {
-    left: 15px;
-    top: 20px;
-    width: 16px;
-    height: 14px;
-    background: var(--icon-b);
+    left: 18px;
+    top: 8px;
+    width: 10px;
+    height: 30px;
+    background: var(--icon-a);
     box-shadow:
-      -8px -10px 0 -2px var(--icon-a),
-      0 -13px 0 -2px var(--icon-a),
-      8px -10px 0 -2px var(--icon-a),
-      -4px 2px 0 4px var(--icon-b),
-      4px 2px 0 4px var(--icon-b);
+      inset 0 -5px 0 var(--icon-b),
+      -10px -1px 0 -3px var(--icon-c),
+      10px -1px 0 -3px var(--icon-c),
+      -10px 12px 0 -3px var(--icon-c),
+      10px 12px 0 -3px var(--icon-c);
+  }
+  .challenge-pixel-icon.mono::after {
+    left: 18px;
+    top: 20px;
+    width: 10px;
+    height: 8px;
+    background: var(--icon-b);
+    border-radius: 45% 45% 55% 55%;
+    box-shadow:
+      -6px -7px 0 -2px var(--icon-a),
+      0 -9px 0 -2px var(--icon-a),
+      6px -7px 0 -2px var(--icon-a);
   }
   .challenge-pixel-icon.starlit {
     --icon-a: #fff8d6;
     --icon-b: #ffd75e;
     --icon-c: #56b8f2;
     background:
-      linear-gradient(135deg, transparent 0 42%, #56b8f244 42% 58%, transparent 58%),
+      radial-gradient(circle at 68% 30%, #56b8f244 0 18%, transparent 19%),
       #2b1a3e;
     border-radius: 6px;
   }
   .challenge-pixel-icon.starlit::before {
     left: 20px;
-    top: 8px;
-    width: 7px;
-    height: 28px;
+    top: 9px;
+    width: 6px;
+    height: 26px;
     background: var(--icon-b);
-    box-shadow: -10px 10px 0 0 var(--icon-b), 10px 10px 0 0 var(--icon-b), 0 10px 0 8px var(--icon-a);
+    box-shadow:
+      -10px 10px 0 0 var(--icon-b),
+      10px 10px 0 0 var(--icon-b),
+      0 10px 0 7px var(--icon-a),
+      -14px 4px 0 -1px var(--icon-c),
+      14px 4px 0 -1px var(--icon-c);
     transform: rotate(45deg);
+  }
+  .challenge-pixel-icon.starlit::after {
+    left: 8px;
+    top: 8px;
+    width: 30px;
+    height: 30px;
+    border: 3px solid #56b8f2;
+    border-left-color: transparent;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    box-shadow:
+      inset 0 0 0 2px #ffffff1f,
+      20px -4px 0 -8px var(--icon-a),
+      -2px 24px 0 -7px var(--icon-c);
+    transform: rotate(24deg);
   }
   .challenge-pixel-icon.sprint {
     --icon-a: #e8dcff;
@@ -1701,7 +1749,7 @@
 
   /* ── 퍼펙트 말랑 ── */
   .float-num.perfect {
-    font-size: 32px;
+    font-size: 28px;
     color: #ff5ea8;
     text-shadow: 2px 2px 0 #ffffff88, 4px 4px 0 #00000066;
   }
@@ -2087,6 +2135,7 @@
     /* 정보 밀도: 박스·아이콘·여백을 줄이고 폰트는 지킨다 —
        전체 축소(zoom)가 아니라 비율 재조정 */
     #shop-list { -webkit-overflow-scrolling: touch; padding: 6px 8px; }
+    body.toast-mobile-active #shop-list { padding-top: var(--mobile-toast-space, 44px); }
     .shop-item { padding: 6px 8px; gap: 8px; margin-bottom: 5px; border-width: 2px; }
     .shop-icon { width: 40px; min-width: 40px; font-size: 24px; }
     /* scale은 시각만 줄인다 — 음수 마진으로 레이아웃 footprint도 40px로 */
@@ -2144,8 +2193,18 @@
     #cosmic-ending-card { padding: 14px; }
     #cosmic-ending-card h3 { font-size: 14px; }
     #cosmic-ending-card p { font-size: 11px; }
-    /* 광란/파티 배너: 모바일에선 게임영역 하단, 선반 위 */
-    #buff-banner { top: auto; bottom: 34px; font-size: 11px; padding: 5px 10px; }
+    /* 광란/파티 배너: 무대 바닥·친구 줄을 침범하지 않는 상단 상태 칩 */
+    #buff-banner {
+      top: 2px;
+      bottom: auto;
+      font-size: 9px;
+      line-height: 1.1;
+      padding: 2px 7px;
+      border-width: 1px;
+      max-width: calc(100vw - 28px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     #news-ticker { font-size: 11px; padding: 5px 12px; }
     #wish-strip { padding: 4px 8px; gap: 6px; font-size: 10px; }
     #wish-strip .ws-bar-outer { width: 56px; height: 6px; }
@@ -3709,8 +3768,8 @@ function missingFriendPixelHtml(id, size, className = '') {
   return `<span class="missing-friend-icon mf-${id} ${className}" aria-hidden="true" style="--mf-size:${size}px"></span>`;
 }
 
-function producerSpriteHtml(id, fallback, className = 'shop-sprite', frame = 0) {
-  const size = className.includes('friend-sprite') ? 56 : 64;
+function producerSpriteHtml(id, fallback, className = 'shop-sprite', frame = 0, sizeOverride = null) {
+  const size = sizeOverride || (className.includes('friend-sprite') ? 56 : 64);
   if (!PRODUCER_SPRITE_LAYOUT[id]) {
     const pixelFallback = missingFriendPixelHtml(id, size, className);
     if (pixelFallback) return pixelFallback;
@@ -4702,7 +4761,7 @@ function firstSquishOfDay(x, y) {
   confettiBurst();
   sndPerfect();
   haptic([12, 40, 12]);
-  spawnFloat(x, y - 34, '🌅 오늘의 첫 말랑! +' + fmt(bonus), true, true);
+  spawnFloat(x, y - 34, '첫 말랑! +' + fmt(bonus), true, false);
   toast(`🌅 <b>오늘의 첫 말랑!</b> +${fmt(bonus)} 코인 · 별가루 +2`);
   showQuip(MORNING_QUIPS[new Date().getDate() % MORNING_QUIPS.length]);
   save();
@@ -4734,7 +4793,7 @@ function doClick(x, y) {
   slimeCv.classList.add('squish');
 
   if (perfect) {
-    spawnFloat(x, y - 10, '퍼펙트 말랑! +' + fmt(gain), false, true);
+    spawnFloat(x, y - 10, (isMobileLayout() ? '완벽! +' : '퍼펙트! +') + fmt(gain), false, true);
     spawnSparks(x, y);
     spawnSparks(x, y);
     spawnClickFx(x, y);
@@ -4856,12 +4915,26 @@ function settleFloatInPlayfield(el) {
   }
 }
 
+function floatCandidateClear(pos, width, height) {
+  const bubble = $('speech-bubble');
+  if (!bubble?.classList.contains('show')) return true;
+  const b = bubble.getBoundingClientRect();
+  if (!b.width || !b.height) return true;
+  return !(
+    pos.left < b.right + 6 &&
+    pos.left + width > b.left - 6 &&
+    pos.top < b.bottom + 6 &&
+    pos.top + height > b.top - 6
+  );
+}
+
 function floatPosition(x, y, big, perfect, text = '') {
   const r = slimeCv.getBoundingClientRect();
   const mobile = isMobileLayout();
   const estimatedWidth = mobile && (big || perfect)
     ? Math.min(innerWidth - 32, Math.max(90, text.length * 12))
-    : Math.min(260, Math.max(70, text.length * (big || perfect ? 13 : 9)));
+    : Math.min(perfect ? 340 : 260, Math.max(70, text.length * (perfect ? 17 : big ? 13 : 9)));
+  const estimatedHeight = mobile ? (perfect ? 25 : big ? 21 : 16) : (perfect ? 38 : big ? 28 : 20);
   const insideSlimeZone =
     x >= r.left - r.width * 0.18 && x <= r.right + r.width * 0.18 &&
     y >= r.top - r.height * 0.12 && y <= r.bottom + r.height * 0.12;
@@ -4873,19 +4946,23 @@ function floatPosition(x, y, big, perfect, text = '') {
   }
   const lane = floatLane++ % 4;
   const sideTop = r.top + r.height * ((big || perfect) ? 0.12 : 0.26) + lane * ((big || perfect) ? 18 : 16);
-  const right = r.right + 12;
-  if (right + estimatedWidth <= innerWidth - 8) {
-    return clampFloatToPlayfield({ left: right, top: sideTop }, estimatedWidth, big, perfect);
+  const sideGap = perfect ? (mobile ? 12 : 28) : 12;
+  const right = r.right + sideGap;
+  const rightPos = { left: right, top: sideTop };
+  if (right + estimatedWidth <= innerWidth - 8 && floatCandidateClear(rightPos, estimatedWidth, estimatedHeight)) {
+    return clampFloatToPlayfield(rightPos, estimatedWidth, big, perfect);
   }
-  const left = r.left - estimatedWidth - 12;
-  if (left >= 8) {
-    return clampFloatToPlayfield({ left, top: sideTop }, estimatedWidth, big, perfect);
+  const left = r.left - estimatedWidth - sideGap;
+  const leftPos = { left, top: sideTop };
+  if (left >= 8 && floatCandidateClear(leftPos, estimatedWidth, estimatedHeight)) {
+    return clampFloatToPlayfield(leftPos, estimatedWidth, big, perfect);
   }
   if (big || perfect) {
     if (mobile) {
+      const railTop = r.top - (perfect ? 26 : 22) - lane * 12;
       return clampFloatToPlayfield({
-        left: 16,
-        top: r.bottom + 8 + lane * 14,
+        left: r.left + r.width / 2 - estimatedWidth / 2,
+        top: railTop,
       }, estimatedWidth, big, perfect);
     }
     return clampFloatToPlayfield({
@@ -5535,7 +5612,7 @@ function renderCrystalModal() {
     row.className = 'crystal-row';
     const maxed = lv >= CRYSTAL_LV_CAP;
     row.innerHTML = `
-      <span style="font-size:20px">${spriteHtml('friends', p.id, p.icon, { size: 28, className: 'sprite-icon' })}</span>
+      <span style="font-size:20px">${producerSpriteHtml(p.id, p.icon, 'sprite-icon', 0, 28)}</span>
       <span class="cr-name">${p.name} <span class="cr-lv">Lv.${lv}${lv > 0 ? ` (+${lv}%)` : ''}</span></span>
       <button data-id="${p.id}" ${maxed || S.crystal.count < cost ? 'disabled' : ''}>
         ${maxed ? 'MAX' : `💎${cost}`}
@@ -6263,16 +6340,16 @@ function isMobileLayout() {
 const MOBILE_GROUND_ORDER = ['chick', 'dog', 'cat', 'rabbit', 'unicorn', 'dragon', 'spirit', 'turtle'];
 
 const DESKTOP_STAGE_FRIEND_SLOTS = {
-  chick:   { x: -0.36, y: 0.58 },
-  cat:     { x: 0.54, y: 0.54 },
-  dog:     { x: 0.40, y: 0.90 },
-  rabbit:  { x: -0.46, y: 0.45 },
-  unicorn: { x: 0.48, y: 0.38 },
-  dragon:  { x: -0.54, y: 0.32 },
-  whale:   { x: 0.02, y: -0.18 },
-  planet:  { x: 0.64, y: -0.04 },
-  spirit:  { x: 0.34, y: 0.30 },
-  turtle:  { x: -0.38, y: 0.90 },
+  chick:   { x: -0.34, y: 0.66 },
+  cat:     { x: 0.30, y: 0.66 },
+  dog:     { x: 0.25, y: 0.86 },
+  rabbit:  { x: -0.36, y: 0.48 },
+  unicorn: { x: 0.50, y: 0.40 },
+  dragon:  { x: -0.52, y: 0.40 },
+  whale:   { x: -0.02, y: -0.08 },
+  planet:  { x: 0.48, y: 0.04 },
+  spirit:  { x: 0.50, y: 0.54 },
+  turtle:  { x: -0.28, y: 0.86 },
 };
 
 function desktopStageFriendPos(id, size, copyIndex) {
@@ -6290,7 +6367,7 @@ function desktopStageFriendPos(id, size, copyIndex) {
   const top = sr.top - ar.top;
   const stageW = clampNum(sr.width * 1.42, 410, 560);
   const stageH = clampNum(sr.height * 0.88, 300, 430);
-  const fan = copyIndex * Math.min(34, size * 0.72);
+  const fan = copyIndex * Math.min(24, size * 0.5);
   const direction = slot.x < 0 ? -1 : 1;
   const x = cx + stageW * slot.x + fan * direction - size / 2;
   const y = top + stageH * slot.y - size / 2;
@@ -6318,7 +6395,7 @@ function rebuildFriends() {
       else if (p.id === 'planet') pos = { right: '7%', top: '29%' };
       else {
         const slot = MOBILE_GROUND_ORDER.indexOf(p.id);
-        pos = { left: (5 + (slot < 0 ? groundIdx : slot) * 11) + '%', bottom: '7%' };
+        pos = { left: (5 + (slot < 0 ? groundIdx : slot) * 11) + '%', bottom: '8%' };
         groundIdx++;
       }
     }
@@ -6327,7 +6404,7 @@ function rebuildFriends() {
       const el = document.createElement('div');
       el.className = 'friend';
       el.dataset.id = p.id;
-      const size = mobile ? 36 : (p.id === 'whale' || p.id === 'planet') ? 64 : (p.id === 'spirit' ? 42 : 48);
+      const size = mobile ? 30 : (p.id === 'whale' || p.id === 'planet') ? 64 : (p.id === 'spirit' ? 42 : 48);
       const stagePos = !mobile ? desktopStageFriendPos(p.id, size, k) : null;
       if (stagePos) pos = stagePos;
       for (const key of ['left', 'right', 'top', 'bottom']) {
@@ -7053,8 +7130,8 @@ function eventRectOverlaps(p, size, r, pad = 0) {
 
 function avoidMiniStarSlimeOverlap(pos, size, bounds, index = 0) {
   const slime = bounds.slime;
-  if (!slime || !eventRectOverlaps(pos, size, slime, bounds.mobile ? 6 : 10)) return pos;
-  const pad = bounds.mobile ? 8 : 14;
+  if (!slime || !eventRectOverlaps(pos, size, slime, bounds.mobile ? 12 : 34)) return pos;
+  const pad = bounds.mobile ? 14 : 44;
   const lane = Math.floor(index / 2);
   const side = index % 2 === 0 ? -1 : 1;
   const sideX = side < 0
@@ -7586,6 +7663,19 @@ let toastTimer = null;
 const toastQueue = [];
 let toastShowing = false;
 let toastLast = '';
+
+function placeMobileToast(el) {
+  const shop = $('shop')?.getBoundingClientRect();
+  if (!shop?.height) return;
+  const list = $('shop-list')?.getBoundingClientRect();
+  el.style.bottom = 'auto';
+  const h = el.getBoundingClientRect().height || 34;
+  document.body.style.setProperty('--mobile-toast-space', Math.ceil(h + 16) + 'px');
+  const laneTop = (list?.top || shop.top + 46) + 8;
+  const maxTop = window.innerHeight - h - 12;
+  el.style.top = Math.round(clampNum(laneTop, shop.top + 8, maxTop)) + 'px';
+}
+
 function toast(html) {
   if (silentTick) return;  // 닫기/숨김 저장 중에는 토스트 생략
   if (toastShowing) {
@@ -7601,12 +7691,9 @@ function showToastNow(html) {
   el.innerHTML = html;   // 주의: 내부 고정 문자열만 전달할 것 (사용자 입력 금지)
   el.classList.add('show');
   if (isMobileLayout()) {
-    const area = $('game-area')?.getBoundingClientRect();
-    if (area?.height) {
-      el.style.bottom = 'auto';
-      const h = el.getBoundingClientRect().height || 34;
-      el.style.top = Math.max(8, area.bottom - h - 12) + 'px';
-    }
+    document.body.classList.add('toast-mobile-active');
+    placeMobileToast(el);
+    requestAnimationFrame(() => placeMobileToast(el));
   } else {
     const h = el.getBoundingClientRect().height || 52;
     el.style.top = '';
@@ -7615,6 +7702,8 @@ function showToastNow(html) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
     el.classList.remove('show');
+    document.body.classList.remove('toast-mobile-active');
+    document.body.style.removeProperty('--mobile-toast-space');
     toastShowing = false;
     if (toastQueue.length) {
       setTimeout(() => { if (!toastShowing && toastQueue.length) showToastNow(toastQueue.shift()); }, 320);
