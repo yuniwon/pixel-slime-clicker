@@ -666,10 +666,10 @@
   }
   .bv-cross { animation-name: bv-cross; animation-duration: 46s; animation-timing-function: linear; }
   @keyframes bv-cross {
-    0% { transform: translateX(calc(-1 * min(34vw, 300px))) scaleX(1); }
-    49% { transform: translateX(min(34vw, 300px)) scaleX(1); }
-    51% { transform: translateX(min(34vw, 300px)) scaleX(-1); }
-    100% { transform: translateX(calc(-1 * min(34vw, 300px))) scaleX(-1); }
+    0% { transform: translateX(calc(-1 * min(9vw, 96px))) scaleX(1); }
+    49% { transform: translateX(min(9vw, 96px)) scaleX(1); }
+    51% { transform: translateX(min(9vw, 96px)) scaleX(-1); }
+    100% { transform: translateX(calc(-1 * min(9vw, 96px))) scaleX(-1); }
   }
   .bv-orbit { animation-name: bv-orbit; animation-duration: 52s; animation-timing-function: linear; }
   @keyframes bv-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -1233,12 +1233,18 @@
     flex: 1;
     position: relative;
     text-align: center;
-    padding: 10px 4px;
+    padding: 8px 4px 7px;
     font-size: 12px;
     cursor: pointer;
     color: var(--text-dim);
     background: linear-gradient(180deg, #2a1a49, #1d1234);
     border-right: 1px solid #ffffff10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 52px;
   }
   .tab.active {
     color: var(--gold);
@@ -1246,12 +1252,23 @@
     box-shadow: inset 0 2px 0 #ffd75e55, inset 0 -2px 0 #00000033;
   }
   .tab[hidden] { display: none; }
+  .tab .tab-icon {
+    display: block;
+    font-size: 18px;
+    line-height: 1;
+    filter: drop-shadow(1px 1px 0 #00000066);
+  }
+  .tab .tab-label {
+    display: block;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
   .tab.fresh { animation: tab-fresh 1.2s ease-in-out 3; }
   @keyframes tab-fresh { 0%, 100% { color: var(--text-dim); } 50% { color: var(--gold); } }
   .tab-badge {
     position: absolute;
-    top: -6px;
-    right: 5px;
+    top: 3px;
+    right: 4px;
     font-size: 9px;
     color: var(--green);
     min-width: 13px;
@@ -2176,7 +2193,8 @@
     #shop-header { padding: 6px 12px 4px; }
     #shop-header h2 { font-size: 12px; }
     .icon-btn { font-size: 11px; padding: 2px 7px; min-height: 30px; min-width: 34px; }  /* 터치 타겟 */
-    .tab { padding: 9px 0; font-size: 11px; }
+    .tab { padding: 6px 2px 5px; font-size: 10px; min-height: 48px; gap: 2px; }
+    .tab .tab-icon { font-size: 17px; }
     #res-strip { padding: 0 8px 4px; }
     .res-chip { font-size: 10px; padding: 2px 7px; min-height: 24px; }
     /* 정보 밀도: 박스·아이콘·여백을 줄이고 폰트는 지킨다 —
@@ -2339,12 +2357,12 @@
     <button class="res-chip" id="res-crystal" hidden aria-label="젤리 결정 — 먹이기 열기">💎 <b>0</b></button>
   </div>
   <div id="shop-tabs">
-    <div class="tab active" data-tab="producers" role="button">친구들</div>
-    <div class="tab" data-tab="upgrades" role="button">강화</div>
-    <div class="tab" data-tab="achievements" role="button">업적</div>
-    <div class="tab" data-tab="prestige" role="button">환생</div>
-    <div class="tab" data-tab="room" role="button">방</div>
-    <div class="tab" data-tab="wishes" role="button">소원</div>
+    <div class="tab active" data-tab="producers" role="button"><span class="tab-icon">🐤</span><span class="tab-label">친구들</span></div>
+    <div class="tab" data-tab="upgrades" role="button"><span class="tab-icon">⬆️</span><span class="tab-label">강화</span></div>
+    <div class="tab" data-tab="achievements" role="button"><span class="tab-icon">🏆</span><span class="tab-label">업적</span></div>
+    <div class="tab" data-tab="prestige" role="button"><span class="tab-icon">🍮</span><span class="tab-label">환생</span></div>
+    <div class="tab" data-tab="room" role="button"><span class="tab-icon">🏠</span><span class="tab-label">방</span></div>
+    <div class="tab" data-tab="wishes" role="button"><span class="tab-icon">⭐</span><span class="tab-label">소원</span></div>
   </div>
   <div id="buy-modes" class="on">
     <button class="mode-btn active" data-mode="1">x1</button>
@@ -8969,7 +8987,8 @@ window.uxCheck = async function uxCheck() {
     add('consistency', '결정 아이콘 통일(💎)', $('res-crystal').textContent.includes('💎'));
     const tabLabel = k => {
       const t = document.querySelector(`.tab[data-tab="${k}"]`);
-      return t ? t.textContent.replace(/[!0-9]/g, '').trim() : '';
+      const label = t && t.querySelector('.tab-label');
+      return label ? label.textContent.trim() : (t ? t.textContent.replace(/[!0-9]/g, '').trim() : '');
     };
     add('consistency', '해금 안내와 탭 라벨 일치',
       Object.keys(TAB_UNLOCK_TOASTS).every(k => TAB_UNLOCK_TOASTS[k].includes(tabLabel(k))));
