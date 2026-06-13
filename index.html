@@ -1127,11 +1127,21 @@
     transform: translateX(-50%);
     font-size: 11px;
     color: var(--gold);
-    background: #000000aa;
-    border: 2px solid var(--border);
+    background: linear-gradient(180deg, #2b1a49ee, #170d2dcc);
+    border: 2px solid #8a6d1f;
     padding: 3px 8px;
     white-space: nowrap;
     text-shadow: 1px 1px 0 #000;
+    box-shadow: 2px 2px 0 #00000055, 0 0 10px #b48aff44;
+  }
+  #cloud-hint::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #8a6d1f;
   }
   #cloud-bar-outer {
     position: absolute;
@@ -1181,11 +1191,21 @@
     transform: translateX(-50%);
     font-size: 11px;
     color: var(--gold);
-    background: #000000aa;
-    border: 2px solid var(--border);
+    background: linear-gradient(180deg, #2b1a49ee, #170d2dcc);
+    border: 2px solid #8a6d1f;
     padding: 3px 8px;
     white-space: nowrap;
     text-shadow: 1px 1px 0 #000;
+    box-shadow: 2px 2px 0 #00000055, 0 0 10px #b48aff44;
+  }
+  #starlet-hint::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #8a6d1f;
   }
   #starlet.hint-left #starlet-hint {
     left: 0;
