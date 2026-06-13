@@ -96,8 +96,8 @@
 | slime-canvas/slime-shadow | `#slime-canvas`, `#slime-shadow` | 2 | slime/ground | always | hero and grounding | shadow grounds slime, but stage props must not cover face |
 | combo-aura/tier-ring/heat | `#combo-aura`, `#tier-ring`, `.heat-particle` | -1/inside | slime/effect | conditional | interactive magic circle | effects are good but need to stay behind/around slime |
 | wish-strip | `#wish-strip` | 3 | UI | conditional | bottom daily objective | good thin strip, must not cover coin pile/crystal |
-| crystal-bed | `#crystal-bed` | CSS/JS positioned | ground | conditional | lower-left garden prop | position was separate from decor/friend stage logic |
-| coin-pile | `#coin-pile` | 3 | ground | conditional | lower-right wealth prop | position was separate from decor/friend stage logic |
+| crystal-bed | `#crystal-bed` | CSS/JS positioned | ground | conditional | lower-left garden prop | `STAGE_LAYOUT` anchors it with other props; percent label now uses a subdued badge instead of raw stage text |
+| coin-pile | `#coin-pile` | 3 | ground | conditional | lower-right wealth prop | `STAGE_LAYOUT` anchors it with other props; continue checking wish-strip clearance at high wealth |
 | golden-star / mini-star | `#golden-star`, `.mini-star` | 60 | sky/event | conditional | bright guest | can read as UI sticker if spawned over dense UI |
 | raincloud | `#raincloud` | 61 | sky/event | conditional | sky guest challenge | fixed positioning can collide with title if unchecked |
 | starlet | `#starlet` | 61 | sky/event | conditional | small guided guest | needs sky-glow treatment, not ground shadow |
