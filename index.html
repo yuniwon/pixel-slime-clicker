@@ -1926,20 +1926,36 @@
   }
   .codex-grid.cols4 { grid-template-columns: repeat(4, 1fr); }
   .codex-cell {
-    background: var(--panel-light);
-    border: 2px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 46%),
+      #21143acc;
+    border: 2px solid #5a3a83;
+    border-radius: 6px;
     text-align: center;
     padding: 8px 2px 6px;
     font-size: 10px;
     color: var(--text-dim);
     line-height: 1.4;
     min-height: 58px;
+    box-shadow:
+      inset 0 1px 0 #ffffff12,
+      0 2px 0 #12091f88;
   }
-  .codex-cell.seen { border-color: var(--gold); color: var(--text); }
+  .codex-cell.seen {
+    border-color: #ffd75e99;
+    color: var(--text);
+    background:
+      linear-gradient(180deg, rgba(255,215,94,.09), rgba(255,255,255,0) 48%),
+      #251744dd;
+  }
   .codex-swatch {
     width: 22px; height: 22px;
     margin: 0 auto 4px;
-    border: 2px solid #00000055;
+    border: 2px solid #00000066;
+    border-radius: 4px;
+    box-shadow:
+      inset 0 1px 0 #ffffff22,
+      1px 1px 0 #00000044;
   }
   .trait-cell {
     min-height: 92px;
@@ -1959,17 +1975,31 @@
   .trait-cell.seen .trait-desc { color: var(--text); opacity: .8; }
   .codex-cell .sprite-icon { margin-bottom: 2px; }
   .story-entry {
-    background: var(--panel-light);
-    border: 3px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 44%),
+      #21143acc;
+    border: 2px solid #5a3a83;
     border-left-color: var(--gold);
+    border-radius: 7px;
     padding: 10px 12px;
     margin-bottom: 8px;
     font-size: 11px;
     line-height: 1.7;
     color: var(--text);
+    box-shadow:
+      inset 0 1px 0 #ffffff14,
+      0 2px 0 #12091f99;
   }
   .story-entry .story-title { color: var(--gold); font-weight: bold; margin-bottom: 4px; font-size: 12px; }
-  .story-entry.locked { opacity: .4; border-left-color: var(--border); }
+  .story-entry.locked {
+    opacity: .68;
+    color: #9a8ab8;
+    border-color: #4f3475;
+    border-left-color: #6b4a96;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0) 44%),
+      #1b102fcc;
+  }
   .story-entry.cosmic-status.locked { opacity: .78; }
 
   /* ── 소원 스트립: 지금 목표와 진행률이 항상 무대에 보인다 (선반 대체) ── */
@@ -2065,10 +2095,16 @@
 
   /* ── 슬라임 앨범 ── */
   .album-box {
-    background: var(--panel-light);
-    border: 3px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 44%),
+      #21143acc;
+    border: 2px solid #5a3a83;
+    border-radius: 7px;
     padding: 10px 14px;
     margin-bottom: 8px;
+    box-shadow:
+      inset 0 1px 0 #ffffff14,
+      0 2px 0 #12091f99;
   }
   .album-row {
     display: flex;
@@ -2076,7 +2112,7 @@
     font-size: 11px;
     color: var(--text-dim);
     padding: 4px 0;
-    border-bottom: 1px solid #00000033;
+    border-bottom: 1px solid #5a3a8355;
   }
   .album-row:last-child { border-bottom: none; }
   .album-row b { color: var(--gold); }
@@ -7436,7 +7472,7 @@ function buildRoomTab() {
   shopList.appendChild(cosmicStatus);
 
   // 별의 기록
-  const unlockedCount = Object.keys(S.story).length;
+  const unlockedCount = STORY.filter(st => S.story[st.id]).length;
   const title5 = document.createElement('div');
   title5.className = 'room-section-title';
   title5.textContent = `📜 별의 기록 (${unlockedCount}/${STORY.length})`;

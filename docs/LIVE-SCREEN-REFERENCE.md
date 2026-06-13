@@ -55,14 +55,14 @@
 - The game already has the core pieces: stage backdrop, slime focus, shop panel, friends, decor, wishes, guests.
 - The main gap is coordination: friend positions, decor positions, utility props, and shop cards use separate visual grammars.
 - The reference shows late-game fullness. The implemented game must preserve early-game negative space and progressive reveal.
-- Current tabs are functional. Card icon/cost/count treatment, producer/wish metadata lines, and prestige summary panel now share more grammar; room codex/story variants still need final pass.
+- Current tabs are functional. Card icon/cost/count treatment, producer/wish metadata lines, prestige summary panel, and room codex/story/album surfaces now share more of the same dark framed-panel grammar; remaining work is a final cross-tab oddity pass rather than a single obviously flat tab.
 
 ## Implementation Priority
 
 1. Centralize stage coordinates for friends, decor, crystal bed, coin pile, and cosmic tree.
 2. Limit visible residents by game phase so late-game feels lively without showing every producer at full size.
 3. Apply sky vs ground classes consistently: glow for sky, contact shadow for ground.
-4. Make shop cards share a darker framed-panel grammar without changing purchase logic. (Base, producer, wish, and prestige summary grammar partially aligned; room codex/story still pending.)
+4. Make shop cards share a darker framed-panel grammar without changing purchase logic. (Base, producer, wish, prestige summary, and room codex/story/album surfaces are partially aligned; continue with final cross-tab oddity checks.)
 5. Keep mobile simpler than desktop and preserve touch targets.
 
 ## Do Not Copy Literally
