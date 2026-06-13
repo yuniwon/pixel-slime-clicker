@@ -43,6 +43,13 @@
 | 코인 더미 | lower-right | wealth prop, behind wish strip if needed |
 | 우주 씨앗/별나무 | behind/above slime, subtle | central symbol, never stronger than slime |
 
+## Dynamic Guest Lanes
+
+- 황금별, 먹구름, 별똥이, 미니 별똥별은 전체 viewport 랜덤 좌표가 아니라 `game-area` 내부의 sky/air 레인에만 등장한다.
+- 모바일에서는 제목/코인 블록 아래, 상점 패널 위, 슬라임 얼굴 바깥쪽을 우선한다.
+- 손님이 동시에 강제 발생해도 상점 패널, 제목, 코인 숫자, 소원 스트립과 겹치지 않아야 한다.
+- 하늘 손님은 접지 그림자 없이 glow/float 처리하고, 바닥 주민처럼 보이게 낮게 놓지 않는다.
+
 ## Current Code vs Reference
 
 - The game already has the core pieces: stage backdrop, slime focus, shop panel, friends, decor, wishes, guests.

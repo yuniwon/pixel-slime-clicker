@@ -7309,17 +7309,21 @@ function starSpawnRect(kind = 'star', index = 0, total = 1) {
   const cy = slime.top + slime.height * 0.48;
   const stageW = clampNum(slime.width * 1.42, mobile ? 300 : 410, mobile ? area.width * 0.92 : 560);
   const stageH = clampNum(slime.height * 0.88, mobile ? 180 : 300, mobile ? 310 : 430);
-  const minX = Math.max(area.left + margin, cx - stageW * 0.58);
-  const maxX = Math.min(area.right - size - margin, cx + stageW * 0.58);
-  const minY = area.top + (kind === 'mini' ? (mobile ? 118 : 172) : (mobile ? 150 : 220));
-  const maxY = area.bottom - size - (mobile ? 68 : 86);
+  const lane = kind === 'cloud' ? 'sky' : kind === 'starlet' ? 'air' : kind === 'mini' ? 'slime-arc' : 'sky';
+  const topHudGuard = mobile ? 116 : 158;
+  const bottomUiGuard = kind === 'mini' ? (mobile ? 104 : 126) : (mobile ? 82 : 104);
+  const minX = Math.max(area.left + margin, cx - stageW * (lane === 'sky' ? 0.62 : 0.56));
+  const maxX = Math.min(area.right - size - margin, cx + stageW * (lane === 'sky' ? 0.62 : 0.56));
+  const minY = Math.max(area.top + topHudGuard, slime.top - stageH * (lane === 'sky' ? 0.42 : 0.18));
+  const maxY = Math.min(area.bottom - size - bottomUiGuard, slime.bottom + stageH * (lane === 'air' ? 0.24 : 0.12));
   const bounds = { minX, maxX, minY, maxY, cx, mobile, slime };
 
   if (kind === 'cloud') {
     const side = Math.random() < 0.5 ? -1 : 1;
+    const sidePull = mobile ? 0.49 : 0.22;
     const pos = {
-      x: clampEventCoord(cx + side * stageW * (0.22 + Math.random() * 0.23) - size / 2, minX, maxX),
-      y: clampEventCoord(slime.top - size * 0.55 + Math.random() * stageH * 0.18, minY, slime.top + stageH * 0.08),
+      x: clampEventCoord(cx + side * stageW * (sidePull + Math.random() * 0.08) - size / 2, minX, maxX),
+      y: clampEventCoord(slime.top - size * 0.68 + Math.random() * stageH * 0.16, minY, Math.min(maxY, slime.top - size * 0.12)),
     };
     return avoidActiveGuestOverlap(kind, pos, size, bounds);
   }
@@ -7328,16 +7332,20 @@ function starSpawnRect(kind = 'star', index = 0, total = 1) {
     const side = Math.random() < 0.5 ? -1 : 1;
     const pos = {
       x: clampEventCoord(cx + side * stageW * (0.34 + Math.random() * 0.12) - size / 2, minX, maxX),
-      y: clampEventCoord(slime.top + slime.height * (0.46 + Math.random() * 0.15), minY, maxY),
+      y: clampEventCoord(slime.top + slime.height * (0.34 + Math.random() * 0.18), minY, maxY),
     };
     return avoidActiveGuestOverlap(kind, pos, size, bounds);
   }
 
-  const arcStart = kind === 'mini' ? 205 : 220;
-  const arcEnd = kind === 'mini' ? 335 : 320;
+  const arcStart = kind === 'mini' ? (mobile ? 190 : 200) : (mobile ? 202 : 214);
+  const arcEnd = kind === 'mini' ? (mobile ? 350 : 340) : (mobile ? 338 : 326);
   const a = (arcStart + Math.random() * (arcEnd - arcStart)) * Math.PI / 180;
-  const rx = stageW * (kind === 'mini' ? 0.46 + Math.random() * 0.1 : 0.36 + Math.random() * 0.12);
-  const ry = stageH * (kind === 'mini' ? 0.34 + Math.random() * 0.08 : 0.32 + Math.random() * 0.08);
+  const rx = stageW * (kind === 'mini'
+    ? (mobile ? 0.56 : 0.46) + Math.random() * 0.08
+    : (mobile ? 0.48 : 0.36) + Math.random() * 0.10);
+  const ry = stageH * (kind === 'mini'
+    ? (mobile ? 0.39 : 0.34) + Math.random() * 0.06
+    : (mobile ? 0.38 : 0.32) + Math.random() * 0.06);
   const pos = {
     x: clampEventCoord(cx + Math.cos(a) * rx - size / 2, minX, maxX),
     y: clampEventCoord(cy + Math.sin(a) * ry - size / 2, minY, maxY),
