@@ -1346,22 +1346,38 @@
     box-shadow: 0 7px 0 #5e1740;
   }
   .challenge-pixel-icon.mono {
-    --icon-a: #c8b6ff;
+    --icon-a: #d9c4ff;
     --icon-b: #8d5ce8;
+    --icon-c: #ffeec4;
+    background:
+      linear-gradient(90deg, transparent 0 34%, #4d3478 34% 66%, transparent 66%),
+      #2b1a3e;
     border-radius: 6px;
   }
   .challenge-pixel-icon.mono::before {
-    left: 15px;
-    top: 20px;
-    width: 16px;
-    height: 14px;
-    background: var(--icon-b);
+    left: 18px;
+    top: 8px;
+    width: 10px;
+    height: 30px;
+    background: var(--icon-a);
     box-shadow:
-      -8px -10px 0 -2px var(--icon-a),
-      0 -13px 0 -2px var(--icon-a),
-      8px -10px 0 -2px var(--icon-a),
-      -4px 2px 0 4px var(--icon-b),
-      4px 2px 0 4px var(--icon-b);
+      inset 0 -5px 0 var(--icon-b),
+      -10px -1px 0 -3px var(--icon-c),
+      10px -1px 0 -3px var(--icon-c),
+      -10px 12px 0 -3px var(--icon-c),
+      10px 12px 0 -3px var(--icon-c);
+  }
+  .challenge-pixel-icon.mono::after {
+    left: 18px;
+    top: 20px;
+    width: 10px;
+    height: 8px;
+    background: var(--icon-b);
+    border-radius: 45% 45% 55% 55%;
+    box-shadow:
+      -6px -7px 0 -2px var(--icon-a),
+      0 -9px 0 -2px var(--icon-a),
+      6px -7px 0 -2px var(--icon-a);
   }
   .challenge-pixel-icon.starlit {
     --icon-a: #fff8d6;
