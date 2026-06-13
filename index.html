@@ -8309,10 +8309,13 @@ function placeMobileToast(el) {
   const list = $('shop-list')?.getBoundingClientRect();
   el.style.bottom = 'auto';
   const h = el.getBoundingClientRect().height || 34;
-  document.body.style.setProperty('--mobile-toast-space', Math.ceil(h + 12) + 'px');
   const laneTop = (list?.top || shop.top + 46) + 8;
   const maxTop = window.innerHeight - h - 12;
+  const listTop = list?.top || shop.top + 46;
   el.style.top = Math.round(clampNum(laneTop, shop.top + 8, maxTop)) + 'px';
+  const rect = el.getBoundingClientRect();
+  const reserved = Math.max(h + 40, rect.bottom - listTop + 32);
+  document.body.style.setProperty('--mobile-toast-space', Math.ceil(reserved) + 'px');
 }
 
 function toast(html) {
