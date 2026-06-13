@@ -7309,6 +7309,7 @@ function refreshShop() {
 
       const reveal = S.totalEarned >= p.baseCost * 0.4 || S.producers[p.id] > 0;
       el.querySelector('.shop-name').textContent = reveal ? p.name : '???';
+      el.querySelector('.shop-desc.flavor').textContent = reveal ? p.desc : '무대 뒤에서 차례를 기다리는 친구예요';
       setProducerShopIcon(el, p, reveal);
 
       // 다음 시너지 표시 — "25마리까지만 더 사자"를 만드는 줄
