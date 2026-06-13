@@ -1967,22 +1967,34 @@
   /* ── 젤리 결정: 화단 + 먹이기 모달 ── */
   #crystal-bed {
     position: absolute;
-    left: 14px;
+    left: clamp(26px, 12vw, 150px);
     bottom: clamp(46px, 4.2vw, 100px);  /* 기록의 선반 위 */
     z-index: 4;
     cursor: pointer;
     text-align: center;
     padding: 6px;
   }
+  #crystal-bed::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    width: 68%;
+    height: 10px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse, #00000059 0%, transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+  }
   #crystal-visual {
     display: block;
     font-size: clamp(26px, 2vw, 44px);
-    filter: drop-shadow(0 2px 4px #00000088);
+    filter: drop-shadow(2px 2px 0 #00000055);
     transition: filter .4s;
   }
   #crystal-bed.ripe #crystal-visual {
     animation: crystal-pulse 1.6s ease-in-out infinite;
-    filter: drop-shadow(0 0 10px #b48aff) drop-shadow(0 2px 4px #00000088);
+    filter: drop-shadow(0 0 9px #b48affaa) drop-shadow(2px 2px 0 #00000055);
   }
   @keyframes crystal-pulse {
     0%, 100% { transform: scale(1); }
